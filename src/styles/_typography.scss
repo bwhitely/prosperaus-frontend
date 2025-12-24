@@ -1,0 +1,183 @@
+@use 'variables' as *;
+
+// ===========================================
+// BASE TYPOGRAPHY
+// ===========================================
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+  color: $color-text-primary;
+}
+
+// ===========================================
+// HEADINGS
+// ===========================================
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+  color: $color-text-primary;
+}
+
+h1 {
+  font-size: $font-size-4xl;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+}
+
+h3 {
+  font-size: $font-size-2xl;
+}
+
+h4 {
+  font-size: $font-size-xl;
+}
+
+h5 {
+  font-size: $font-size-lg;
+}
+
+h6 {
+  font-size: $font-size-base;
+}
+
+// ===========================================
+// BODY TEXT
+// ===========================================
+p {
+  margin: 0 0 $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+small {
+  font-size: $font-size-sm;
+}
+
+// ===========================================
+// LINKS
+// ===========================================
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary-dark;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// ===========================================
+// LISTS
+// ===========================================
+ul, ol {
+  margin: 0 0 $spacing-md;
+  padding-left: $spacing-lg;
+
+  li {
+    margin-bottom: $spacing-xs;
+  }
+}
+
+// ===========================================
+// MONOSPACE / CODE
+// ===========================================
+code, pre {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+code {
+  background: $color-background;
+  padding: 0.125rem 0.25rem;
+  border-radius: $radius-sm;
+}
+
+pre {
+  background: $color-background;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  overflow-x: auto;
+
+  code {
+    background: none;
+    padding: 0;
+  }
+}
+
+// ===========================================
+// UTILITY CLASSES
+// ===========================================
+.text-primary {
+  color: $color-text-primary;
+}
+
+.text-secondary {
+  color: $color-text-secondary;
+}
+
+.text-muted {
+  color: $color-text-muted;
+}
+
+.text-accent {
+  color: $color-accent;
+}
+
+.text-negative {
+  color: $color-negative;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+.font-mono {
+  font-family: $font-family-mono;
+}

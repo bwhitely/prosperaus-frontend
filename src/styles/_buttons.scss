@@ -1,0 +1,126 @@
+@use 'sass:color';
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// ===========================================
+// BASE BUTTON
+// ===========================================
+.btn {
+  @include button-base;
+
+  // Primary button
+  &--primary {
+    background: $color-primary;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+    }
+
+    &:active:not(:disabled) {
+      background: color.adjust($color-primary-dark, $lightness: -5%);
+    }
+  }
+
+  // Secondary button
+  &--secondary {
+    background: transparent;
+    color: $color-primary;
+    border: 1px solid $color-primary;
+
+    &:hover:not(:disabled) {
+      background: rgba($color-primary, 0.05);
+    }
+
+    &:active:not(:disabled) {
+      background: rgba($color-primary, 0.1);
+    }
+  }
+
+  // Accent button (CTA)
+  &--accent {
+    background: $color-accent;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: $color-accent-dark;
+    }
+
+    &:active:not(:disabled) {
+      background: color.adjust($color-accent-dark, $lightness: -5%);
+    }
+  }
+
+  // Ghost button
+  &--ghost {
+    background: transparent;
+    color: $color-text-secondary;
+
+    &:hover:not(:disabled) {
+      background: $color-background;
+      color: $color-text-primary;
+    }
+  }
+
+  // Danger button
+  &--danger {
+    background: $color-negative;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: color.adjust($color-negative, $lightness: -10%);
+    }
+  }
+
+  // ===========================================
+  // SIZE VARIANTS
+  // ===========================================
+  &--sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-xs;
+  }
+
+  &--lg {
+    padding: $spacing-md $spacing-lg;
+    font-size: $font-size-base;
+  }
+
+  // ===========================================
+  // WIDTH VARIANTS
+  // ===========================================
+  &--full {
+    width: 100%;
+  }
+
+  // ===========================================
+  // ICON BUTTON
+  // ===========================================
+  &--icon {
+    padding: $spacing-sm;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+}
+
+// ===========================================
+// BUTTON GROUP
+// ===========================================
+.btn-group {
+  display: inline-flex;
+
+  .btn {
+    border-radius: 0;
+
+    &:first-child {
+      border-radius: $radius-md 0 0 $radius-md;
+    }
+
+    &:last-child {
+      border-radius: 0 $radius-md $radius-md 0;
+    }
+
+    &:not(:first-child) {
+      margin-left: -1px;
+    }
+  }
+}

@@ -1,0 +1,105 @@
+<nav class="navbar">
+  <div class="navbar__container container">
+    <!-- Logo -->
+    <a routerLink="/" class="navbar__logo">
+      <span class="navbar__logo-text">AusFinance</span>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <div class="navbar__nav hide-mobile">
+      <a routerLink="/dashboard" routerLinkActive="active" class="navbar__link">
+        Dashboard
+      </a>
+
+      <!-- Tools Dropdown -->
+      <div class="navbar__dropdown" (mouseleave)="closeDropdowns()">
+        <button
+          class="navbar__link navbar__dropdown-trigger"
+          (click)="toggleToolsDropdown()"
+          (mouseenter)="isToolsDropdownOpen.set(true)"
+        >
+          Tools
+          <svg class="navbar__dropdown-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        @if (isToolsDropdownOpen()) {
+          <div class="navbar__dropdown-menu">
+            <a routerLink="/equity-recycling" class="navbar__dropdown-item">
+              Equity Recycling Calculator
+            </a>
+            <a routerLink="/fire-calculator" class="navbar__dropdown-item">
+              FIRE Calculator
+            </a>
+            <a routerLink="/super-optimiser" class="navbar__dropdown-item">
+              Super Optimiser
+            </a>
+            <a routerLink="/property-analyser" class="navbar__dropdown-item">
+              Property Analyser
+            </a>
+          </div>
+        }
+      </div>
+
+      <a routerLink="/portfolio" routerLinkActive="active" class="navbar__link">
+        Portfolio
+      </a>
+      <a routerLink="/analyse" routerLinkActive="active" class="navbar__link">
+        Analyse
+      </a>
+    </div>
+
+    <!-- Desktop Actions -->
+    <div class="navbar__actions hide-mobile">
+      <a routerLink="/profile" class="navbar__avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="navbar__mobile-toggle hide-desktop" (click)="toggleMobileMenu()">
+      @if (isMobileMenuOpen()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      }
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  @if (isMobileMenuOpen()) {
+    <div class="navbar__mobile-menu hide-desktop">
+      <a routerLink="/dashboard" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Dashboard
+      </a>
+      <a routerLink="/equity-recycling" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Equity Recycling
+      </a>
+      <a routerLink="/fire-calculator" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        FIRE Calculator
+      </a>
+      <a routerLink="/super-optimiser" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Super Optimiser
+      </a>
+      <a routerLink="/property-analyser" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Property Analyser
+      </a>
+      <a routerLink="/portfolio" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Portfolio
+      </a>
+      <a routerLink="/analyse" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Analyse
+      </a>
+      <a routerLink="/profile" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        Profile
+      </a>
+    </div>
+  }
+</nav>
