@@ -176,6 +176,11 @@
     color: $color-text-secondary;
     text-decoration: none;
     transition: all $transition-base;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
 
     &:hover {
       background: $color-background;
@@ -186,6 +191,58 @@
     &.active {
       color: $color-primary;
       background: rgba($color-primary, 0.05);
+    }
+
+    &--primary {
+      background: $color-primary;
+      color: white;
+
+      &:hover {
+        background: $color-primary-dark;
+        color: white;
+      }
+    }
+
+    &--danger {
+      color: $color-negative;
+
+      &:hover {
+        background: rgba($color-negative, 0.1);
+      }
+    }
+  }
+
+  &__mobile-header {
+    padding: $spacing-md;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    border-bottom: 1px solid $color-border;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__dropdown-header {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    border-bottom: 1px solid $color-border;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__dropdown-menu--right {
+    right: 0;
+    left: auto;
+  }
+
+  &__dropdown-item--danger {
+    color: $color-negative;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba($color-negative, 0.1);
     }
   }
 }

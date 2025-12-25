@@ -1,0 +1,210 @@
+<div class="onboarding">
+  <div class="onboarding__container">
+    <div class="onboarding__header">
+      <h1 class="onboarding__title">Welcome to AusFinance</h1>
+      <p class="onboarding__subtitle">Let's set up your profile to personalise your experience</p>
+    </div>
+
+    <!-- Progress indicator -->
+    <div class="onboarding__progress">
+      @for (step of [1, 2, 3]; track step) {
+        <div
+          class="onboarding__progress-step"
+          [class.onboarding__progress-step--active]="currentStep() >= step"
+          [class.onboarding__progress-step--completed]="currentStep() > step"
+        >
+          <div class="onboarding__progress-circle">
+            @if (currentStep() > step) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+            } @else {
+              {{ step }}
+            }
+          </div>
+          <span class="onboarding__progress-label">
+            @switch (step) {
+              @case (1) { Basics }
+              @case (2) { Tax Status }
+              @case (3) { Preferences }
+            }
+          </span>
+        </div>
+        @if (step < 3) {
+          <div
+            class="onboarding__progress-line"
+            [class.onboarding__progress-line--active]="currentStep() > step"
+          ></div>
+        }
+      }
+    </div>
+
+    @if (error()) {
+      <div class="alert alert--error">
+        {{ error() }}
+      </div>
+    }
+
+    <form [formGroup]="onboardingForm" (ngSubmit)="onSubmit()">
+      <!-- Step 1: Basic Info -->
+      @if (currentStep() === 1) {
+        <div class="onboarding__step">
+          <h2 class="onboarding__step-title">Tell us about yourself</h2>
+
+          <div class="form-group">
+            <label for="displayName">What should we call you?</label>
+            <input
+              type="text"
+              id="displayName"
+              formControlName="displayName"
+              placeholder="Enter your name"
+              class="form-control"
+            />
+            @if (onboardingForm.get('displayName')?.touched && onboardingForm.get('displayName')?.errors?.['required']) {
+              <span class="form-error">Name is required</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input
+              type="date"
+              id="dateOfBirth"
+              formControlName="dateOfBirth"
+              class="form-control"
+            />
+            @if (onboardingForm.get('dateOfBirth')?.touched && onboardingForm.get('dateOfBirth')?.errors?.['required']) {
+              <span class="form-error">Date of birth is required</span>
+            }
+            <span class="form-hint">Used for super and retirement calculations</span>
+          </div>
+
+          <div class="onboarding__actions">
+            <button
+              type="button"
+              class="btn btn--primary btn--lg"
+              [disabled]="!canProceedFromStep1()"
+              (click)="nextStep()"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Step 2: Tax Status -->
+      @if (currentStep() === 2) {
+        <div class="onboarding__step">
+          <h2 class="onboarding__step-title">Your tax situation</h2>
+
+          <div class="form-group">
+            <label>Tax Residency Status</label>
+            <div class="onboarding__options">
+              @for (option of taxResidencyOptions; track option.value) {
+                <label
+                  class="onboarding__option"
+                  [class.onboarding__option--selected]="onboardingForm.get('taxResidency')?.value === option.value"
+                >
+                  <input
+                    type="radio"
+                    formControlName="taxResidency"
+                    [value]="option.value"
+                  />
+                  <div class="onboarding__option-content">
+                    <span class="onboarding__option-label">{{ option.label }}</span>
+                    <span class="onboarding__option-desc">{{ option.description }}</span>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="marginalTaxRate">Marginal Tax Rate (optional)</label>
+            <select
+              id="marginalTaxRate"
+              formControlName="marginalTaxRate"
+              class="form-control"
+            >
+              <option [ngValue]="null">Select your tax bracket...</option>
+              @for (bracket of taxBrackets; track bracket.rate) {
+                <option [ngValue]="bracket.value">{{ bracket.label }}</option>
+              }
+            </select>
+            <span class="form-hint">We'll use this for tax benefit calculations</span>
+          </div>
+
+          <div class="onboarding__actions onboarding__actions--split">
+            <button
+              type="button"
+              class="btn btn--secondary btn--lg"
+              (click)="previousStep()"
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              class="btn btn--primary btn--lg"
+              [disabled]="!canProceedFromStep2()"
+              (click)="nextStep()"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Step 3: Preferences -->
+      @if (currentStep() === 3) {
+        <div class="onboarding__step">
+          <h2 class="onboarding__step-title">Final details</h2>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                formControlName="hasPrivateHealthInsurance"
+              />
+              <span>I have private health insurance</span>
+            </label>
+            <span class="form-hint">Affects Medicare Levy Surcharge calculations</span>
+          </div>
+
+          <div class="form-group">
+            <label for="retirementAge">Target Retirement Age</label>
+            <input
+              type="number"
+              id="retirementAge"
+              formControlName="retirementAge"
+              min="55"
+              max="100"
+              class="form-control form-control--narrow"
+            />
+            <span class="form-hint">Used for FIRE and super projections</span>
+          </div>
+
+          <div class="onboarding__actions onboarding__actions--split">
+            <button
+              type="button"
+              class="btn btn--secondary btn--lg"
+              (click)="previousStep()"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              class="btn btn--accent btn--lg"
+              [disabled]="isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                Completing...
+              } @else {
+                Complete Setup
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </form>
+  </div>
+</div>
