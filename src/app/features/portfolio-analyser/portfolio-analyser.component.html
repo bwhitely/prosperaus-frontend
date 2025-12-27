@@ -1,12 +1,240 @@
 <div class="page-header">
-  <h1>PortfolioAnalyser</h1>
-  <p>Coming soon...</p>
-</div>
-
-<div class="card">
-  <div class="card__body">
-    <p class="text-secondary">
-      This feature is under development. Check back soon!
-    </p>
+  <div class="page-header__content">
+    <h1>Portfolio Analyser</h1>
+    <p>Analyse your ETF and investment portfolio allocation, fees, and franking credits</p>
   </div>
 </div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Analysing your portfolio...</p>
+  </div>
+} @else if (!hasHoldings()) {
+  <div class="empty-state">
+    <div class="empty-state__icon">📊</div>
+    <h3>No investments to analyse</h3>
+    <p>Add some investments first to see your portfolio analysis.</p>
+    <a routerLink="/investments" class="btn btn--primary">
+      Go to Investments
+    </a>
+  </div>
+} @else {
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-card__label">Total Value</span>
+      <span class="summary-card__value">{{ analysis()!.totalValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Cost Base</span>
+      <span class="summary-card__value">{{ analysis()!.totalCostBase | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card" [class.summary-card--positive]="analysis()!.unrealisedGainLoss > 0" [class.summary-card--negative]="analysis()!.unrealisedGainLoss < 0">
+      <span class="summary-card__label">Unrealised Gain/Loss</span>
+      <span class="summary-card__value" [class]="getGainLossClass(analysis()!.unrealisedGainLoss)">
+        {{ analysis()!.unrealisedGainLoss >= 0 ? '+' : '' }}{{ analysis()!.unrealisedGainLoss | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </span>
+      <span class="summary-card__hint" [class]="getGainLossClass(analysis()!.unrealisedGainLoss)">
+        {{ analysis()!.unrealisedGainLossPercent >= 0 ? '+' : '' }}{{ analysis()!.unrealisedGainLossPercent | number:'1.1-1' }}%
+      </span>
+    </div>
+  </div>
+
+  <!-- Overlap Warnings -->
+  @if (analysis()!.overlapWarnings.length > 0) {
+    <div class="overlap-warnings">
+      <h2>Portfolio Overlap Warnings</h2>
+      @for (warning of analysis()!.overlapWarnings; track warning.tickers.join(',')) {
+        <div class="overlap-warning" [class]="getSeverityClass(warning.severity)">
+          <div class="overlap-warning__header">
+            <span class="overlap-warning__tickers">
+              @for (ticker of warning.tickers; track ticker; let last = $last) {
+                <span class="ticker-badge ticker-badge--small">{{ ticker }}</span>
+                @if (!last) { <span class="ticker-separator">+</span> }
+              }
+            </span>
+            <span class="overlap-warning__percent">{{ warning.overlapPercentage | number:'1.0-0' }}% of portfolio</span>
+          </div>
+          <p class="overlap-warning__description">{{ warning.description }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Allocation Charts Grid -->
+  <div class="analysis-grid">
+    <!-- Geography Allocation -->
+    <div class="card analysis-card">
+      <div class="card__header">
+        <h2>Geographic Allocation</h2>
+      </div>
+      <div class="card__body">
+        <div class="allocation-chart">
+          @for (entry of geographyEntries(); track entry.key; let i = $index) {
+            <div class="allocation-bar">
+              <div class="allocation-bar__label">
+                <span class="allocation-bar__name">{{ getGeographyLabel(entry.key) }}</span>
+                <span class="allocation-bar__value">{{ entry.value.percentage | number:'1.0-0' }}%</span>
+              </div>
+              <div class="allocation-bar__track">
+                <div class="allocation-bar__fill" [style.width.%]="entry.value.percentage" [style.background-color]="getAllocationColor(i)"></div>
+              </div>
+              <span class="allocation-bar__amount">{{ entry.value.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Class Allocation -->
+    <div class="card analysis-card">
+      <div class="card__header">
+        <h2>Asset Class Allocation</h2>
+      </div>
+      <div class="card__body">
+        <div class="allocation-chart">
+          @for (entry of assetClassEntries(); track entry.key; let i = $index) {
+            <div class="allocation-bar">
+              <div class="allocation-bar__label">
+                <span class="allocation-bar__name">{{ getAssetClassLabel(entry.key) }}</span>
+                <span class="allocation-bar__value">{{ entry.value.percentage | number:'1.0-0' }}%</span>
+              </div>
+              <div class="allocation-bar__track">
+                <div class="allocation-bar__fill" [style.width.%]="entry.value.percentage" [style.background-color]="getAllocationColor(i)"></div>
+              </div>
+              <span class="allocation-bar__amount">{{ entry.value.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fee & Franking Analysis -->
+  <div class="analysis-grid">
+    <div class="card analysis-card">
+      <div class="card__header">
+        <h2>Fee Analysis</h2>
+      </div>
+      <div class="card__body">
+        <div class="metrics-list">
+          <div class="metric">
+            <span class="metric__label">Weighted Average MER</span>
+            <span class="metric__value">{{ formatMer(analysis()!.weightedAverageMer) }}</span>
+          </div>
+          <div class="metric">
+            <span class="metric__label">Estimated Annual Fees</span>
+            <span class="metric__value">{{ analysis()!.estimatedAnnualFees | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+        <p class="metric__note">Lower MER = more money stays invested. Index ETFs typically have MERs under 0.20%.</p>
+      </div>
+    </div>
+
+    <div class="card analysis-card">
+      <div class="card__header">
+        <h2>Franking Credits</h2>
+      </div>
+      <div class="card__body">
+        <div class="metrics-list">
+          <div class="metric">
+            <span class="metric__label">Estimated Dividend Yield</span>
+            <span class="metric__value">{{ analysis()!.estimatedDividendYield | number:'1.1-1' }}%</span>
+          </div>
+          <div class="metric">
+            <span class="metric__label">Est. Annual Franking Credits</span>
+            <span class="metric__value positive">{{ analysis()!.estimatedAnnualFrankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+        <p class="metric__note">Franking credits reduce your tax. Australian equity ETFs typically provide the most franking credits.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  @if (categoryEntries().length > 0) {
+    <div class="card">
+      <div class="card__header">
+        <h2>Category Breakdown</h2>
+      </div>
+      <div class="card__body">
+        <div class="allocation-chart allocation-chart--wide">
+          @for (entry of categoryEntries(); track entry.key; let i = $index) {
+            <div class="allocation-bar">
+              <div class="allocation-bar__label">
+                <span class="allocation-bar__name">{{ getCategoryLabel(entry.key) }}</span>
+                <span class="allocation-bar__value">{{ entry.value.percentage | number:'1.0-0' }}%</span>
+              </div>
+              <div class="allocation-bar__track">
+                <div class="allocation-bar__fill" [style.width.%]="entry.value.percentage" [style.background-color]="getAllocationColor(i)"></div>
+              </div>
+              <span class="allocation-bar__amount">{{ entry.value.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Individual Holdings Table -->
+  <div class="card">
+    <div class="card__header">
+      <h2>Holdings Analysis</h2>
+    </div>
+    <div class="holdings-table-wrapper">
+      <table class="holdings-table">
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th class="text-right">Weight</th>
+            <th class="text-right">Value</th>
+            <th class="text-right">Gain/Loss</th>
+            <th class="text-right">MER</th>
+            <th class="text-right">Franking</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (holding of analysis()!.holdings; track holding.ticker) {
+            <tr>
+              <td>
+                <span class="ticker-badge">{{ holding.ticker }}</span>
+              </td>
+              <td>
+                <span class="holding-name">{{ holding.name || '-' }}</span>
+                @if (holding.category) {
+                  <span class="holding-category">{{ holding.category }}</span>
+                }
+              </td>
+              <td class="text-right mono">{{ holding.portfolioPercentage | number:'1.1-1' }}%</td>
+              <td class="text-right mono">{{ holding.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right mono" [class]="getGainLossClass(holding.unrealisedGainLoss)">
+                @if (holding.unrealisedGainLoss !== null) {
+                  {{ holding.unrealisedGainLoss >= 0 ? '+' : '' }}{{ holding.unrealisedGainLoss | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                } @else {
+                  -
+                }
+              </td>
+              <td class="text-right mono">{{ formatMer(holding.mer) }}</td>
+              <td class="text-right mono">
+                @if (holding.estimatedFrankingPercentage !== null) {
+                  {{ holding.estimatedFrankingPercentage * 100 | number:'1.0-0' }}%
+                } @else {
+                  -
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

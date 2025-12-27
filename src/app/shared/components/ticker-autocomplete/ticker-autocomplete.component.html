@@ -1,0 +1,46 @@
+<div class="autocomplete-container">
+  <div class="input-wrapper">
+    <input
+      type="text"
+      [formControl]="searchControl"
+      [placeholder]="placeholder()"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()"
+      (change)="onManualInput()"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    @if (isLoading()) {
+      <span class="loading-indicator"></span>
+    }
+  </div>
+
+  @if (isOpen()) {
+    <div class="dropdown">
+      @if (noResults()) {
+        <div class="no-results">
+          <span>No securities found</span>
+          <span class="hint">You can still enter a custom ticker</span>
+        </div>
+      } @else {
+        <ul class="results-list" role="listbox">
+          @for (result of results(); track result.ticker; let i = $index) {
+            <li
+              class="result-item"
+              [class.highlighted]="highlightedIndex() === i"
+              (mousedown)="selectResult(result)"
+              (mouseenter)="highlightedIndex.set(i)"
+              role="option"
+            >
+              <span class="ticker">{{ result.ticker }}</span>
+              <span class="name">{{ result.name }}</span>
+              <span class="type-badge" [attr.data-type]="result.type">
+                {{ getTypeLabel(result.type) }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

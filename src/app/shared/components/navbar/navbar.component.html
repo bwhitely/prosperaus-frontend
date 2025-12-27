@@ -26,6 +26,9 @@
           </button>
           @if (isToolsDropdownOpen()) {
             <div class="navbar__dropdown-menu">
+              <a routerLink="/projections" class="navbar__dropdown-item" (click)="closeDropdowns()">
+                Net Worth Projection
+              </a>
               <a routerLink="/equity-recycling" class="navbar__dropdown-item" (click)="closeDropdowns()">
                 Equity Recycling Calculator
               </a>
@@ -44,6 +47,9 @@
 
         <a routerLink="/portfolio" routerLinkActive="active" class="navbar__link">
           Portfolio
+        </a>
+        <a routerLink="/cash-flow" routerLinkActive="active" class="navbar__link">
+          Cash Flow
         </a>
         <a routerLink="/analyse" routerLinkActive="active" class="navbar__link">
           Analyse
@@ -123,6 +129,9 @@
         <a routerLink="/dashboard" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
           Dashboard
         </a>
+        <a routerLink="/projections" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+          Net Worth Projection
+        </a>
         <a routerLink="/equity-recycling" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
           Equity Recycling
         </a>
@@ -137,6 +146,9 @@
         </a>
         <a routerLink="/portfolio" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
           Portfolio
+        </a>
+        <a routerLink="/cash-flow" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+          Cash Flow
         </a>
         <a routerLink="/analyse" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
           Analyse

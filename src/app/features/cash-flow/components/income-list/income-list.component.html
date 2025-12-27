@@ -1,0 +1,181 @@
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<div class="section-header">
+  <h2>Income Sources</h2>
+  <button class="btn btn--primary" (click)="openAddModal()">
+    + Add Income
+  </button>
+</div>
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading income sources...</p>
+  </div>
+} @else if (incomeSources().length === 0) {
+  <div class="empty-state">
+    <div class="empty-state__icon">💰</div>
+    <h3>No income sources yet</h3>
+    <p>Add your salary, rental income, dividends, and other income sources.</p>
+    <button class="btn btn--primary" (click)="openAddModal()">
+      Add Your First Income Source
+    </button>
+  </div>
+} @else {
+  <div class="card">
+    <div class="income-table-wrapper">
+      <table class="income-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th class="text-right">Amount</th>
+            <th class="text-right">Monthly</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (source of incomeSources(); track source.id) {
+            <tr [class.inactive]="!source.isActive">
+              <td>
+                <span class="income-name">{{ source.name }}</span>
+              </td>
+              <td>
+                <span class="source-type-badge">{{ formatSourceType(source.sourceType) }}</span>
+              </td>
+              <td class="text-right mono">
+                {{ source.grossAmount | currency:'AUD':'symbol-narrow':'1.0-0' }}{{ formatFrequency(source.frequency) }}
+              </td>
+              <td class="text-right mono">
+                {{ source.monthlyAmount | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </td>
+              <td>
+                @if (source.isActive) {
+                  <span class="status-badge status-badge--active">Active</span>
+                } @else {
+                  <span class="status-badge status-badge--inactive">Inactive</span>
+                }
+              </td>
+              <td class="actions-cell">
+                <button class="btn btn--icon btn--sm" (click)="openEditModal(source)" title="Edit">
+                  ✏️
+                </button>
+                <button class="btn btn--icon btn--sm btn--danger" (click)="delete(source)" title="Delete">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3"><strong>Total Monthly Income</strong></td>
+            <td class="text-right mono positive"><strong>{{ getTotalMonthly() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- Modal -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingSource() ? 'Edit Income Source' : 'Add Income Source' }}</h2>
+        <button class="modal__close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="name">Name *</label>
+            <input type="text" id="name" formControlName="name"
+                   placeholder="e.g., Main Salary, Rental Income">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sourceType">Type *</label>
+              <select id="sourceType" formControlName="sourceType">
+                @for (type of commonSourceTypes; track type) {
+                  <option [value]="type">{{ formatSourceType(type) }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="frequency">Frequency *</label>
+              <select id="frequency" formControlName="frequency">
+                @for (freq of frequencies; track freq.value) {
+                  <option [value]="freq.value">{{ freq.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="grossAmount">Gross Amount *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="grossAmount" formControlName="grossAmount" step="0.01">
+              </div>
+              <span class="form-hint">Before tax</span>
+            </div>
+
+            <div class="form-group">
+              <label for="taxWithheld">Tax Withheld (PAYG)</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="taxWithheld" formControlName="taxWithheld" step="0.01">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="startDate">Start Date</label>
+              <input type="date" id="startDate" formControlName="startDate">
+            </div>
+
+            <div class="form-group">
+              <label for="endDate">End Date</label>
+              <input type="date" id="endDate" formControlName="endDate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isActive">
+              <span>Active income source</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" formControlName="notes" rows="2"
+                      placeholder="Optional notes..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingSource() ? 'Update' : 'Add') }} Income Source
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

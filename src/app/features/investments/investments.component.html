@@ -1,0 +1,237 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <h1>Investments</h1>
+    <p>Track your shares, ETFs, and other investments</p>
+  </div>
+  <button class="btn btn--primary" (click)="openAddModal()">
+    + Add Investment
+  </button>
+</div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<!-- Summary Cards -->
+@if (holdings().length > 0) {
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-card__label">Total Value</span>
+      <span class="summary-card__value">{{ getTotalValue() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Cost Base</span>
+      <span class="summary-card__value">{{ getTotalCostBase() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card" [class.summary-card--positive]="getTotalGainLoss() > 0" [class.summary-card--negative]="getTotalGainLoss() < 0">
+      <span class="summary-card__label">Unrealised Gain/Loss</span>
+      <span class="summary-card__value" [class]="getGainLossClass(getTotalGainLoss())">
+        {{ getTotalGainLoss() >= 0 ? '+' : '' }}{{ getTotalGainLoss() | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </span>
+      <span class="summary-card__hint" [class]="getGainLossClass(getTotalGainLoss())">
+        {{ getTotalGainLossPercent() >= 0 ? '+' : '' }}{{ getTotalGainLossPercent() | number:'1.1-1' }}%
+      </span>
+    </div>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading investments...</p>
+  </div>
+} @else if (holdings().length === 0) {
+  <div class="empty-state">
+    <div class="empty-state__icon">📈</div>
+    <h3>No investments yet</h3>
+    <p>Add your shares, ETFs, and other investments to track your portfolio.</p>
+    <button class="btn btn--primary" (click)="openAddModal()">
+      Add Your First Investment
+    </button>
+  </div>
+} @else {
+  <!-- Holdings Table -->
+  <div class="card">
+    <div class="holdings-table-wrapper">
+      <table class="holdings-table">
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Name</th>
+            <th class="text-right">Units</th>
+            <th class="text-right">Avg Cost</th>
+            <th class="text-right">Current Price</th>
+            <th class="text-right">Value</th>
+            <th class="text-right">Gain/Loss</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (holding of holdings(); track holding.id) {
+            <tr>
+              <td>
+                <span class="ticker-badge">{{ holding.ticker }}</span>
+              </td>
+              <td>
+                <span class="security-name">{{ holding.securityName || '-' }}</span>
+                <span class="security-type">{{ holding.securityType | uppercase }}</span>
+              </td>
+              <td class="text-right mono">{{ holding.units | number:'1.2-4' }}</td>
+              <td class="text-right mono">{{ holding.averageCostPerUnit | currency:'AUD':'symbol-narrow':'1.2-2' }}</td>
+              <td class="text-right mono">
+                @if (holding.currentPrice) {
+                  {{ holding.currentPrice | currency:'AUD':'symbol-narrow':'1.2-2' }}
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td class="text-right mono">{{ holding.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right mono" [class]="getGainLossClass(holding.unrealisedGainLoss)">
+                {{ holding.unrealisedGainLoss >= 0 ? '+' : '' }}{{ holding.unrealisedGainLoss | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </td>
+              <td class="actions-cell">
+                <button class="btn btn--icon btn--sm" (click)="openEditModal(holding)" title="Edit">
+                  ✏️
+                </button>
+                <button class="btn btn--icon btn--sm btn--danger" (click)="delete(holding)" title="Delete">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5"><strong>Total</strong></td>
+            <td class="text-right mono"><strong>{{ getTotalValue() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></td>
+            <td class="text-right mono" [class]="getGainLossClass(getTotalGainLoss())">
+              <strong>{{ getTotalGainLoss() >= 0 ? '+' : '' }}{{ getTotalGainLoss() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong>
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- Modal -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingHolding() ? 'Edit Investment' : 'Add Investment' }}</h2>
+        <button class="modal__close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal__body">
+          <div class="form-row">
+            <div class="form-group form-group--ticker">
+              <label for="ticker">Ticker *</label>
+              @if (editingHolding()) {
+                <input type="text" id="ticker" formControlName="ticker"
+                       placeholder="e.g., VAS" style="text-transform: uppercase;" readonly>
+              } @else {
+                <app-ticker-autocomplete
+                  formControlName="ticker"
+                  [placeholder]="'Search ticker or company...'"
+                  (securitySelected)="onSecuritySelected($event)">
+                </app-ticker-autocomplete>
+              }
+              @if (isFetchingQuote()) {
+                <span class="form-hint">Fetching price...</span>
+              }
+              @if (quoteError() && !editingHolding()) {
+                <span class="form-hint form-hint--warning">{{ quoteError() }}</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="securityType">Type</label>
+              <select id="securityType" formControlName="securityType">
+                @for (type of securityTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          @if (lastQuote() && !editingHolding()) {
+            <div class="quote-preview">
+              <span class="quote-preview__symbol">{{ lastQuote()!.symbol }}</span>
+              <span class="quote-preview__price">{{ lastQuote()!.price | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+              @if (lastQuote()!.change) {
+                <span class="quote-preview__change" [class.positive]="lastQuote()!.change > 0" [class.negative]="lastQuote()!.change < 0">
+                  {{ lastQuote()!.change >= 0 ? '+' : '' }}{{ lastQuote()!.change | currency:'AUD':'symbol-narrow':'1.2-2' }}
+                  ({{ lastQuote()!.changePercent >= 0 ? '+' : '' }}{{ lastQuote()!.changePercent | number:'1.2-2' }}%)
+                </span>
+              }
+            </div>
+          }
+
+          <div class="form-group">
+            <label for="securityName">Security Name</label>
+            <input type="text" id="securityName" formControlName="securityName"
+                   placeholder="e.g., Vanguard Australian Shares Index ETF">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="units">Units *</label>
+              <input type="number" id="units" formControlName="units" step="0.0001">
+            </div>
+
+            <div class="form-group">
+              <label for="costBase">Total Cost Base *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="costBase" formControlName="costBase" step="0.01">
+              </div>
+              <span class="form-hint">Total amount paid including brokerage</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="currentPrice">Current Price</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="currentPrice" formControlName="currentPrice" step="0.01">
+            </div>
+            <span class="form-hint">Auto-filled from market data when available</span>
+          </div>
+
+          <!-- Advanced Options Toggle -->
+          <div class="advanced-toggle">
+            <button type="button" class="btn btn--link" (click)="toggleAdvancedOptions()">
+              {{ showAdvancedOptions() ? 'Hide' : 'Show' }} advanced options
+              <span class="toggle-icon">{{ showAdvancedOptions() ? '−' : '+' }}</span>
+            </button>
+          </div>
+
+          @if (showAdvancedOptions()) {
+            <div class="advanced-options">
+              <div class="form-group">
+                <label for="acquisitionDate">Acquisition Date</label>
+                <input type="date" id="acquisitionDate" formControlName="acquisitionDate">
+                <span class="form-hint">Used for CGT calculations (12-month discount)</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingHolding() ? 'Update' : 'Add') }} Investment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,12 +1,415 @@
 <div class="page-header">
-  <h1>SuperOptimiser</h1>
-  <p>Coming soon...</p>
+  <div class="header-content">
+    <div>
+      <h1>Super Optimiser</h1>
+      <p class="subtitle">Maximise your superannuation contributions and tax savings</p>
+    </div>
+  </div>
 </div>
 
-<div class="card">
-  <div class="card__body">
-    <p class="text-secondary">
-      This feature is under development. Check back soon!
-    </p>
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+  </div>
+}
+
+<div class="optimiser-layout">
+  <!-- Input Section -->
+  <div class="input-section">
+    <div class="card">
+      <div class="card__header">
+        <h2>Your Details</h2>
+        @if (isPrefilling()) {
+          <span class="loading-badge">Loading your data...</span>
+        }
+      </div>
+      <div class="card__body">
+        <form [formGroup]="form">
+          <!-- Income & Super Balance -->
+          <div class="form-section">
+            <h3>Income & Super</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="annualGrossIncome">Annual Gross Income</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="annualGrossIncome" formControlName="annualGrossIncome" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="currentSuperBalance">Current Super Balance</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="currentSuperBalance" formControlName="currentSuperBalance" min="0">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contributions YTD -->
+          <div class="form-section">
+            <h3>Contributions This Financial Year</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="employerContributionsYtd">Employer SG (YTD)</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="employerContributionsYtd" formControlName="employerContributionsYtd" min="0">
+                </div>
+                <span class="help-text">Super guarantee from your employer</span>
+              </div>
+              <div class="form-group">
+                <label for="salarySacrificeYtd">Salary Sacrifice (YTD)</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="salarySacrificeYtd" formControlName="salarySacrificeYtd" min="0">
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="personalConcessionalYtd">Personal Deductible (YTD)</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="personalConcessionalYtd" formControlName="personalConcessionalYtd" min="0">
+                </div>
+                <span class="help-text">Personal contributions you'll claim as a tax deduction</span>
+              </div>
+              <div class="form-group">
+                <label for="nonConcessionalYtd">Non-Concessional (YTD)</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="nonConcessionalYtd" formControlName="nonConcessionalYtd" min="0">
+                </div>
+                <span class="help-text">After-tax contributions</span>
+              </div>
+            </div>
+
+            <!-- Cap Progress -->
+            <div class="cap-progress">
+              <div class="cap-header">
+                <span class="label">Concessional Cap Used</span>
+                <span class="value">{{ formatCurrency(totalConcessionalYtd()) }} / $30,000</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="getProgressPercent()"
+                     [class.warning]="getProgressPercent() > 100"
+                     [class.near-limit]="getProgressPercent() >= 80 && getProgressPercent() <= 100"></div>
+              </div>
+              <div class="cap-remaining">
+                Remaining: {{ formatCurrency(remainingCap()) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Spouse Section Toggle -->
+          <button type="button" class="section-toggle" (click)="toggleSpouseSection()">
+            {{ showSpouseSection() ? 'Hide' : 'Show' }} Spouse Details
+            <span class="toggle-icon">{{ showSpouseSection() ? '−' : '+' }}</span>
+          </button>
+
+          @if (showSpouseSection()) {
+            <div class="form-section spouse-section">
+              <h3>Spouse Details</h3>
+              <p class="section-hint">For spouse contribution tax offset calculations</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="spouseIncome">Spouse Annual Income</label>
+                  <div class="input-prefix">
+                    <span>$</span>
+                    <input type="number" id="spouseIncome" formControlName="spouseIncome" min="0" placeholder="Optional">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="spouseSuperBalance">Spouse Super Balance</label>
+                  <div class="input-prefix">
+                    <span>$</span>
+                    <input type="number" id="spouseSuperBalance" formControlName="spouseSuperBalance" min="0" placeholder="Optional">
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Advanced Options Toggle -->
+          <button type="button" class="section-toggle" (click)="toggleAdvanced()">
+            {{ showAdvanced() ? 'Hide' : 'Show' }} Advanced Options
+            <span class="toggle-icon">{{ showAdvanced() ? '−' : '+' }}</span>
+          </button>
+
+          @if (showAdvanced()) {
+            <div class="advanced-section">
+              <!-- Carry-forward -->
+              <div class="form-section">
+                <h3>Carry-Forward Unused Cap</h3>
+                <p class="section-hint">Available if your total super was under $500k on 30 June last year</p>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="unusedConcessionalCapTotal">Unused Cap (Total)</label>
+                    <div class="input-prefix">
+                      <span>$</span>
+                      <input type="number" id="unusedConcessionalCapTotal" formControlName="unusedConcessionalCapTotal" min="0">
+                    </div>
+                    <span class="help-text">Check your ATO online account for exact amounts</span>
+                  </div>
+                  <div class="form-group">
+                    <label for="totalSuperBalancePrevFy">Super Balance (30 June)</label>
+                    <div class="input-prefix">
+                      <span>$</span>
+                      <input type="number" id="totalSuperBalancePrevFy" formControlName="totalSuperBalancePrevFy" min="0" placeholder="Optional">
+                    </div>
+                    <span class="help-text">Your total super balance at end of last FY</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Other Settings -->
+              <div class="form-section">
+                <h3>Other Details</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="age">Your Age</label>
+                    <input type="number" id="age" formControlName="age" min="18" max="100" placeholder="Optional">
+                  </div>
+                  <div class="form-group">
+                    <label for="marginalTaxRate">Marginal Tax Rate</label>
+                    <select id="marginalTaxRate" formControlName="marginalTaxRate">
+                      <option [ngValue]="null">Auto-calculate</option>
+                      <option [ngValue]="0.16">16%</option>
+                      <option [ngValue]="0.30">30%</option>
+                      <option [ngValue]="0.37">37%</option>
+                      <option [ngValue]="0.45">45%</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" formControlName="wantsToMaximiseContributions">
+                    I want to maximise contributions (use carry-forward if available)
+                  </label>
+                </div>
+              </div>
+            </div>
+          }
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section">
+    @if (isLoading()) {
+      <div class="card loading-card">
+        <div class="loading-spinner"></div>
+        <p>Analysing your super...</p>
+      </div>
+    } @else if (result()) {
+      <!-- Warnings -->
+      @if (warnings().length > 0) {
+        <div class="warnings-card">
+          @for (warning of warnings(); track warning) {
+            <div class="warning-item">
+              <span class="warning-icon">!</span>
+              {{ warning }}
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Key Metrics -->
+      <div class="summary-cards">
+        <div class="summary-card primary-card">
+          <span class="label">Suggested Contribution</span>
+          <span class="value">{{ formatCurrency(suggestedContribution()) }}</span>
+          <span class="subtext">Additional salary sacrifice this FY</span>
+        </div>
+
+        <div class="summary-card savings-card">
+          <span class="label">Estimated Tax Saving</span>
+          <span class="value positive">{{ formatCurrency(taxSaving()) }}</span>
+          <span class="subtext">At your marginal rate of {{ marginalRate() | number:'1.0-0' }}%</span>
+        </div>
+
+        <div class="summary-card contribution-room-card">
+          <span class="label">Total Contribution Room</span>
+          <span class="value">{{ formatCurrency(result()!.totalContributionRoom) }}</span>
+          <span class="subtext">
+            @if (result()!.eligibleForCarryForward && result()!.carryForwardAvailable > 0) {
+              Includes {{ formatCurrency(result()!.carryForwardAvailable) }} carry-forward
+            } @else {
+              Standard cap: $30,000
+            }
+          </span>
+        </div>
+      </div>
+
+      <!-- Strategy Summary -->
+      @if (result()!.strategySummary) {
+        <div class="card strategy-card">
+          <div class="card__header">
+            <h3>Your Strategy</h3>
+          </div>
+          <div class="card__body">
+            <p class="strategy-summary">{{ result()!.strategySummary }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- Recommendations -->
+      @if (recommendations().length > 0) {
+        <div class="card recommendations-card">
+          <div class="card__header">
+            <h3>Recommendations</h3>
+          </div>
+          <div class="card__body">
+            <div class="recommendations-list">
+              @for (rec of recommendations(); track rec.title) {
+                <div class="recommendation-item" [class]="getPriorityClass(rec.priority)">
+                  <div class="rec-header">
+                    <span class="rec-priority">{{ rec.priority }}</span>
+                    <h4>{{ rec.title }}</h4>
+                  </div>
+                  <p class="rec-description">{{ rec.description }}</p>
+                  <div class="rec-action">
+                    <span class="action-label">Action:</span>
+                    <span>{{ rec.action }}</span>
+                  </div>
+                  @if (rec.estimatedBenefit > 0) {
+                    <div class="rec-benefit">
+                      Potential benefit: <span class="benefit-value">{{ formatCurrency(rec.estimatedBenefit) }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Detailed Breakdown -->
+      <div class="card details-card">
+        <div class="card__header">
+          <h3>Detailed Analysis</h3>
+        </div>
+        <div class="card__body">
+          <div class="details-grid">
+            <!-- Concessional -->
+            <div class="detail-section">
+              <h4>Concessional Contributions</h4>
+              <div class="detail-row">
+                <span class="detail-label">YTD Contributions</span>
+                <span class="detail-value">{{ formatCurrency(result()!.totalConcessionalYtd) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Remaining Cap</span>
+                <span class="detail-value">{{ formatCurrency(result()!.remainingConcessionalCap) }}</span>
+              </div>
+              @if (result()!.eligibleForCarryForward) {
+                <div class="detail-row highlight">
+                  <span class="detail-label">Carry-Forward Available</span>
+                  <span class="detail-value">{{ formatCurrency(result()!.carryForwardAvailable) }}</span>
+                </div>
+              }
+              <div class="detail-row total">
+                <span class="detail-label">Total Room</span>
+                <span class="detail-value">{{ formatCurrency(result()!.totalContributionRoom) }}</span>
+              </div>
+            </div>
+
+            <!-- Tax Impact -->
+            <div class="detail-section">
+              <h4>Tax Impact</h4>
+              <div class="detail-row">
+                <span class="detail-label">Marginal Tax Rate</span>
+                <span class="detail-value">{{ (result()!.marginalTaxRate * 100) | number:'1.0-0' }}%</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Super Tax Rate</span>
+                <span class="detail-value">{{ (result()!.effectiveSuperTaxRate * 100) | number:'1.0-0' }}%</span>
+              </div>
+              <div class="detail-row highlight">
+                <span class="detail-label">Net Benefit</span>
+                <span class="detail-value positive">{{ formatCurrency(result()!.netBenefitFromContributing) }}</span>
+              </div>
+            </div>
+
+            <!-- Division 293 -->
+            @if (result()!.subjectToDiv293) {
+              <div class="detail-section warning-section">
+                <h4>Division 293</h4>
+                <p class="section-note">Additional 15% tax on super contributions for high income earners</p>
+                <div class="detail-row">
+                  <span class="detail-label">Contributions Affected</span>
+                  <span class="detail-value">{{ formatCurrency(result()!.div293ContributionsAmount) }}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Additional Tax</span>
+                  <span class="detail-value negative">{{ formatCurrency(result()!.div293TaxLiability) }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Spouse Contributions -->
+            @if (result()!.spouseContributionExplanation) {
+              <div class="detail-section">
+                <h4>Spouse Contributions</h4>
+                <p class="section-note">{{ result()!.spouseContributionExplanation }}</p>
+                @if (result()!.spouseContributionRecommended) {
+                  <div class="detail-row">
+                    <span class="detail-label">Max Contribution</span>
+                    <span class="detail-value">{{ formatCurrency(result()!.maxSpouseContribution) }}</span>
+                  </div>
+                  <div class="detail-row highlight">
+                    <span class="detail-label">Tax Offset</span>
+                    <span class="detail-value positive">{{ formatCurrency(result()!.spouseContributionTaxOffset) }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Co-contribution -->
+            @if (result()!.coContributionExplanation) {
+              <div class="detail-section">
+                <h4>Government Co-contribution</h4>
+                <p class="section-note">{{ result()!.coContributionExplanation }}</p>
+                @if (result()!.eligibleForCoContribution) {
+                  <div class="detail-row">
+                    <span class="detail-label">Required Contribution</span>
+                    <span class="detail-value">{{ formatCurrency(result()!.requiredNonConcessionalForMaxCoContribution) }}</span>
+                  </div>
+                  <div class="detail-row highlight">
+                    <span class="detail-label">Government Adds</span>
+                    <span class="detail-value positive">{{ formatCurrency(result()!.maxCoContribution) }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Non-Concessional -->
+            <div class="detail-section">
+              <h4>Non-Concessional Contributions</h4>
+              <div class="detail-row">
+                <span class="detail-label">Remaining Cap</span>
+                <span class="detail-value">{{ formatCurrency(result()!.remainingNonConcessionalCap) }}</span>
+              </div>
+              @if (result()!.bringForwardAvailable) {
+                <div class="detail-row">
+                  <span class="detail-label">With Bring-Forward</span>
+                  <span class="detail-value">{{ formatCurrency(result()!.maxNonConcessionalWithBringForward) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Note -->
+      <div class="info-note">
+        <p>
+          <strong>Note:</strong> This analysis is based on FY 2025-26 rules.
+          Contribution caps and thresholds may change. Consult a financial adviser for personalised advice.
+        </p>
+      </div>
+    }
   </div>
 </div>

@@ -1,0 +1,631 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.projections {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+
+  &__content {
+    h1 {
+      font-size: $font-size-3xl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-xs;
+    }
+  }
+
+  &__subtitle {
+    color: $color-text-secondary;
+    margin: 0;
+  }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  background: rgba($color-negative, 0.1);
+  border: 1px solid $color-negative;
+  border-radius: $radius-md;
+  color: $color-negative;
+  margin-bottom: $spacing-lg;
+
+  &__close {
+    background: none;
+    border: none;
+    color: $color-negative;
+    cursor: pointer;
+    font-size: $font-size-lg;
+    padding: $spacing-xs;
+  }
+}
+
+.projections__layout {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: $spacing-xl;
+  align-items: start;
+
+  @include respond-to(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.projections__inputs {
+  position: sticky;
+  top: $spacing-lg;
+}
+
+.input-section {
+  @include card;
+  margin-bottom: $spacing-md;
+  padding: 0;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: $spacing-md;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      background: rgba($color-primary, 0.02);
+    }
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  &__toggle {
+    font-size: $font-size-lg;
+    color: $color-text-muted;
+  }
+
+  &__content {
+    padding: 0 $spacing-md $spacing-md;
+    border-top: 1px solid $color-border;
+    padding-top: $spacing-md;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-group {
+  flex: 1;
+
+  &--small {
+    flex: 0 0 80px;
+  }
+
+  label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  input, select {
+    width: 100%;
+    padding: $spacing-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+
+  input[type="checkbox"] {
+    width: auto;
+  }
+}
+
+.income-source {
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.02);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+
+  &:last-of-type {
+    margin-bottom: $spacing-md;
+  }
+}
+
+.btn--icon {
+  padding: $spacing-sm;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-end;
+}
+
+.btn--danger {
+  background: rgba($color-negative, 0.1);
+  color: $color-negative;
+  border: 1px solid transparent;
+
+  &:hover:not(:disabled) {
+    background: rgba($color-negative, 0.2);
+  }
+}
+
+.btn--small {
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
+}
+
+// Results section
+.projections__results {
+  min-height: 600px;
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(white, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+
+  p {
+    margin-top: $spacing-md;
+    color: $color-text-secondary;
+  }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+
+  @include respond-to(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  @include card;
+  text-align: center;
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $color-text-primary;
+    font-family: $font-family-mono;
+  }
+
+  &__change {
+    display: block;
+    font-size: $font-size-sm;
+    margin-top: $spacing-xs;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  &--highlight {
+    background: linear-gradient(135deg, rgba($color-primary, 0.05), rgba($color-accent, 0.05));
+    border-color: rgba($color-primary, 0.2);
+
+    .summary-card__value {
+      color: $color-primary;
+    }
+  }
+}
+
+.milestones-section {
+  @include card;
+  margin-bottom: $spacing-lg;
+
+  h3 {
+    font-size: $font-size-lg;
+    margin: 0 0 $spacing-md;
+    color: $color-text-primary;
+  }
+}
+
+.milestones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: $spacing-md;
+}
+
+.milestone {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.03);
+  border-radius: $radius-md;
+  text-align: center;
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-primary;
+  }
+
+  &__years {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: 2px;
+  }
+}
+
+.fire-status {
+  @include card;
+  margin-bottom: $spacing-lg;
+  border-left: 4px solid $color-warning;
+
+  h4 {
+    margin: 0 0 $spacing-sm;
+    font-size: $font-size-lg;
+    color: $color-text-primary;
+  }
+
+  p {
+    margin: 0;
+    color: $color-text-secondary;
+  }
+
+  &.achievable {
+    border-left-color: $color-accent;
+
+    h4 {
+      color: $color-accent;
+    }
+  }
+
+  &__details {
+    margin-top: $spacing-sm !important;
+    font-family: $font-family-mono;
+    font-weight: 600;
+  }
+}
+
+.insights-section {
+  @include card;
+  margin-bottom: $spacing-lg;
+
+  h3 {
+    font-size: $font-size-lg;
+    margin: 0 0 $spacing-md;
+    color: $color-text-primary;
+  }
+}
+
+.insights {
+  margin: 0;
+  padding-left: $spacing-lg;
+
+  li {
+    margin-bottom: $spacing-sm;
+    color: $color-text-secondary;
+    line-height: 1.5;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.key-points {
+  @include card;
+  margin-bottom: $spacing-lg;
+
+  h3 {
+    font-size: $font-size-lg;
+    margin: 0 0 $spacing-md;
+    color: $color-text-primary;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-md;
+
+    @include respond-to(md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+.key-point {
+  text-align: center;
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.03);
+  border-radius: $radius-md;
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+  }
+}
+
+.allocation-section {
+  @include card;
+  margin-bottom: $spacing-lg;
+
+  h3 {
+    font-size: $font-size-lg;
+    margin: 0 0 $spacing-md;
+    color: $color-text-primary;
+  }
+}
+
+.allocation-bars {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.allocation-bar {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  align-items: center;
+  gap: $spacing-md;
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__fill {
+    height: 24px;
+    border-radius: $radius-sm;
+    transition: width 0.3s ease;
+
+    &--super {
+      background: $color-primary;
+    }
+
+    &--property {
+      background: $color-accent;
+    }
+
+    &--shares {
+      background: #9B59B6;
+    }
+
+    &--cash {
+      background: $color-warning;
+    }
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    font-family: $font-family-mono;
+    color: $color-text-secondary;
+    text-align: right;
+  }
+}
+
+.table-section {
+  @include card;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    h3 {
+      font-size: $font-size-lg;
+      margin: 0;
+      color: $color-text-primary;
+    }
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.projection-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+    border-bottom: 1px solid $color-border;
+  }
+
+  th {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-secondary;
+    background: rgba($color-primary, 0.02);
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .mono {
+    font-family: $font-family-mono;
+  }
+
+  .milestone-row {
+    background: rgba($color-accent, 0.05);
+  }
+}
+
+// Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  @include card;
+  width: 100%;
+  max-width: 400px;
+  margin: $spacing-md;
+
+  h3 {
+    margin: 0 0 $spacing-lg;
+    font-size: $font-size-xl;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-md;
+    margin-top: $spacing-lg;
+  }
+}
+
+// Scenarios sidebar
+.scenarios-sidebar {
+  position: fixed;
+  right: $spacing-lg;
+  top: 100px;
+  width: 250px;
+  @include card;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+
+  h4 {
+    margin: 0 0 $spacing-md;
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+  }
+
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+.scenarios-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.scenario-item {
+  padding: $spacing-sm;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  margin-bottom: $spacing-xs;
+
+  &:hover {
+    background: rgba($color-primary, 0.05);
+  }
+
+  &__name {
+    display: block;
+    font-weight: 500;
+    color: $color-text-primary;
+    margin-bottom: 2px;
+  }
+
+  &__date {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// Positive/negative helpers
+.positive {
+  color: $color-accent;
+}
+
+.negative {
+  color: $color-negative;
+}

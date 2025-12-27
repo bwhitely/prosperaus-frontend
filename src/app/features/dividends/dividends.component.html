@@ -1,0 +1,297 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <h1>Dividends & Distributions</h1>
+    <p>Track your dividend income and franking credits for tax time</p>
+  </div>
+  <button class="btn btn--primary" (click)="openAddModal()">+ Log Distribution</button>
+</div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading dividend data...</p>
+  </div>
+} @else if (summary()) {
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-card__label">Financial Year</span>
+      <span class="summary-card__value">{{ summary()!.financialYearDisplay }}</span>
+    </div>
+    <div class="summary-card summary-card--positive">
+      <span class="summary-card__label">Total Dividends</span>
+      <span class="summary-card__value positive">{{ summary()!.totalDividends | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card summary-card--positive">
+      <span class="summary-card__label">Franking Credits</span>
+      <span class="summary-card__value positive">{{ summary()!.totalFrankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">Grossed Up Income</span>
+      <span class="summary-card__value">{{ summary()!.totalGrossedUp | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+  </div>
+
+  <!-- Year Selector -->
+  @if (summary()!.historicalYears.length > 1) {
+    <div class="year-selector">
+      @for (year of summary()!.historicalYears; track year.financialYear) {
+        <button
+          class="year-btn"
+          [class.year-btn--active]="selectedYear() === year.financialYear"
+          (click)="selectYear(year.financialYear)"
+        >
+          FY {{ year.financialYear }}
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="activeTab() === 'summary'" (click)="setTab('summary')">
+      Summary
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'list'" (click)="setTab('list')">
+      All Distributions ({{ getFilteredDistributions().length }})
+    </button>
+  </div>
+
+  <!-- Summary Tab -->
+  @if (activeTab() === 'summary') {
+    <div class="tab-content">
+      <!-- Holdings Breakdown -->
+      @if (summary()!.holdingSummaries.length > 0) {
+        <div class="card">
+          <div class="card__header">
+            <h3>Dividends by Holding</h3>
+          </div>
+          <div class="card__body">
+            <div class="holdings-list">
+              @for (holding of summary()!.holdingSummaries; track holding.holdingId) {
+                <div class="holding-row">
+                  <div class="holding-info">
+                    <span class="holding-ticker">{{ holding.ticker }}</span>
+                    <span class="holding-name">{{ holding.securityName }}</span>
+                    <span class="holding-meta">{{ holding.distributionCount }} distribution(s), {{ holding.averageFrankingPercentage * 100 | number:'1.0-0' }}% franked</span>
+                  </div>
+                  <div class="holding-values">
+                    <span class="holding-dividends positive">{{ holding.totalDividends | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                    <span class="holding-franking">Franking: {{ holding.totalFrankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <p>No dividend distributions recorded yet.</p>
+              <button class="btn btn--primary" (click)="openAddModal()">Log First Distribution</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tax Summary -->
+      <div class="card mt-md">
+        <div class="card__header">
+          <h3>Tax Time Summary</h3>
+          <p class="card__subtitle">Use these figures for your tax return</p>
+        </div>
+        <div class="card__body">
+          <div class="tax-summary">
+            <div class="tax-row">
+              <span class="tax-label">Unfranked Dividends</span>
+              <span class="tax-value">{{ summary()!.totalDividends - (summary()!.totalFrankingCredits / 0.4286) | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="tax-row">
+              <span class="tax-label">Franked Dividends</span>
+              <span class="tax-value">{{ summary()!.totalFrankingCredits / 0.4286 | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="tax-row">
+              <span class="tax-label">Franking Credits</span>
+              <span class="tax-value">{{ summary()!.totalFrankingCredits | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="tax-row tax-row--highlight">
+              <span class="tax-label">Grossed Up Dividend Income</span>
+              <span class="tax-value">{{ summary()!.totalGrossedUp | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- List Tab -->
+  @if (activeTab() === 'list') {
+    <div class="tab-content">
+      @if (getFilteredDistributions().length === 0) {
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <p>No distributions for {{ summary()!.financialYearDisplay }}.</p>
+              <button class="btn btn--primary" (click)="openAddModal()">Log Distribution</button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="distributions-list">
+          @for (dist of getFilteredDistributions(); track dist.id) {
+            <div class="distribution-card">
+              <div class="distribution-header">
+                <div class="distribution-holding">
+                  <span class="distribution-ticker">{{ dist.ticker }}</span>
+                  <span class="distribution-type">{{ getDistributionTypeLabel(dist.distributionType) }}</span>
+                </div>
+                <div class="distribution-date">{{ dist.distributionDate | date:'dd MMM yyyy' }}</div>
+              </div>
+              <div class="distribution-body">
+                <div class="distribution-detail">
+                  <span class="detail-label">Amount</span>
+                  <span class="detail-value">{{ dist.grossAmount | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+                </div>
+                <div class="distribution-detail">
+                  <span class="detail-label">Per Unit</span>
+                  <span class="detail-value">{{ dist.amountPerUnit | currency:'AUD':'symbol-narrow':'1.4-4' }}</span>
+                </div>
+                <div class="distribution-detail">
+                  <span class="detail-label">Units</span>
+                  <span class="detail-value">{{ dist.unitsHeld | number:'1.0-2' }}</span>
+                </div>
+                <div class="distribution-detail">
+                  <span class="detail-label">Franking</span>
+                  <span class="detail-value">{{ dist.frankingPercentage * 100 | number:'1.0-0' }}%</span>
+                </div>
+                <div class="distribution-detail">
+                  <span class="detail-label">Franking Credits</span>
+                  <span class="detail-value positive">{{ dist.frankingCredits | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+                </div>
+              </div>
+              <div class="distribution-actions">
+                <button class="btn btn--icon btn--sm" (click)="openEditModal(dist)">Edit</button>
+                <button class="btn btn--icon btn--sm btn--danger" (click)="deleteDistribution(dist)">Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- Distribution Modal -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editing() ? 'Edit' : 'Log' }} Distribution</h2>
+        <button class="modal__close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="distributionForm" (ngSubmit)="saveDistribution()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="holdingId">Holding *</label>
+            <select id="holdingId" formControlName="holdingId">
+              <option value="">Select holding...</option>
+              @for (holding of holdings(); track holding.id) {
+                <option [value]="holding.id">{{ holding.ticker }} - {{ holding.securityName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="distributionType">Type</label>
+              <select id="distributionType" formControlName="distributionType">
+                @for (type of distributionTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="distributionDate">Distribution Date *</label>
+              <input type="date" id="distributionDate" formControlName="distributionDate">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="amountPerUnit">Amount Per Unit *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="amountPerUnit" formControlName="amountPerUnit" step="0.0001">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="unitsHeld">Units Held *</label>
+              <input type="number" id="unitsHeld" formControlName="unitsHeld" step="0.0001">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="frankingPercentage">Franking Percentage</label>
+              <div class="input-suffix">
+                <input type="number" id="frankingPercentage" formControlName="frankingPercentage" min="0" max="100">
+                <span class="suffix">%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="paymentDate">Payment Date</label>
+              <input type="date" id="paymentDate" formControlName="paymentDate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isDrp">
+              <span>Dividend Reinvestment Plan (DRP)</span>
+            </label>
+          </div>
+
+          @if (distributionForm.get('isDrp')?.value) {
+            <div class="form-row">
+              <div class="form-group">
+                <label for="drpUnits">DRP Units Received</label>
+                <input type="number" id="drpUnits" formControlName="drpUnits" step="0.0001">
+              </div>
+              <div class="form-group">
+                <label for="drpPrice">DRP Price</label>
+                <div class="input-prefix">
+                  <span class="prefix">$</span>
+                  <input type="number" id="drpPrice" formControlName="drpPrice" step="0.01">
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" formControlName="notes" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="distributionForm.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editing() ? 'Update' : 'Log') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

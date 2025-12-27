@@ -1,0 +1,153 @@
+@use '../../../../styles/variables' as *;
+
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+
+  input {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    padding-right: 2.5rem;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    text-transform: uppercase;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &:disabled {
+      background-color: $color-background;
+      cursor: not-allowed;
+    }
+
+    &::placeholder {
+      text-transform: none;
+      color: $color-text-muted;
+    }
+  }
+
+  .loading-indicator {
+    position: absolute;
+    right: $spacing-sm;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border: 2px solid $color-border;
+    border-top-color: $color-primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.no-results {
+  padding: $spacing-md;
+  text-align: center;
+  color: $color-text-secondary;
+
+  span {
+    display: block;
+  }
+
+  .hint {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+.results-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+
+  &:hover,
+  &.highlighted {
+    background-color: rgba($color-primary, 0.05);
+  }
+
+  .ticker {
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: $color-primary;
+    min-width: 60px;
+  }
+
+  .name {
+    flex: 1;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .type-badge {
+    font-size: $font-size-xs;
+    padding: 2px 6px;
+    border-radius: $radius-sm;
+    background-color: $color-background;
+    color: $color-text-secondary;
+    font-weight: 500;
+    text-transform: uppercase;
+
+    &[data-type="ETF"] {
+      background-color: rgba($color-accent, 0.1);
+      color: $color-accent-dark;
+    }
+
+    &[data-type="Stock"] {
+      background-color: rgba($color-primary, 0.1);
+      color: $color-primary;
+    }
+
+    &[data-type="REIT"] {
+      background-color: rgba(#8b5cf6, 0.1);
+      color: #7c3aed;
+    }
+
+    &[data-type="LIC"] {
+      background-color: rgba(#f59e0b, 0.1);
+      color: #d97706;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}

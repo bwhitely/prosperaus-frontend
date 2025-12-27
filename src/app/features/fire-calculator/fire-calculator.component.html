@@ -1,12 +1,424 @@
 <div class="page-header">
-  <h1>FireCalculator</h1>
-  <p>Coming soon...</p>
+  <div class="header-content">
+    <div>
+      <h1>FIRE Calculator</h1>
+      <p class="subtitle">Calculate your path to Financial Independence, Retire Early</p>
+    </div>
+    <div class="header-actions">
+      @if (scenarios().length > 0) {
+        <button class="btn btn--secondary" (click)="openLoadModal()">
+          Load Scenario
+        </button>
+      }
+      @if (result()) {
+        <button class="btn btn--secondary" (click)="openSaveModal()">
+          {{ currentScenarioId() ? 'Update' : 'Save' }} Scenario
+        </button>
+      }
+      @if (currentScenarioId()) {
+        <button class="btn btn--ghost" (click)="newScenario()">New</button>
+      }
+    </div>
+  </div>
+  @if (getCurrentScenarioName()) {
+    <div class="current-scenario">
+      <span class="scenario-label">Current:</span>
+      <span class="scenario-name">{{ getCurrentScenarioName() }}</span>
+    </div>
+  }
 </div>
 
-<div class="card">
-  <div class="card__body">
-    <p class="text-secondary">
-      This feature is under development. Check back soon!
-    </p>
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+  </div>
+}
+
+<div class="calculator-layout">
+  <!-- Input Section -->
+  <div class="input-section">
+    <div class="card">
+      <div class="card__header">
+        <h2>Your Details</h2>
+        @if (isPrefilling()) {
+          <span class="loading-badge">Loading your data...</span>
+        }
+      </div>
+      <div class="card__body">
+        <form [formGroup]="form">
+          <!-- Personal Details -->
+          <div class="form-section">
+            <h3>Personal</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="currentAge">Current Age</label>
+                <input type="number" id="currentAge" formControlName="currentAge" min="18" max="80">
+              </div>
+              <div class="form-group">
+                <label for="targetRetirementAge">
+                  Target FIRE Age
+                  <span class="optional">(optional)</span>
+                </label>
+                <input type="number" id="targetRetirementAge" formControlName="targetRetirementAge" min="30" max="100" placeholder="Auto-calculate">
+                <span class="help-text">Leave blank to auto-calculate</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assets -->
+          <div class="form-section">
+            <h3>Current Assets</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="currentSuperBalance">Super Balance</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="currentSuperBalance" formControlName="currentSuperBalance" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="currentNonSuperInvestments">Non-Super Investments</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="currentNonSuperInvestments" formControlName="currentNonSuperInvestments" min="0">
+                </div>
+                <span class="help-text">Shares, ETFs, investment properties</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Income & Expenses -->
+          <div class="form-section">
+            <h3>Annual Cash Flow</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="annualGrossIncome">Gross Income</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="annualGrossIncome" formControlName="annualGrossIncome" min="0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="annualExpenses">Annual Expenses</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input type="number" id="annualExpenses" formControlName="annualExpenses" min="0">
+                </div>
+              </div>
+            </div>
+            <div class="savings-rate-display">
+              <span class="label">Savings Rate:</span>
+              <span class="value" [class.excellent]="savingsRate() >= 50" [class.good]="savingsRate() >= 20 && savingsRate() < 50">
+                {{ savingsRate() | number:'1.0-0' }}%
+              </span>
+            </div>
+          </div>
+
+          <!-- Advanced Options Toggle -->
+          <button type="button" class="advanced-toggle" (click)="toggleAdvanced()">
+            {{ showAdvanced() ? 'Hide' : 'Show' }} Advanced Options
+            <span class="toggle-icon">{{ showAdvanced() ? '−' : '+' }}</span>
+          </button>
+
+          @if (showAdvanced()) {
+            <div class="advanced-section">
+              <!-- Super Contributions -->
+              <div class="form-section">
+                <h3>Super Contributions</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="superGuaranteeRate">SG Rate (%)</label>
+                    <div class="input-suffix">
+                      <input type="number" id="superGuaranteeRate" formControlName="superGuaranteeRate" min="0" max="30" step="0.5">
+                      <span>%</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="annualSalarySacrifice">Salary Sacrifice p.a.</label>
+                    <div class="input-prefix">
+                      <span>$</span>
+                      <input type="number" id="annualSalarySacrifice" formControlName="annualSalarySacrifice" min="0">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Return Assumptions -->
+              <div class="form-section">
+                <h3>Return Assumptions</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="preRetirementReturnRate">Pre-FIRE Return (%)</label>
+                    <div class="input-suffix">
+                      <input type="number" id="preRetirementReturnRate" formControlName="preRetirementReturnRate" min="0" max="20" step="0.5">
+                      <span>%</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="postRetirementReturnRate">Post-FIRE Return (%)</label>
+                    <div class="input-suffix">
+                      <input type="number" id="postRetirementReturnRate" formControlName="postRetirementReturnRate" min="0" max="15" step="0.5">
+                      <span>%</span>
+                    </div>
+                    <span class="help-text">More conservative in retirement</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Other Settings -->
+              <div class="form-section">
+                <h3>Other Settings</h3>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="inflationRate">Inflation Rate (%)</label>
+                    <div class="input-suffix">
+                      <input type="number" id="inflationRate" formControlName="inflationRate" min="0" max="10" step="0.1">
+                      <span>%</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="safeWithdrawalRate">Safe Withdrawal Rate (%)</label>
+                    <div class="input-suffix">
+                      <input type="number" id="safeWithdrawalRate" formControlName="safeWithdrawalRate" min="2" max="10" step="0.1">
+                      <span>%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" formControlName="includeAgePension">
+                    Include Age Pension (from age 67)
+                  </label>
+                  <span class="help-text">Based on asset test for homeowner singles</span>
+                </div>
+              </div>
+            </div>
+          }
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section">
+    @if (isLoading()) {
+      <div class="card loading-card">
+        <div class="loading-spinner"></div>
+        <p>Calculating your FIRE projection...</p>
+      </div>
+    } @else if (result()) {
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card fire-number-card">
+          <span class="label">FIRE Number</span>
+          <span class="value">{{ formatCurrency(fireNumber()) }}</span>
+          <span class="subtext">{{ form.get('annualExpenses')?.value | currency:'AUD':'symbol':'1.0-0' }} / {{ form.get('safeWithdrawalRate')?.value }}%</span>
+        </div>
+
+        @if (canAchieveFire()) {
+          <div class="summary-card fire-age-card">
+            <span class="label">FIRE Age</span>
+            <span class="value">{{ fireAge() }}</span>
+            <span class="subtext">{{ yearsToFire() }} years from now</span>
+          </div>
+        } @else {
+          <div class="summary-card fire-age-card warning">
+            <span class="label">FIRE Status</span>
+            <span class="value">Not Achievable</span>
+            <span class="subtext">With current inputs</span>
+          </div>
+        }
+
+        <div class="summary-card assets-card">
+          <span class="label">Assets at FIRE</span>
+          <span class="value">{{ formatCurrency(totalAssetsAtFire()) }}</span>
+          <span class="subtext">Safe withdrawal: {{ formatCurrency(safeWithdrawalAmount()) }}/yr</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="card progress-card">
+        <div class="card__header">
+          <h3>Progress to FIRE</h3>
+        </div>
+        <div class="card__body">
+          <div class="progress-bar-container">
+            <div class="progress-bar" [style.width.%]="getProgressToFire()"></div>
+          </div>
+          <div class="progress-labels">
+            <span class="current">
+              Current: {{ formatCurrency((form.get('currentSuperBalance')?.value || 0) + (form.get('currentNonSuperInvestments')?.value || 0)) }}
+            </span>
+            <span class="target">
+              Target: {{ formatCurrency(fireNumber()) }}
+            </span>
+          </div>
+          <div class="progress-percent">{{ getProgressToFire() | number:'1.0-0' }}% complete</div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      @if (result()!.insights.length > 0) {
+        <div class="card insights-card">
+          <div class="card__header">
+            <h3>Key Insights</h3>
+          </div>
+          <div class="card__body">
+            <ul class="insights-list">
+              @for (insight of result()!.insights; track insight) {
+                <li [class.warning]="insight.toLowerCase().includes('warning')">
+                  {{ insight }}
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+
+      <!-- Milestones -->
+      <div class="card milestones-card">
+        <div class="card__header">
+          <h3>Key Milestones</h3>
+        </div>
+        <div class="card__body">
+          <div class="milestones-grid">
+            @if (canAchieveFire()) {
+              <div class="milestone fire-milestone">
+                <div class="milestone-age">{{ fireAge() }}</div>
+                <div class="milestone-label">FIRE</div>
+                <div class="milestone-detail">
+                  Super: {{ formatCurrency(result()!.superBalanceAtFire) }}<br>
+                  Non-Super: {{ formatCurrency(result()!.nonSuperBalanceAtFire) }}
+                </div>
+              </div>
+            }
+            <div class="milestone preservation-milestone">
+              <div class="milestone-age">60</div>
+              <div class="milestone-label">Super Access</div>
+              <div class="milestone-detail">
+                Super: {{ formatCurrency(result()!.superBalanceAtPreservation) }}<br>
+                Non-Super: {{ formatCurrency(result()!.nonSuperBalanceAtPreservation) }}
+              </div>
+            </div>
+            <div class="milestone pension-milestone">
+              <div class="milestone-age">67</div>
+              <div class="milestone-label">Age Pension</div>
+              <div class="milestone-detail">
+                Estimated: {{ formatCurrency(result()!.estimatedAgePensionPerYear) }}/yr
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Year-by-Year Projections -->
+      <div class="card projections-card">
+        <div class="card__header">
+          <h3>Year-by-Year Projection</h3>
+          <button class="btn btn--ghost btn--sm" (click)="toggleAllProjections()">
+            {{ showAllProjections() ? 'Show Milestones' : 'Show All Years' }}
+          </button>
+        </div>
+        <div class="card__body">
+          <div class="table-container">
+            <table class="projections-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Age</th>
+                  <th>Super</th>
+                  <th>Non-Super</th>
+                  <th>Total</th>
+                  <th>Phase</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (projection of displayedProjections(); track projection.year) {
+                  <tr [class]="getRowClass(projection)">
+                    <td>{{ projection.year }}</td>
+                    <td>{{ projection.age }}</td>
+                    <td>{{ projection.superBalance | currency:'AUD':'symbol':'1.0-0' }}</td>
+                    <td>{{ projection.nonSuperBalance | currency:'AUD':'symbol':'1.0-0' }}</td>
+                    <td class="total">{{ projection.totalAssets | currency:'AUD':'symbol':'1.0-0' }}</td>
+                    <td>
+                      <span class="phase-badge" [class.accumulating]="!projection.hasFired" [class.fired]="projection.hasFired">
+                        {{ getPhaseLabel(projection) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </div>
+
+<!-- Save Scenario Modal -->
+@if (showSaveModal()) {
+  <div class="modal-overlay" (click)="closeSaveModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h3>{{ currentScenarioId() ? 'Update' : 'Save' }} Scenario</h3>
+        <button class="modal__close" (click)="closeSaveModal()">&times;</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label for="scenarioName">Scenario Name</label>
+          <input
+            type="text"
+            id="scenarioName"
+            [value]="scenarioName()"
+            (input)="scenarioName.set($any($event.target).value)"
+            placeholder="e.g., Conservative FIRE Plan"
+            maxlength="100"
+          >
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" (click)="closeSaveModal()">Cancel</button>
+        <button
+          class="btn btn--primary"
+          (click)="saveScenario()"
+          [disabled]="!scenarioName().trim() || isSaving()"
+        >
+          {{ isSaving() ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Load Scenario Modal -->
+@if (showLoadModal()) {
+  <div class="modal-overlay" (click)="closeLoadModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h3>Load Scenario</h3>
+        <button class="modal__close" (click)="closeLoadModal()">&times;</button>
+      </div>
+      <div class="modal__body">
+        @if (scenarios().length === 0) {
+          <p class="text-muted">No saved scenarios yet.</p>
+        } @else {
+          <ul class="scenario-list">
+            @for (scenario of scenarios(); track scenario.id) {
+              <li class="scenario-item" (click)="loadScenario(scenario)">
+                <div class="scenario-info">
+                  <span class="scenario-name">{{ scenario.name }}</span>
+                  <span class="scenario-date">{{ scenario.updatedAt | date:'short' }}</span>
+                </div>
+                <button class="btn btn--ghost btn--sm" (click)="deleteScenario(scenario, $event)">Delete</button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" (click)="closeLoadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}

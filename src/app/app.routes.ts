@@ -92,6 +92,64 @@ export const routes: Routes = [
     title: 'Profile - AusFinance'
   },
 
+  // Asset Management Routes
+  {
+    path: 'properties',
+    loadComponent: () => import('./features/properties/properties.component')
+      .then(m => m.PropertiesComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Properties - AusFinance'
+  },
+  {
+    path: 'super',
+    loadComponent: () => import('./features/super-accounts/super-accounts.component')
+      .then(m => m.SuperAccountsComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Super Accounts - AusFinance'
+  },
+  {
+    path: 'investments',
+    loadComponent: () => import('./features/investments/investments.component')
+      .then(m => m.InvestmentsComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Investments - AusFinance'
+  },
+  {
+    path: 'cash',
+    loadComponent: () => import('./features/cash-liabilities/cash-liabilities.component')
+      .then(m => m.CashLiabilitiesComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Cash & Liabilities - AusFinance'
+  },
+  {
+    path: 'cash-flow',
+    loadComponent: () => import('./features/cash-flow/cash-flow.component')
+      .then(m => m.CashFlowComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Cash Flow - AusFinance'
+  },
+  {
+    path: 'projections',
+    loadComponent: () => import('./features/projections/projections.component')
+      .then(m => m.ProjectionsComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Net Worth Projection - AusFinance'
+  },
+  {
+    path: 'cgt',
+    loadComponent: () => import('./features/cgt-helper/cgt-helper.component')
+      .then(m => m.CgtHelperComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'CGT Helper - AusFinance'
+  },
+  {
+    path: 'dividends',
+    loadComponent: () => import('./features/dividends/dividends.component')
+      .then(m => m.DividendsComponent),
+    canActivate: [authGuard, onboardingGuard],
+    title: 'Dividends & Distributions - AusFinance'
+  },
+
   // Fallback
   {
     path: '**',

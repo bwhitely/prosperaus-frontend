@@ -1,1 +1,698 @@
-// PropertyAnalyser component styles
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.property-analyser {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+}
+
+.page-header {
+  margin-bottom: $spacing-xl;
+
+  h1 {
+    font-size: $font-size-3xl;
+    font-weight: 700;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-xs;
+  }
+
+  p {
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    margin: 0;
+  }
+}
+
+.analyser-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: $spacing-xl;
+
+  @include respond-to(lg) {
+    grid-template-columns: 420px 1fr;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Form Panel
+.form-panel {
+  @include card;
+  height: fit-content;
+  position: sticky;
+  top: $spacing-lg;
+}
+
+.property-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.form-section {
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.section-title {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: $color-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 $spacing-md;
+}
+
+.form-group {
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  input, select {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    background: $color-surface;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  select {
+    cursor: pointer;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.input-with-prefix,
+.input-with-suffix {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    flex: 1;
+  }
+
+  .prefix,
+  .suffix {
+    position: absolute;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    pointer-events: none;
+  }
+
+  .prefix {
+    left: $spacing-md;
+  }
+
+  .suffix {
+    right: $spacing-md;
+  }
+}
+
+.input-with-prefix input {
+  padding-left: $spacing-xl;
+}
+
+.input-with-suffix input {
+  padding-right: $spacing-2xl;
+}
+
+.checkbox-group {
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+
+    span {
+      font-size: $font-size-sm;
+      color: $color-text-primary;
+    }
+  }
+}
+
+// Results Panel
+.results-panel {
+  @include card;
+  min-height: 400px;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  color: $color-text-secondary;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: $spacing-md;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state {
+  color: $color-negative;
+
+  .btn {
+    margin-top: $spacing-md;
+  }
+}
+
+// Summary Cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  @include respond-to(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.summary-card {
+  background: $color-background;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  text-align: center;
+
+  &.negative {
+    background: rgba($color-negative, 0.05);
+  }
+
+  .label {
+    display: block;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: $spacing-xs;
+  }
+
+  .value {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  .sublabel {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+// Insights Section
+.insights-section {
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.03);
+  border-radius: $radius-md;
+
+  h3 {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-primary;
+    margin: 0 0 $spacing-sm;
+  }
+}
+
+.insights-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.insight-item {
+  padding: $spacing-xs 0;
+  padding-left: $spacing-lg;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $color-text-muted;
+  }
+
+  &.warning::before {
+    background: $color-warning;
+  }
+
+  &.check::before {
+    background: $color-accent;
+  }
+
+  &.alert::before {
+    background: $color-negative;
+  }
+
+  &.info::before {
+    background: $color-primary;
+  }
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-lg;
+  border-bottom: 1px solid $color-border;
+  padding-bottom: $spacing-xs;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+  background: none;
+  border: none;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $color-primary;
+    background: rgba($color-primary, 0.05);
+  }
+
+  &.active {
+    color: $color-primary;
+    background: rgba($color-primary, 0.1);
+    font-weight: 600;
+  }
+}
+
+// Tab Content
+.tab-content {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// Detail Sections
+.detail-section {
+  margin-bottom: $spacing-lg;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h4 {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+.detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+
+  .label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .value {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  &.highlight {
+    background: rgba($color-accent, 0.05);
+    padding: $spacing-sm $spacing-md;
+    margin: 0 (-$spacing-md);
+    border-radius: $radius-sm;
+  }
+}
+
+// Cash Flow Table
+.cashflow-table {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.cashflow-section {
+  h5 {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-secondary;
+    margin: 0 0 $spacing-sm;
+  }
+}
+
+.cashflow-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs 0;
+  font-size: $font-size-sm;
+
+  .amount {
+    font-family: $font-family-mono;
+    font-weight: 500;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  &.subtotal {
+    border-top: 1px solid $color-border;
+    padding-top: $spacing-sm;
+    margin-top: $spacing-xs;
+    font-weight: 600;
+  }
+
+  &.total {
+    background: $color-background;
+    padding: $spacing-sm $spacing-md;
+    margin: 0 (-$spacing-md);
+    border-radius: $radius-sm;
+    font-weight: 600;
+  }
+}
+
+// Projections Table
+.projections-table-wrapper {
+  overflow-x: auto;
+  margin: 0 (-$spacing-md);
+  padding: 0 $spacing-md;
+}
+
+.projections-table,
+.cgt-table,
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: right;
+    white-space: nowrap;
+
+    &:first-child {
+      text-align: left;
+    }
+  }
+
+  th {
+    background: $color-background;
+    font-weight: 600;
+    color: $color-text-secondary;
+    border-bottom: 2px solid $color-border;
+  }
+
+  td {
+    border-bottom: 1px solid $color-border;
+    font-family: $font-family-mono;
+  }
+
+  .positive {
+    color: $color-accent;
+  }
+
+  .negative {
+    color: $color-negative;
+  }
+
+  tbody tr:hover {
+    background: rgba($color-primary, 0.02);
+  }
+}
+
+.projection-summary {
+  display: flex;
+  gap: $spacing-lg;
+  margin-top: $spacing-lg;
+  padding: $spacing-md;
+  background: $color-background;
+  border-radius: $radius-md;
+
+  .summary-item {
+    .label {
+      display: block;
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .value {
+      font-size: $font-size-lg;
+      font-weight: 700;
+      font-family: $font-family-mono;
+
+      &.positive {
+        color: $color-accent;
+      }
+
+      &.negative {
+        color: $color-negative;
+      }
+    }
+  }
+}
+
+// ETF Comparison
+.comparison-intro {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.comparison-result {
+  text-align: center;
+  padding: $spacing-lg;
+  background: $color-background;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &.property-wins {
+    background: rgba($color-accent, 0.1);
+
+    .winner-badge {
+      color: $color-accent;
+    }
+  }
+
+  &.etf-wins {
+    background: rgba($color-primary, 0.1);
+
+    .winner-badge {
+      color: $color-primary;
+    }
+  }
+
+  .winner-badge {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    margin-bottom: $spacing-xs;
+  }
+
+  .difference {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.comparison-card {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+
+  h5 {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    margin: 0 0 $spacing-md;
+  }
+
+  &.property h5 {
+    color: $color-accent;
+  }
+
+  &.etf h5 {
+    color: $color-primary;
+  }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: $spacing-xs 0;
+
+    .label {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+    }
+
+    .value {
+      font-size: $font-size-sm;
+      font-weight: 600;
+      font-family: $font-family-mono;
+    }
+  }
+}
+
+.etf-yearly-table {
+  h5 {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-secondary;
+    margin: 0 0 $spacing-md;
+  }
+}
+
+// CGT Section
+.cgt-intro {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.cgt-table-wrapper {
+  overflow-x: auto;
+  margin: 0 (-$spacing-md);
+  padding: 0 $spacing-md;
+}
+
+.cgt-note {
+  margin-top: $spacing-lg;
+  padding: $spacing-md;
+  background: rgba($color-warning, 0.1);
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+
+  strong {
+    color: $color-warning;
+  }
+}
+
+// Button styles
+.btn {
+  @include button-base;
+
+  &--primary {
+    background: $color-primary;
+    color: white;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+    }
+  }
+}

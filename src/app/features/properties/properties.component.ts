@@ -1,0 +1,274 @@
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PropertyService } from '../../core/services/property.service';
+import { PropertyResponse, PropertyRequest, MortgageResponse, MortgageRequest } from '../../shared/models/property.model';
+
+@Component({
+  selector: 'app-properties',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe],
+  templateUrl: './properties.component.html',
+  styleUrl: './properties.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class PropertiesComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private propertyService = inject(PropertyService);
+
+  properties = signal<PropertyResponse[]>([]);
+  mortgages = signal<Map<string, MortgageResponse[]>>(new Map());
+  isLoading = signal(true);
+  error = signal<string | null>(null);
+
+  // Modal state
+  showPropertyModal = signal(false);
+  showMortgageModal = signal(false);
+  editingProperty = signal<PropertyResponse | null>(null);
+  editingMortgage = signal<MortgageResponse | null>(null);
+  selectedPropertyId = signal<string | null>(null);
+  isSubmitting = signal(false);
+
+  propertyForm: FormGroup = this.fb.group({
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    currentValue: [null, [Validators.required, Validators.min(1)]],
+    propertyType: ['residential'],
+    address: [''],
+    purchasePrice: [null],
+    purchaseDate: [''],
+    isInvestment: [false],
+    weeklyRent: [null],
+    annualExpenses: [null]
+  });
+
+  mortgageForm: FormGroup = this.fb.group({
+    lender: [''],
+    loanName: [''],
+    currentBalance: [null, [Validators.required, Validators.min(0)]],
+    offsetBalance: [0],
+    interestRate: [null, [Validators.required, Validators.min(0), Validators.max(25)]],
+    isFixed: [false],
+    fixedRateExpiry: [''],
+    repaymentType: ['principal_and_interest'],
+    isDeductible: [false]
+  });
+
+  propertyTypes = [
+    { value: 'residential', label: 'Residential' },
+    { value: 'investment', label: 'Investment Property' },
+    { value: 'commercial', label: 'Commercial' },
+    { value: 'land', label: 'Land' }
+  ];
+
+  ngOnInit(): void {
+    this.loadProperties();
+  }
+
+  loadProperties(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.propertyService.getProperties().subscribe({
+      next: (properties) => {
+        this.properties.set(properties);
+        this.isLoading.set(false);
+        // Load mortgages for each property
+        properties.forEach(p => this.loadMortgagesForProperty(p.id));
+      },
+      error: (err) => {
+        this.error.set('Failed to load properties');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadMortgagesForProperty(propertyId: string): void {
+    this.propertyService.getMortgagesForProperty(propertyId).subscribe({
+      next: (propertyMortgages) => {
+        this.mortgages.update(m => {
+          const newMap = new Map(m);
+          newMap.set(propertyId, propertyMortgages);
+          return newMap;
+        });
+      }
+    });
+  }
+
+  getMortgagesForProperty(propertyId: string): MortgageResponse[] {
+    return this.mortgages().get(propertyId) || [];
+  }
+
+  getTotalMortgageBalance(propertyId: string): number {
+    const mortgages = this.getMortgagesForProperty(propertyId);
+    return mortgages.reduce((sum, m) => sum + (m.effectiveBalance || m.currentBalance), 0);
+  }
+
+  // Property Modal
+  openAddPropertyModal(): void {
+    this.editingProperty.set(null);
+    this.propertyForm.reset({
+      propertyType: 'residential',
+      isInvestment: false
+    });
+    this.showPropertyModal.set(true);
+  }
+
+  openEditPropertyModal(property: PropertyResponse): void {
+    this.editingProperty.set(property);
+    this.propertyForm.patchValue({
+      name: property.name,
+      currentValue: property.currentValue,
+      propertyType: property.propertyType,
+      address: property.address || '',
+      purchasePrice: property.purchasePrice,
+      purchaseDate: property.purchaseDate || '',
+      isInvestment: property.isInvestment,
+      weeklyRent: property.weeklyRent,
+      annualExpenses: property.annualExpenses
+    });
+    this.showPropertyModal.set(true);
+  }
+
+  closePropertyModal(): void {
+    this.showPropertyModal.set(false);
+    this.editingProperty.set(null);
+  }
+
+  saveProperty(): void {
+    if (this.propertyForm.invalid || this.isSubmitting()) return;
+
+    this.isSubmitting.set(true);
+    const formValue = this.propertyForm.value;
+
+    const request: PropertyRequest = {
+      name: formValue.name,
+      currentValue: formValue.currentValue,
+      propertyType: formValue.propertyType,
+      address: formValue.address || undefined,
+      purchasePrice: formValue.purchasePrice || undefined,
+      purchaseDate: formValue.purchaseDate || undefined,
+      isInvestment: formValue.isInvestment,
+      weeklyRent: formValue.weeklyRent || undefined,
+      annualExpenses: formValue.annualExpenses || undefined
+    };
+
+    const editing = this.editingProperty();
+    const operation = editing
+      ? this.propertyService.updateProperty(editing.id, request)
+      : this.propertyService.createProperty(request);
+
+    operation.subscribe({
+      next: () => {
+        this.loadProperties();
+        this.closePropertyModal();
+        this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to save property');
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  deleteProperty(property: PropertyResponse): void {
+    if (!confirm(`Are you sure you want to delete "${property.name}"? This will also delete all associated mortgages.`)) {
+      return;
+    }
+
+    this.propertyService.deleteProperty(property.id).subscribe({
+      next: () => this.loadProperties(),
+      error: (err) => this.error.set('Failed to delete property')
+    });
+  }
+
+  // Mortgage Modal
+  openAddMortgageModal(propertyId: string): void {
+    this.selectedPropertyId.set(propertyId);
+    this.editingMortgage.set(null);
+    this.mortgageForm.reset({
+      offsetBalance: 0,
+      isFixed: false,
+      repaymentType: 'principal_and_interest',
+      isDeductible: false
+    });
+    this.showMortgageModal.set(true);
+  }
+
+  openEditMortgageModal(mortgage: MortgageResponse): void {
+    this.selectedPropertyId.set(mortgage.propertyId);
+    this.editingMortgage.set(mortgage);
+    this.mortgageForm.patchValue({
+      lender: mortgage.lender || '',
+      loanName: mortgage.loanName || '',
+      currentBalance: mortgage.currentBalance,
+      offsetBalance: mortgage.offsetBalance,
+      interestRate: mortgage.interestRate * 100, // Convert to percentage
+      isFixed: mortgage.isFixed,
+      fixedRateExpiry: mortgage.fixedRateExpiry || '',
+      repaymentType: mortgage.repaymentType,
+      isDeductible: mortgage.isDeductible
+    });
+    this.showMortgageModal.set(true);
+  }
+
+  closeMortgageModal(): void {
+    this.showMortgageModal.set(false);
+    this.editingMortgage.set(null);
+    this.selectedPropertyId.set(null);
+  }
+
+  saveMortgage(): void {
+    if (this.mortgageForm.invalid || this.isSubmitting()) return;
+
+    const propertyId = this.selectedPropertyId();
+    if (!propertyId) return;
+
+    this.isSubmitting.set(true);
+    const formValue = this.mortgageForm.value;
+
+    const request: MortgageRequest = {
+      propertyId: propertyId,
+      lender: formValue.lender || undefined,
+      loanName: formValue.loanName || undefined,
+      currentBalance: formValue.currentBalance,
+      offsetBalance: formValue.offsetBalance || 0,
+      interestRate: formValue.interestRate / 100, // Convert from percentage
+      isFixed: formValue.isFixed,
+      fixedRateExpiry: formValue.fixedRateExpiry || undefined,
+      repaymentType: formValue.repaymentType,
+      isDeductible: formValue.isDeductible
+    };
+
+    const editing = this.editingMortgage();
+    const operation = editing
+      ? this.propertyService.updateMortgage(editing.id, request)
+      : this.propertyService.createMortgage(request);
+
+    operation.subscribe({
+      next: () => {
+        this.loadMortgagesForProperty(propertyId);
+        this.loadProperties(); // Refresh equity calculations
+        this.closeMortgageModal();
+        this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to save mortgage');
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  deleteMortgage(mortgage: MortgageResponse): void {
+    if (!confirm('Are you sure you want to delete this mortgage?')) {
+      return;
+    }
+
+    this.propertyService.deleteMortgage(mortgage.id).subscribe({
+      next: () => {
+        this.loadMortgagesForProperty(mortgage.propertyId);
+        this.loadProperties();
+      },
+      error: (err) => this.error.set('Failed to delete mortgage')
+    });
+  }
+}

@@ -1,0 +1,537 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-lg;
+
+  &__content {
+    h1 {
+      font-size: $font-size-3xl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-xs;
+    }
+
+    p {
+      color: $color-text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+.alert {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &--error {
+    background: rgba($color-negative, 0.1);
+    color: $color-negative;
+    border: 1px solid rgba($color-negative, 0.2);
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: $font-size-xl;
+    cursor: pointer;
+    color: inherit;
+  }
+}
+
+.loading-container {
+  text-align: center;
+  padding: $spacing-2xl;
+  color: $color-text-secondary;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto $spacing-md;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Summary Cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.summary-card {
+  @include card;
+  text-align: center;
+
+  &--positive {
+    border-left: 4px solid $color-accent;
+  }
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+
+    &.positive { color: $color-accent; }
+  }
+}
+
+// Year Selector
+.year-selector {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.year-btn {
+  @include button-base;
+  background: $color-background;
+  border: 1px solid $color-border;
+  color: $color-text-secondary;
+  padding: $spacing-xs $spacing-md;
+
+  &:hover {
+    background: rgba($color-primary, 0.05);
+    border-color: $color-primary;
+  }
+
+  &--active {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: white;
+  }
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  border-bottom: 1px solid $color-border;
+  padding-bottom: $spacing-xs;
+}
+
+.tab {
+  @include button-base;
+  background: none;
+  border: none;
+  color: $color-text-secondary;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md $radius-md 0 0;
+
+  &:hover {
+    color: $color-primary;
+    background: rgba($color-primary, 0.05);
+  }
+
+  &--active {
+    color: $color-primary;
+    font-weight: 600;
+    border-bottom: 2px solid $color-primary;
+    margin-bottom: -1px;
+  }
+}
+
+.tab-content {
+  padding-top: $spacing-md;
+}
+
+// Card styles
+.card {
+  @include card;
+
+  &__header {
+    margin-bottom: $spacing-md;
+
+    h3 {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $color-text-primary;
+      margin: 0;
+    }
+
+    &__subtitle {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin: $spacing-xs 0 0;
+    }
+  }
+}
+
+// Holdings list
+.holdings-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.holding-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-background;
+  border-radius: $radius-md;
+}
+
+.holding-info {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.holding-ticker {
+  font-weight: 600;
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+}
+
+.holding-name {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.holding-meta {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.holding-values {
+  text-align: right;
+}
+
+.holding-dividends {
+  display: block;
+  font-weight: 600;
+  font-family: $font-family-mono;
+  font-size: $font-size-lg;
+}
+
+.holding-franking {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+// Tax Summary
+.tax-summary {
+  .tax-row {
+    display: flex;
+    justify-content: space-between;
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &--highlight {
+      background: rgba($color-primary, 0.05);
+      margin: 0 (-$spacing-lg);
+      padding: $spacing-md $spacing-lg;
+      margin-top: $spacing-sm;
+      font-weight: 600;
+    }
+  }
+
+  .tax-label {
+    color: $color-text-secondary;
+  }
+
+  .tax-value {
+    font-family: $font-family-mono;
+    font-weight: 500;
+  }
+}
+
+// Distributions list
+.distributions-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.distribution-card {
+  @include card;
+}
+
+.distribution-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid $color-border;
+}
+
+.distribution-holding {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.distribution-ticker {
+  font-weight: 600;
+  font-size: $font-size-lg;
+}
+
+.distribution-type {
+  font-size: $font-size-xs;
+  padding: $spacing-xs $spacing-sm;
+  background: $color-background;
+  border-radius: $radius-sm;
+  color: $color-text-secondary;
+}
+
+.distribution-date {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.distribution-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.distribution-detail {
+  text-align: center;
+}
+
+.detail-label {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.detail-value {
+  font-weight: 500;
+  font-family: $font-family-mono;
+}
+
+.distribution-actions {
+  display: flex;
+  gap: $spacing-sm;
+  justify-content: flex-end;
+  padding-top: $spacing-sm;
+  border-top: 1px solid $color-border;
+}
+
+// Empty state
+.empty-state {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-text-secondary;
+
+  p {
+    margin-bottom: $spacing-md;
+  }
+}
+
+// Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: $color-surface;
+  border-radius: $radius-lg;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-lg;
+    border-bottom: 1px solid $color-border;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-xl;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: $font-size-2xl;
+    cursor: pointer;
+    color: $color-text-secondary;
+  }
+
+  &__body {
+    padding: $spacing-lg;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    padding: $spacing-lg;
+    border-top: 1px solid $color-border;
+  }
+}
+
+// Form styles
+.form-group {
+  margin-bottom: $spacing-md;
+
+  label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.input-prefix, .input-suffix {
+  display: flex;
+  align-items: center;
+
+  input {
+    flex: 1;
+  }
+}
+
+.input-prefix {
+  .prefix {
+    padding: $spacing-sm;
+    background: $color-background;
+    border: 1px solid $color-border;
+    border-right: none;
+    border-radius: $radius-md 0 0 $radius-md;
+    color: $color-text-secondary;
+  }
+
+  input {
+    border-radius: 0 $radius-md $radius-md 0;
+  }
+}
+
+.input-suffix {
+  .suffix {
+    padding: $spacing-sm;
+    background: $color-background;
+    border: 1px solid $color-border;
+    border-left: none;
+    border-radius: 0 $radius-md $radius-md 0;
+    color: $color-text-secondary;
+  }
+
+  input {
+    border-radius: $radius-md 0 0 $radius-md;
+  }
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    width: auto;
+  }
+}
+
+// Utility
+.positive { color: $color-accent; }
+.mt-md { margin-top: $spacing-md; }
+
+.btn {
+  @include button-base;
+
+  &--primary {
+    background: $color-primary;
+    color: white;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+    }
+  }
+
+  &--secondary {
+    background: transparent;
+    color: $color-primary;
+    border: 1px solid $color-primary;
+
+    &:hover:not(:disabled) {
+      background: rgba($color-primary, 0.05);
+    }
+  }
+
+  &--icon {
+    padding: $spacing-xs $spacing-sm;
+  }
+
+  &--sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+  }
+
+  &--danger {
+    color: $color-negative;
+    border-color: $color-negative;
+
+    &:hover:not(:disabled) {
+      background: rgba($color-negative, 0.05);
+    }
+  }
+}

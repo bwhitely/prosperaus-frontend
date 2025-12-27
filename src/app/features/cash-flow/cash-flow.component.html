@@ -1,0 +1,78 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <h1>Cash Flow</h1>
+    <p>Track your income, expenses, and savings rate</p>
+  </div>
+  <button class="btn btn--secondary" (click)="loadSummary()">
+    Refresh
+  </button>
+</div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<!-- Summary Cards -->
+<div class="summary-cards">
+  <div class="summary-card">
+    <span class="summary-card__label">Monthly Income</span>
+    <span class="summary-card__value positive">
+      {{ (summary()?.totalMonthlyIncome ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+    </span>
+  </div>
+  <div class="summary-card">
+    <span class="summary-card__label">Monthly Expenses</span>
+    <span class="summary-card__value negative">
+      {{ (summary()?.totalMonthlyExpenses ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+    </span>
+  </div>
+  <div class="summary-card" [class]="'summary-card--' + getSavingsRateClass()">
+    <span class="summary-card__label">Savings Rate</span>
+    <span class="summary-card__value" [class]="getSavingsRateClass()">
+      {{ ((summary()?.savingsRate ?? 0) * 100) | number:'1.1-1' }}%
+    </span>
+    <span class="summary-card__hint">
+      {{ (summary()?.monthlySavings ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
+    </span>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tabs">
+  <button
+    class="tabs__tab"
+    [class.tabs__tab--active]="activeTab() === 'income'"
+    (click)="setTab('income')">
+    Income
+  </button>
+  <button
+    class="tabs__tab"
+    [class.tabs__tab--active]="activeTab() === 'expenses'"
+    (click)="setTab('expenses')">
+    Expenses
+  </button>
+  <button
+    class="tabs__tab"
+    [class.tabs__tab--active]="activeTab() === 'statements'"
+    (click)="setTab('statements')">
+    Bank Statements
+  </button>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content">
+  @switch (activeTab()) {
+    @case ('income') {
+      <app-income-list (changed)="loadSummary()"></app-income-list>
+    }
+    @case ('expenses') {
+      <app-expense-list (changed)="loadSummary()"></app-expense-list>
+    }
+    @case ('statements') {
+      <app-statement-upload></app-statement-upload>
+    }
+  }
+</div>

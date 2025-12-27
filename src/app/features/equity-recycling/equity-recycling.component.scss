@@ -1,1 +1,436 @@
-// EquityRecycling component styles
+@use 'sass:color';
+@use '../../../styles/variables' as *;
+
+// Two-column calculator layout
+.calculator-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-lg;
+
+  @media (min-width: $breakpoint-lg) {
+    grid-template-columns: 400px 1fr;
+  }
+}
+
+.calculator-inputs {
+  position: sticky;
+  top: $spacing-lg;
+  height: fit-content;
+}
+
+.calculator-results {
+  min-width: 0;
+}
+
+// Form sections
+.form-section {
+  margin-bottom: $spacing-lg;
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: $spacing-md;
+  }
+
+  &--advanced {
+    background: rgba($color-primary, 0.03);
+    padding: $spacing-md;
+    border-radius: $radius-md;
+    margin-top: $spacing-md;
+  }
+}
+
+// Input with prefix/suffix
+.input-prefix,
+.input-suffix {
+  display: flex;
+  align-items: center;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &:focus-within {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-base;
+    min-width: 0;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .prefix,
+  .suffix {
+    padding: $spacing-sm $spacing-md;
+    background: $color-background;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+  }
+
+  .prefix {
+    border-right: 1px solid $color-border;
+  }
+
+  .suffix {
+    border-left: 1px solid $color-border;
+  }
+}
+
+// Info box
+.info-box {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &--highlight {
+    background: linear-gradient(135deg, rgba($color-primary, 0.05), rgba($color-accent, 0.05));
+    border: 1px solid rgba($color-primary, 0.1);
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+  }
+}
+
+// Result cards
+.result-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
+
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.result-card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  text-align: center;
+
+  &--primary {
+    background: linear-gradient(135deg, $color-primary, $color-primary-light);
+    border: none;
+    color: white;
+
+    .result-card__label {
+      color: rgba(white, 0.8);
+    }
+
+    .result-card__value {
+      color: white;
+
+      &.positive {
+        color: $color-accent-light;
+      }
+
+      &.negative {
+        color: #feb2b2;
+      }
+    }
+
+    .result-card__change {
+      color: rgba(white, 0.9);
+    }
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  &__change {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+// Breakdown grid
+.breakdown-grid {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--total {
+    border-top: 2px solid $color-border;
+    padding-top: $spacing-md;
+    margin-top: $spacing-sm;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.breakdown-label {
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
+
+.breakdown-value {
+  font-family: $font-family-mono;
+  font-weight: $font-weight-semibold;
+
+  &.positive {
+    color: $color-accent;
+  }
+
+  &.negative {
+    color: $color-negative;
+  }
+}
+
+// Risk assessment
+.risk-assessment {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  line-height: $line-height-relaxed;
+
+  &.risk-low {
+    background: rgba($color-accent, 0.1);
+    border-left: 4px solid $color-accent;
+    color: $color-accent-dark;
+  }
+
+  &.risk-moderate {
+    background: rgba($color-warning, 0.1);
+    border-left: 4px solid $color-warning;
+    color: color.adjust($color-warning, $lightness: -15%);
+  }
+
+  &.risk-high {
+    background: rgba($color-negative, 0.1);
+    border-left: 4px solid $color-negative;
+    color: color.adjust($color-negative, $lightness: -10%);
+  }
+
+  &.risk-very-high {
+    background: rgba($color-negative, 0.15);
+    border-left: 4px solid color.adjust($color-negative, $lightness: -10%);
+    color: color.adjust($color-negative, $lightness: -15%);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+// Projection chart
+.projection-chart {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.projection-bar {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__year {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  &__track {
+    height: 8px;
+    background: $color-background;
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: $radius-full;
+    transition: width $transition-slow;
+
+    &--positive {
+      background: linear-gradient(90deg, $color-accent-light, $color-accent);
+    }
+
+    &--negative {
+      background: linear-gradient(90deg, color.adjust($color-negative, $lightness: 20%), $color-negative);
+    }
+  }
+}
+
+// Disclaimer
+.disclaimer {
+  background: rgba($color-info, 0.05);
+  border: 1px solid rgba($color-info, 0.2);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-relaxed;
+
+  p {
+    margin: 0;
+  }
+}
+
+// Button modifiers
+.btn--link {
+  background: transparent;
+  border: none;
+  color: $color-primary;
+  padding: $spacing-sm 0;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  text-decoration: underline;
+
+  &:hover {
+    color: $color-primary-dark;
+  }
+}
+
+.btn--full-width {
+  width: 100%;
+}
+
+// Error state for cards
+.card--error {
+  border-color: $color-negative;
+  background: rgba($color-negative, 0.05);
+}
+
+// Scenario badge
+.scenario-badge {
+  display: inline-block;
+  margin-top: $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba($color-primary, 0.1);
+  color: $color-primary;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+// Scenario list in load modal
+.scenario-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.scenario-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-background;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    background: rgba($color-primary, 0.03);
+    border-color: $color-primary;
+  }
+
+  &--active {
+    background: rgba($color-primary, 0.05);
+    border-color: $color-primary;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__date {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// Modal size modifier
+.modal--sm {
+  max-width: 400px;
+}
+
+// Page header actions
+.page-header__actions {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+// Reuse common modal styles
+@import '../properties/properties.component';

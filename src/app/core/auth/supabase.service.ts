@@ -57,6 +57,28 @@ export class SupabaseService {
 
   async getSession(): Promise<Session | null> {
     const { data } = await this.supabase.auth.getSession();
+
+    if (!data.session) {
+      return null;
+    }
+
+    // Check if token is expired or about to expire (within 60 seconds)
+    const expiresAt = data.session.expires_at;
+    if (expiresAt) {
+      const now = Math.floor(Date.now() / 1000);
+      const bufferSeconds = 60;
+
+      if (expiresAt < now + bufferSeconds) {
+        // Token expired or about to expire, refresh it
+        const { data: refreshData, error } = await this.supabase.auth.refreshSession();
+        if (error || !refreshData.session) {
+          console.error('Failed to refresh session:', error);
+          return null;
+        }
+        return refreshData.session;
+      }
+    }
+
     return data.session;
   }
 

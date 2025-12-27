@@ -1,0 +1,221 @@
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<div class="section-header">
+  <div class="section-header__title">
+    <h2>Expenses</h2>
+    <button class="btn btn--sm btn--secondary" (click)="openCategoryModal()">
+      Manage Categories
+    </button>
+  </div>
+  <button class="btn btn--primary" (click)="openAddExpenseModal()">
+    + Add Expense
+  </button>
+</div>
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading expenses...</p>
+  </div>
+} @else if (expenses().length === 0) {
+  <div class="empty-state">
+    <div class="empty-state__icon">💸</div>
+    <h3>No expenses tracked yet</h3>
+    <p>Add your recurring expenses like rent, utilities, subscriptions, and more.</p>
+    <button class="btn btn--primary" (click)="openAddExpenseModal()">
+      Add Your First Expense
+    </button>
+  </div>
+} @else {
+  <div class="expenses-list">
+    @for (group of getExpensesByCategory(); track group.category?.id ?? 'uncategorised') {
+      <div class="category-group">
+        <div class="category-header" [style.border-left-color]="group.category?.color || '#95A5A6'">
+          <div class="category-info">
+            <span class="category-name">{{ group.category?.name || 'Uncategorised' }}</span>
+            @if (!group.category?.isSystemDefault && group.category) {
+              <button class="btn btn--icon btn--xs" (click)="openEditCategoryModal(group.category)" title="Edit category">
+                ✏️
+              </button>
+            }
+          </div>
+          <span class="category-total">{{ getCategoryTotal(group.expenses) | currency:'AUD':'symbol-narrow':'1.0-0' }}/mo</span>
+        </div>
+
+        <div class="card">
+          <table class="expense-table">
+            <tbody>
+              @for (expense of group.expenses; track expense.id) {
+                <tr [class.one-off]="!expense.isRecurring">
+                  <td class="expense-name-cell">
+                    <span class="expense-name">{{ expense.name }}</span>
+                    @if (!expense.isRecurring) {
+                      <span class="one-off-badge">One-off</span>
+                    }
+                  </td>
+                  <td class="text-right mono">
+                    {{ expense.amount | currency:'AUD':'symbol-narrow':'1.0-0' }}{{ formatFrequency(expense.frequency) }}
+                  </td>
+                  <td class="text-right mono monthly-amount">
+                    @if (expense.isRecurring) {
+                      {{ expense.monthlyAmount | currency:'AUD':'symbol-narrow':'1.0-0' }}/mo
+                    }
+                  </td>
+                  <td class="actions-cell">
+                    <button class="btn btn--icon btn--sm" (click)="openEditExpenseModal(expense)" title="Edit">
+                      ✏️
+                    </button>
+                    <button class="btn btn--icon btn--sm btn--danger" (click)="deleteExpense(expense)" title="Delete">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <div class="total-bar">
+      <span>Total Monthly Expenses</span>
+      <span class="total-amount negative">{{ getTotalMonthly() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+  </div>
+}
+
+<!-- Expense Modal -->
+@if (showExpenseModal()) {
+  <div class="modal-overlay" (click)="closeExpenseModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingExpense() ? 'Edit Expense' : 'Add Expense' }}</h2>
+        <button class="modal__close" (click)="closeExpenseModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="expenseForm" (ngSubmit)="saveExpense()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="name">Name *</label>
+            <input type="text" id="name" formControlName="name"
+                   placeholder="e.g., Rent, Netflix, Electricity">
+          </div>
+
+          <div class="form-group">
+            <label for="categoryId">Category</label>
+            <select id="categoryId" formControlName="categoryId">
+              <option value="">-- Select Category --</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="amount">Amount *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="amount" formControlName="amount" step="0.01">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="frequency">Frequency *</label>
+              <select id="frequency" formControlName="frequency">
+                @for (freq of frequencies; track freq.value) {
+                  <option [value]="freq.value">{{ freq.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isRecurring">
+              <span>Recurring expense</span>
+            </label>
+            <span class="form-hint">Uncheck for one-time expenses (won't count towards monthly total)</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="startDate">Start Date</label>
+              <input type="date" id="startDate" formControlName="startDate">
+            </div>
+
+            <div class="form-group">
+              <label for="endDate">End Date</label>
+              <input type="date" id="endDate" formControlName="endDate">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" formControlName="notes" rows="2"
+                      placeholder="Optional notes..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeExpenseModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="expenseForm.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingExpense() ? 'Update' : 'Add') }} Expense
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Category Modal -->
+@if (showCategoryModal()) {
+  <div class="modal-overlay" (click)="closeCategoryModal()">
+    <div class="modal modal--sm" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingCategory() ? 'Edit Category' : 'Add Custom Category' }}</h2>
+        <button class="modal__close" (click)="closeCategoryModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="catName">Name *</label>
+            <input type="text" id="catName" formControlName="name"
+                   placeholder="e.g., Pet Expenses">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="color">Color</label>
+              <input type="color" id="color" formControlName="color">
+            </div>
+
+            <div class="form-group">
+              <label for="icon">Icon</label>
+              <input type="text" id="icon" formControlName="icon"
+                     placeholder="e.g., paw">
+              <span class="form-hint">Icon name from your icon library</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeCategoryModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="categoryForm.invalid || isCategorySubmitting()">
+            {{ isCategorySubmitting() ? 'Saving...' : (editingCategory() ? 'Update' : 'Add') }} Category
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

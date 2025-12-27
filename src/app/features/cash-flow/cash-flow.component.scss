@@ -1,0 +1,56 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.tabs {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-lg;
+  border-bottom: 1px solid $color-border;
+  padding-bottom: $spacing-xs;
+
+  &__tab {
+    @include button-base;
+    background: transparent;
+    color: $color-text-secondary;
+    border: none;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-md $radius-md 0 0;
+    position: relative;
+
+    &:hover:not(:disabled) {
+      color: $color-text-primary;
+      background: rgba($color-primary, 0.05);
+    }
+
+    &--active {
+      color: $color-primary;
+      font-weight: 600;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: calc(-#{$spacing-xs} - 1px);
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: $color-primary;
+      }
+    }
+  }
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+.positive {
+  color: $color-accent !important;
+}
+
+.negative {
+  color: $color-negative !important;
+}
+
+.neutral {
+  color: $color-warning !important;
+}

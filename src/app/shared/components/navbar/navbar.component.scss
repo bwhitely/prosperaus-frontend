@@ -90,8 +90,18 @@
     border-radius: $radius-md;
     box-shadow: $shadow-lg;
     padding: $spacing-xs;
-    margin-top: $spacing-xs;
+    padding-top: $spacing-sm;
     z-index: $z-index-dropdown;
+
+    // Invisible bridge to prevent mouseleave when moving from trigger to menu
+    &::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 0;
+      right: 0;
+      height: 8px;
+    }
   }
 
   &__dropdown-item {

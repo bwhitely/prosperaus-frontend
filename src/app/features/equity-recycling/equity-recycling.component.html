@@ -1,12 +1,399 @@
 <div class="page-header">
-  <h1>EquityRecycling</h1>
-  <p>Coming soon...</p>
-</div>
-
-<div class="card">
-  <div class="card__body">
-    <p class="text-secondary">
-      This feature is under development. Check back soon!
-    </p>
+  <div class="page-header__content">
+    <h1>Equity Recycling Calculator</h1>
+    <p>Model the tax benefits of recycling your home equity into income-producing investments</p>
+    @if (getCurrentScenarioName(); as name) {
+      <span class="scenario-badge">{{ name }}</span>
+    }
+  </div>
+  <div class="page-header__actions">
+    <button class="btn btn--secondary btn--sm" (click)="newScenario()">New</button>
+    <button class="btn btn--secondary btn--sm" (click)="openLoadModal()" [disabled]="scenarios().length === 0">
+      Load ({{ scenarios().length }})
+    </button>
+    <button class="btn btn--primary btn--sm" (click)="openSaveModal()" [disabled]="!result()">
+      {{ currentScenarioId() ? 'Update' : 'Save' }}
+    </button>
   </div>
 </div>
+
+<div class="calculator-layout">
+  <!-- Input Form -->
+  <div class="calculator-inputs">
+    <div class="card">
+      <div class="card__header">
+        <h3>Your Details</h3>
+      </div>
+      <div class="card__body">
+        <form [formGroup]="form">
+          <!-- Property Details -->
+          <div class="form-section">
+            <h4 class="form-section__title">Property Details</h4>
+
+            <div class="form-group">
+              <label for="propertyValue">Property Value</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input
+                  type="number"
+                  id="propertyValue"
+                  formControlName="propertyValue"
+                  placeholder="800,000">
+              </div>
+              @if (form.get('propertyValue')?.invalid && form.get('propertyValue')?.touched) {
+                <span class="form-error">Please enter a valid property value (min $50,000)</span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="mortgageBalance">Current Mortgage Balance</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input
+                  type="number"
+                  id="mortgageBalance"
+                  formControlName="mortgageBalance"
+                  placeholder="400,000">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="interestRate">Interest Rate</label>
+              <div class="input-suffix">
+                <input
+                  type="number"
+                  id="interestRate"
+                  formControlName="interestRate"
+                  step="0.1"
+                  placeholder="6.5">
+                <span class="suffix">%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="offsetBalance">Offset Balance (Optional)</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input
+                  type="number"
+                  id="offsetBalance"
+                  formControlName="offsetBalance"
+                  placeholder="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Equity Info Box -->
+          @if (result()) {
+            <div class="info-box info-box--highlight">
+              <div class="info-box__label">Available Equity (80% LVR)</div>
+              <div class="info-box__value">{{ result()!.availableEquity | currency:'AUD':'symbol-narrow':'1.0-0' }}</div>
+            </div>
+          }
+
+          <!-- Recycling Details -->
+          <div class="form-section">
+            <h4 class="form-section__title">Recycling Strategy</h4>
+
+            <div class="form-group">
+              <label for="amountToRecycle">Amount to Recycle</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input
+                  type="number"
+                  id="amountToRecycle"
+                  formControlName="amountToRecycle"
+                  placeholder="100,000">
+              </div>
+              <span class="form-hint">Amount to borrow and invest</span>
+            </div>
+
+            <div class="form-group">
+              <label for="expectedReturn">Expected Investment Return</label>
+              <div class="input-suffix">
+                <input
+                  type="number"
+                  id="expectedReturn"
+                  formControlName="expectedReturn"
+                  step="0.5"
+                  placeholder="8">
+                <span class="suffix">% p.a.</span>
+              </div>
+              <span class="form-hint">Historical ASX average: ~9-10% p.a.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="marginalTaxRate">Marginal Tax Rate</label>
+              <select id="marginalTaxRate" formControlName="marginalTaxRate">
+                @for (bracket of taxBrackets; track bracket.rate) {
+                  <option [value]="bracket.rate">{{ bracket.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="projectionYears">Projection Period</label>
+              <div class="input-suffix">
+                <input
+                  type="number"
+                  id="projectionYears"
+                  formControlName="projectionYears"
+                  min="1"
+                  max="30"
+                  placeholder="10">
+                <span class="suffix">years</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced Options -->
+          <button type="button" class="btn btn--link" (click)="toggleAdvanced()">
+            {{ showAdvanced() ? 'Hide' : 'Show' }} Advanced Options
+          </button>
+
+          @if (showAdvanced()) {
+            <div class="form-section form-section--advanced">
+              <h4 class="form-section__title">Investment Assumptions</h4>
+
+              <div class="form-group">
+                <label for="dividendYield">Dividend Yield</label>
+                <div class="input-suffix">
+                  <input
+                    type="number"
+                    id="dividendYield"
+                    formControlName="dividendYield"
+                    step="0.5"
+                    placeholder="4">
+                  <span class="suffix">%</span>
+                </div>
+                <span class="form-hint">Typical Australian shares: 3-5%</span>
+              </div>
+
+              <div class="form-group">
+                <label for="frankingRate">Franking Rate</label>
+                <div class="input-suffix">
+                  <input
+                    type="number"
+                    id="frankingRate"
+                    formControlName="frankingRate"
+                    min="0"
+                    max="100"
+                    placeholder="100">
+                  <span class="suffix">%</span>
+                </div>
+                <span class="form-hint">100% = fully franked dividends</span>
+              </div>
+            </div>
+          }
+
+          <button
+            type="button"
+            class="btn btn--primary btn--full-width mt-md"
+            (click)="calculate()"
+            [disabled]="form.invalid || isLoading()">
+            {{ isLoading() ? 'Calculating...' : 'Calculate' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="calculator-results">
+    @if (error()) {
+      <div class="card card--error">
+        <div class="card__body">
+          <p class="error-message">{{ error() }}</p>
+        </div>
+      </div>
+    }
+
+    @if (result(); as r) {
+      <!-- Summary Cards -->
+      <div class="result-cards">
+        <div class="result-card result-card--primary">
+          <div class="result-card__label">Total Benefit ({{ form.value.projectionYears }} years)</div>
+          <div class="result-card__value" [class.positive]="r.totalBenefit > 0" [class.negative]="r.totalBenefit < 0">
+            {{ r.totalBenefit | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </div>
+          <div class="result-card__change">{{ r.percentageBenefit | number:'1.1-1' }}% better than baseline</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card__label">Baseline (Do Nothing)</div>
+          <div class="result-card__value">
+            {{ r.baselineWealth | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card__label">With Recycling</div>
+          <div class="result-card__value positive">
+            {{ r.recyclingWealth | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Annual Breakdown -->
+      <div class="card mt-md">
+        <div class="card__header">
+          <h3>Annual Cost & Benefit</h3>
+        </div>
+        <div class="card__body">
+          <div class="breakdown-grid">
+            <div class="breakdown-item">
+              <span class="breakdown-label">Interest Cost</span>
+              <span class="breakdown-value negative">{{ r.annualInterestCost | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Tax Deduction</span>
+              <span class="breakdown-value positive">+{{ r.annualTaxDeduction | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Franking Credits</span>
+              <span class="breakdown-value" [class.positive]="r.taxBenefits.frankingCredits > 0" [class.negative]="r.taxBenefits.frankingCredits < 0">
+                {{ r.taxBenefits.frankingCredits >= 0 ? '+' : '' }}{{ r.taxBenefits.frankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </span>
+            </div>
+            <div class="breakdown-item breakdown-item--total">
+              <span class="breakdown-label">Net Annual Cost</span>
+              <span class="breakdown-value" [class.positive]="r.netAnnualCost < 0" [class.negative]="r.netAnnualCost > 0">
+                {{ r.netAnnualCost | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Assessment -->
+      <div class="card mt-md">
+        <div class="card__header">
+          <h3>Risk Assessment</h3>
+        </div>
+        <div class="card__body">
+          <div class="risk-assessment" [class]="getRiskClass(r.riskAssessment)">
+            <p>{{ r.riskAssessment }}</p>
+          </div>
+          <div class="breakdown-item mt-sm">
+            <span class="breakdown-label">Break-even Return</span>
+            <span class="breakdown-value">{{ formatPercent(r.breakEvenReturn) }}</span>
+          </div>
+          <p class="text-secondary mt-sm">
+            Your investments need to return at least {{ formatPercent(r.breakEvenReturn) }} annually to cover the net interest cost.
+          </p>
+        </div>
+      </div>
+
+      <!-- Year-by-Year Projection -->
+      <div class="card mt-md">
+        <div class="card__header">
+          <h3>Year-by-Year Projection</h3>
+        </div>
+        <div class="card__body">
+          <!-- Simple Bar Chart -->
+          <div class="projection-chart">
+            @for (projection of r.yearlyProjections; track projection.year) {
+              <div class="projection-bar">
+                <div class="projection-bar__header">
+                  <span class="projection-bar__year">Year {{ projection.year }}</span>
+                  <span class="projection-bar__value" [class.positive]="projection.netBenefit > 0" [class.negative]="projection.netBenefit < 0">
+                    {{ projection.netBenefit | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                  </span>
+                </div>
+                <div class="projection-bar__track">
+                  @if (projection.netBenefit > 0) {
+                    <div
+                      class="projection-bar__fill projection-bar__fill--positive"
+                      [style.width.%]="(projection.netBenefit / r.totalBenefit) * 100">
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer mt-md">
+        <p>
+          <strong>Important:</strong> This calculator provides estimates only and should not be considered financial advice.
+          Interest deductibility depends on the borrowed funds being used for income-producing purposes.
+          Consult a qualified financial adviser before implementing any equity recycling strategy.
+        </p>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Save Modal -->
+@if (showSaveModal()) {
+  <div class="modal-overlay" (click)="closeSaveModal()">
+    <div class="modal modal--sm" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ currentScenarioId() ? 'Update Scenario' : 'Save Scenario' }}</h2>
+        <button class="modal__close" (click)="closeSaveModal()">&times;</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-group">
+          <label for="scenarioName">Scenario Name</label>
+          <input
+            type="text"
+            id="scenarioName"
+            [value]="scenarioName()"
+            (input)="scenarioName.set($any($event.target).value)"
+            placeholder="e.g., Primary residence - aggressive">
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" (click)="closeSaveModal()">Cancel</button>
+        <button
+          class="btn btn--primary"
+          (click)="saveScenario()"
+          [disabled]="!scenarioName().trim() || isSaving()">
+          {{ isSaving() ? 'Saving...' : (currentScenarioId() ? 'Update' : 'Save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Load Modal -->
+@if (showLoadModal()) {
+  <div class="modal-overlay" (click)="closeLoadModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>Load Scenario</h2>
+        <button class="modal__close" (click)="closeLoadModal()">&times;</button>
+      </div>
+      <div class="modal__body">
+        @if (scenarios().length === 0) {
+          <p class="text-muted text-center">No saved scenarios yet.</p>
+        } @else {
+          <div class="scenario-list">
+            @for (scenario of scenarios(); track scenario.id) {
+              <div
+                class="scenario-item"
+                [class.scenario-item--active]="scenario.id === currentScenarioId()"
+                (click)="loadScenario(scenario)">
+                <div class="scenario-item__info">
+                  <div class="scenario-item__name">{{ scenario.name }}</div>
+                  <div class="scenario-item__date">Last updated: {{ scenario.updatedAt | date:'medium' }}</div>
+                </div>
+                <button
+                  class="btn btn--icon btn--sm btn--danger"
+                  (click)="deleteScenario(scenario, $event)"
+                  title="Delete">
+                  🗑️
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" (click)="closeLoadModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

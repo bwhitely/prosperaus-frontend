@@ -1,0 +1,329 @@
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<!-- Analysis Results Modal -->
+@if (showAnalysisResults() && analysisResult()) {
+  <div class="modal-overlay" (click)="closeAnalysisResults()">
+    <div class="modal modal--large" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>AI Spending Analysis</h2>
+        <button class="modal__close" (click)="closeAnalysisResults()">&times;</button>
+      </div>
+      <div class="modal__body">
+        <!-- Summary Cards -->
+        <div class="analysis-summary">
+          <div class="analysis-card">
+            <span class="analysis-card__label">Total Spending</span>
+            <span class="analysis-card__value negative">
+              {{ analysisResult()!.spendingSummary.totalSpending | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="analysis-card">
+            <span class="analysis-card__label">Total Income</span>
+            <span class="analysis-card__value positive">
+              {{ analysisResult()!.spendingSummary.totalIncome | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="analysis-card">
+            <span class="analysis-card__label">Net Flow</span>
+            <span class="analysis-card__value" [class.positive]="analysisResult()!.summary.netFlow >= 0" [class.negative]="analysisResult()!.summary.netFlow < 0">
+              {{ analysisResult()!.summary.netFlow | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="analysis-card">
+            <span class="analysis-card__label">Transactions</span>
+            <span class="analysis-card__value">
+              {{ analysisResult()!.summary.totalTransactions }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Spending Breakdown -->
+        <div class="analysis-section">
+          <h3>Spending by Category</h3>
+          <div class="spending-bars">
+            @for (cat of getSpendingCategories(); track cat.name) {
+              <div class="spending-bar">
+                <div class="spending-bar__label">
+                  <span>{{ cat.name }}</span>
+                  <span>{{ cat.amount | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+                <div class="spending-bar__track">
+                  <div class="spending-bar__fill" [style.width.%]="cat.percentage"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- AI Insights -->
+        @if (analysisResult()!.insights.length > 0) {
+          <div class="analysis-section">
+            <h3>Key Insights</h3>
+            <ul class="insights-list">
+              @for (insight of analysisResult()!.insights; track insight) {
+                <li class="insight-item">
+                  <span class="insight-icon">💡</span>
+                  {{ insight }}
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <!-- Optimisation Suggestions -->
+        @if (analysisResult()!.optimisationSuggestions.length > 0) {
+          <div class="analysis-section">
+            <h3>Saving Opportunities</h3>
+            <ul class="suggestions-list">
+              @for (suggestion of analysisResult()!.optimisationSuggestions; track suggestion) {
+                <li class="suggestion-item">
+                  <span class="suggestion-icon">💰</span>
+                  {{ suggestion }}
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <!-- Top Merchants -->
+        @if (analysisResult()!.spendingSummary.topMerchants.length > 0) {
+          <div class="analysis-section">
+            <h3>Top Spending Places</h3>
+            <div class="merchants-list">
+              @for (merchant of analysisResult()!.spendingSummary.topMerchants; track merchant) {
+                <span class="merchant-tag">{{ merchant }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Category Suggestions -->
+        @if (analysisResult()!.categorySuggestions.length > 0 && analysisResult()!.uploadId) {
+          <div class="analysis-section">
+            <h3>Auto-Categorisation Available</h3>
+            <p class="section-hint">
+              AI has suggested categories for {{ analysisResult()!.categorySuggestions.length }} transactions.
+            </p>
+            <button class="btn btn--primary" (click)="applySuggestions()">
+              Apply All Suggestions
+            </button>
+          </div>
+        }
+
+        <!-- Privacy Notice -->
+        <div class="privacy-notice">
+          <span class="privacy-icon">🔒</span>
+          <p>Your data is processed securely and not shared with third parties. Transaction details are summarised before analysis.</p>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" (click)="closeAnalysisResults()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (!selectedUpload()) {
+  <!-- Upload Zone -->
+  <div class="upload-section">
+    <div
+      class="upload-zone"
+      [class.upload-zone--dragover]="isDragOver()"
+      [class.upload-zone--uploading]="isUploading()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()">
+
+      <input
+        #fileInput
+        type="file"
+        accept=".csv"
+        (change)="onFileSelect($event)"
+        hidden>
+
+      @if (isUploading()) {
+        <div class="upload-zone__content">
+          <div class="loading-spinner"></div>
+          <p>{{ uploadProgress() }}</p>
+        </div>
+      } @else {
+        <div class="upload-zone__content">
+          <span class="upload-zone__icon">📂</span>
+          <p class="upload-zone__text">Drop CSV files here or click to upload</p>
+          <p class="upload-zone__hint">Supports: CBA, Westpac, ANZ, NAB CSV formats</p>
+        </div>
+      }
+    </div>
+
+    <div class="upload-options" [formGroup]="uploadForm">
+      <div class="form-group">
+        <label for="accountName">Account Name (optional)</label>
+        <input type="text" id="accountName" formControlName="accountName"
+               placeholder="e.g., Everyday Account">
+      </div>
+      <div class="form-group">
+        <label for="institution">Bank (optional)</label>
+        <input type="text" id="institution" formControlName="institution"
+               placeholder="e.g., Commonwealth Bank">
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyse All Button -->
+  @if (uploads().length > 0) {
+    <div class="analyse-all-section">
+      <button
+        class="btn btn--primary btn--lg"
+        [disabled]="isAnalysing()"
+        (click)="analyseAllStatements()">
+        @if (isAnalysing()) {
+          <span class="loading-spinner loading-spinner--sm"></span>
+          Analysing...
+        } @else {
+          🤖 Analyse All Statements with AI
+        }
+      </button>
+      <p class="analyse-hint">Get AI-powered insights across all your uploaded statements</p>
+    </div>
+  }
+
+  <!-- Uploaded Statements List -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading statements...</p>
+    </div>
+  } @else if (uploads().length > 0) {
+    <h3 class="section-title">Uploaded Statements</h3>
+    <div class="statements-list">
+      @for (upload of uploads(); track upload.id) {
+        <div class="statement-card">
+          <div class="statement-card__icon">📄</div>
+          <div class="statement-card__info" (click)="viewTransactions(upload)">
+            <span class="statement-card__filename">{{ upload.filename }}</span>
+            <span class="statement-card__meta">
+              @if (upload.institution) {
+                {{ upload.institution }} •
+              }
+              {{ upload.transactionCount }} transactions
+            </span>
+          </div>
+          <div class="statement-card__stats">
+            <span class="inflow">+{{ upload.totalInflow | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            <span class="outflow">-{{ upload.totalOutflow | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="statement-card__actions">
+            <button
+              class="btn btn--sm btn--outline"
+              [disabled]="isAnalysing()"
+              (click)="analyseStatement(upload); $event.stopPropagation()"
+              title="Analyse with AI">
+              @if (isAnalysing()) {
+                ...
+              } @else {
+                🤖 Analyse
+              }
+            </button>
+            <button
+              class="btn btn--sm btn--secondary"
+              (click)="viewTransactions(upload); $event.stopPropagation()"
+              title="View transactions">
+              View
+            </button>
+            <button
+              class="btn btn--icon btn--sm btn--danger"
+              (click)="deleteUpload(upload); $event.stopPropagation()"
+              title="Delete">
+              🗑️
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="empty-state__icon">📊</span>
+      <h3>No statements uploaded yet</h3>
+      <p>Upload a CSV bank statement to get started with AI-powered spending analysis.</p>
+    </div>
+  }
+} @else {
+  <!-- Transactions View -->
+  <div class="transactions-view">
+    <div class="transactions-header">
+      <button class="btn btn--secondary btn--sm" (click)="closeTransactions()">
+        ← Back to Statements
+      </button>
+      <h3>{{ selectedUpload()!.filename }}</h3>
+      <div class="transactions-header__actions">
+        <button
+          class="btn btn--primary btn--sm"
+          [disabled]="isAnalysing()"
+          (click)="analyseStatement(selectedUpload()!)">
+          @if (isAnalysing()) {
+            Analysing...
+          } @else {
+            🤖 Analyse
+          }
+        </button>
+        <span class="meta">{{ transactions().length }} transactions</span>
+      </div>
+    </div>
+
+    @if (isLoadingTransactions()) {
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading transactions...</p>
+      </div>
+    } @else {
+      <div class="card">
+        <div class="transactions-table-wrapper">
+          <table class="transactions-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th class="text-right">Amount</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (tx of transactions(); track tx.id) {
+                <tr [class.income]="!tx.isExpense" [class.expense]="tx.isExpense">
+                  <td class="date-cell">{{ tx.transactionDate | date:'d MMM' }}</td>
+                  <td class="description-cell">
+                    {{ tx.description }}
+                  </td>
+                  <td class="text-right mono" [class.positive]="!tx.isExpense" [class.negative]="tx.isExpense">
+                    {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount | currency:'AUD':'symbol-narrow':'1.2-2' }}
+                  </td>
+                  <td>
+                    @if (tx.isExpense) {
+                      <select
+                        class="category-select"
+                        [value]="tx.categoryId || ''"
+                        (change)="categoriseTransaction(tx, $any($event.target).value)">
+                        <option value="">-- Select --</option>
+                        @for (cat of categories(); track cat.id) {
+                          <option [value]="cat.id">{{ cat.name }}</option>
+                        }
+                      </select>
+                    } @else {
+                      <span class="income-label">Income</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </div>
+}

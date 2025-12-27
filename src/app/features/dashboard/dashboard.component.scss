@@ -1,2 +1,189 @@
-// Dashboard-specific styles
-// Most styles come from global _cards.scss and utility classes
+@use 'sass:color';
+@use '../../../styles/variables' as *;
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2xl;
+  gap: $spacing-md;
+  color: $color-text-secondary;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid $color-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-2xl;
+  gap: $spacing-md;
+}
+
+.error-message {
+  color: $color-negative;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+
+  &--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: $spacing-lg;
+  }
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .breakdown-list--horizontal & {
+    flex-direction: column;
+    align-items: flex-start;
+    border-bottom: none;
+    padding: 0;
+    min-width: 150px;
+  }
+}
+
+.breakdown-label {
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
+
+.breakdown-value {
+  font-family: $font-family-mono;
+  font-weight: 600;
+  color: $color-text-primary;
+
+  &--negative {
+    color: $color-negative;
+  }
+}
+
+.allocation-chart {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.allocation-bar {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__percent {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  &__track {
+    height: 8px;
+    background: $color-border;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: $color-primary;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+
+    .allocation-bar:nth-child(1) & {
+      background: $color-primary;
+    }
+    .allocation-bar:nth-child(2) & {
+      background: $color-accent;
+    }
+    .allocation-bar:nth-child(3) & {
+      background: #805ad5;
+    }
+    .allocation-bar:nth-child(4) & {
+      background: #dd6b20;
+    }
+  }
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: $spacing-md;
+}
+
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-md;
+  background: $color-background;
+  border-radius: $radius-md;
+  text-decoration: none;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: color.adjust($color-background, $lightness: -3%);
+    transform: translateY(-2px);
+  }
+
+  &__icon {
+    font-size: 1.5rem;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-primary;
+    text-align: center;
+  }
+}
+
+.positive {
+  color: $color-accent;
+}
+
+.negative {
+  color: $color-negative;
+}

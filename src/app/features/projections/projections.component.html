@@ -1,0 +1,589 @@
+<div class="projections">
+  <header class="page-header">
+    <div class="page-header__content">
+      <h1>Net Worth Projection</h1>
+      <p class="page-header__subtitle">
+        Project your wealth growth over time with Australian tax and super rules
+      </p>
+    </div>
+    <div class="page-header__actions">
+      <button class="btn btn--secondary" (click)="openSaveModal()">
+        Save Scenario
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="error-banner">
+      {{ error() }}
+      <button class="error-banner__close" (click)="error.set(null)">x</button>
+    </div>
+  }
+
+  <div class="projections__layout">
+    <!-- Input Form -->
+    <div class="projections__inputs">
+      <form [formGroup]="form">
+        <!-- Personal Details -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('personal')"
+          >
+            <span class="input-section__title">Personal Details</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('personal') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('personal')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="currentAge">Current Age</label>
+                  <input
+                    type="number"
+                    id="currentAge"
+                    formControlName="currentAge"
+                    min="18"
+                    max="100"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="targetRetirementAge">Target Retirement Age</label>
+                  <input
+                    type="number"
+                    id="targetRetirementAge"
+                    formControlName="targetRetirementAge"
+                    min="18"
+                    max="100"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="projectionYears">Projection Years</label>
+                  <input
+                    type="number"
+                    id="projectionYears"
+                    formControlName="projectionYears"
+                    min="1"
+                    max="50"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="stateOfResidence">State</label>
+                  <select id="stateOfResidence" formControlName="stateOfResidence">
+                    @for (state of stateOptions; track state) {
+                      <option [value]="state">{{ state }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Income Sources -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('income')"
+          >
+            <span class="input-section__title">Income Sources</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('income') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('income')) {
+            <div class="input-section__content">
+              @for (source of incomeSources.controls; track $index) {
+                <div class="income-source" [formGroupName]="$index">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Name</label>
+                      <input type="text" formControlName="name" />
+                    </div>
+                    <div class="form-group">
+                      <label>Type</label>
+                      <select formControlName="sourceType">
+                        <option value="salary">Salary</option>
+                        <option value="dividends">Dividends</option>
+                        <option value="rental">Rental</option>
+                        <option value="business">Business</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Amount ($)</label>
+                      <input type="number" formControlName="amount" min="0" />
+                    </div>
+                    <div class="form-group">
+                      <label>Frequency</label>
+                      <select formControlName="frequency">
+                        @for (freq of frequencyOptions; track freq.value) {
+                          <option [value]="freq.value">{{ freq.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group form-group--small">
+                      <label>Growth %</label>
+                      <input type="number" formControlName="annualGrowthRate" min="-10" max="20" />
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn--icon btn--danger"
+                      (click)="removeIncomeSource($index)"
+                      [disabled]="incomeSources.length === 1"
+                    >
+                      x
+                    </button>
+                  </div>
+                </div>
+              }
+              <button type="button" class="btn btn--secondary btn--small" (click)="addIncomeSource()">
+                + Add Income Source
+              </button>
+            </div>
+          }
+        </section>
+
+        <!-- Superannuation -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('super')"
+          >
+            <span class="input-section__title">Superannuation</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('super') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('super')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="superBalance">Current Balance ($)</label>
+                  <input type="number" id="superBalance" formControlName="superBalance" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="superGrowthRate">Growth Rate (%)</label>
+                  <input type="number" id="superGrowthRate" formControlName="superGrowthRate" min="0" max="20" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sgRate">SG Rate (%)</label>
+                  <input type="number" id="sgRate" formControlName="sgRate" min="0" max="15" />
+                </div>
+                <div class="form-group">
+                  <label for="salarySacrifice">Salary Sacrifice ($/yr)</label>
+                  <input type="number" id="salarySacrifice" formControlName="salarySacrifice" min="0" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="employerMatch">Employer Match (%)</label>
+                  <input type="number" id="employerMatch" formControlName="employerMatch" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="preservationAge">Preservation Age</label>
+                  <input type="number" id="preservationAge" formControlName="preservationAge" min="55" max="65" />
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Property (PPOR) -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('ppor')"
+          >
+            <span class="input-section__title">Home (PPOR)</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('ppor') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('ppor')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pporValue">Property Value ($)</label>
+                  <input type="number" id="pporValue" formControlName="pporValue" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="pporMortgage">Mortgage Balance ($)</label>
+                  <input type="number" id="pporMortgage" formControlName="pporMortgage" min="0" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pporInterestRate">Interest Rate (%)</label>
+                  <input type="number" id="pporInterestRate" formControlName="pporInterestRate" min="0" max="20" />
+                </div>
+                <div class="form-group">
+                  <label for="pporOffsetBalance">Offset Balance ($)</label>
+                  <input type="number" id="pporOffsetBalance" formControlName="pporOffsetBalance" min="0" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pporGrowthRate">Growth Rate (%)</label>
+                  <input type="number" id="pporGrowthRate" formControlName="pporGrowthRate" min="0" max="15" />
+                </div>
+                <div class="form-group">
+                  <label for="pporRemainingTerm">Remaining Term (years)</label>
+                  <input type="number" id="pporRemainingTerm" formControlName="pporRemainingTerm" min="1" max="30" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pporExtraRepayments">Extra Repayments ($/yr)</label>
+                  <input type="number" id="pporExtraRepayments" formControlName="pporExtraRepayments" min="0" />
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Shares/ETFs -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('shares')"
+          >
+            <span class="input-section__title">Shares & ETFs</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('shares') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('shares')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sharesValue">Current Value ($)</label>
+                  <input type="number" id="sharesValue" formControlName="sharesValue" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="sharesAnnualContributions">Annual Contributions ($)</label>
+                  <input type="number" id="sharesAnnualContributions" formControlName="sharesAnnualContributions" min="0" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sharesGrowthRate">Growth Rate (%)</label>
+                  <input type="number" id="sharesGrowthRate" formControlName="sharesGrowthRate" min="-10" max="20" />
+                </div>
+                <div class="form-group">
+                  <label for="sharesMer">Weighted MER (%)</label>
+                  <input type="number" id="sharesMer" formControlName="sharesMer" min="0" max="3" step="0.01" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="dividendYield">Dividend Yield (%)</label>
+                  <input type="number" id="dividendYield" formControlName="dividendYield" min="0" max="15" />
+                </div>
+                <div class="form-group">
+                  <label for="frankingRate">Franking Rate (%)</label>
+                  <input type="number" id="frankingRate" formControlName="frankingRate" min="0" max="100" />
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Cash & Savings -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('cash')"
+          >
+            <span class="input-section__title">Cash & Savings</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('cash') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('cash')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cashBalance">Current Balance ($)</label>
+                  <input type="number" id="cashBalance" formControlName="cashBalance" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="monthlySavings">Monthly Savings ($)</label>
+                  <input type="number" id="monthlySavings" formControlName="monthlySavings" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cashInterestRate">Interest Rate (%)</label>
+                  <input type="number" id="cashInterestRate" formControlName="cashInterestRate" min="0" max="10" />
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Expenses -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('expenses')"
+          >
+            <span class="input-section__title">Expenses</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('expenses') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('expenses')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="annualExpenses">Annual Expenses ($)</label>
+                  <input type="number" id="annualExpenses" formControlName="annualExpenses" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="inflationRate">Inflation Rate (%)</label>
+                  <input type="number" id="inflationRate" formControlName="inflationRate" min="0" max="10" />
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+
+        <!-- Tax -->
+        <section class="input-section">
+          <button
+            class="input-section__header"
+            type="button"
+            (click)="toggleSection('tax')"
+          >
+            <span class="input-section__title">Tax</span>
+            <span class="input-section__toggle">{{ isSectionExpanded('tax') ? '-' : '+' }}</span>
+          </button>
+          @if (isSectionExpanded('tax')) {
+            <div class="input-section__content">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="marginalTaxRate">Marginal Tax Rate</label>
+                  <select id="marginalTaxRate" formControlName="marginalTaxRate">
+                    @for (bracket of taxBrackets; track bracket.rate) {
+                      <option [value]="bracket.rate">{{ bracket.label }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="includeFrankingCredits" />
+                  Include franking credit refunds
+                </label>
+              </div>
+            </div>
+          }
+        </section>
+      </form>
+    </div>
+
+    <!-- Results -->
+    <div class="projections__results">
+      @if (isLoading()) {
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p>Calculating projection...</p>
+        </div>
+      }
+
+      @if (result(); as r) {
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+          <div class="summary-card">
+            <span class="summary-card__label">Current Net Worth</span>
+            <span class="summary-card__value">{{ formatCurrency(r.summary.currentNetWorth) }}</span>
+          </div>
+          <div class="summary-card summary-card--highlight">
+            <span class="summary-card__label">Projected Net Worth</span>
+            <span class="summary-card__value">{{ formatCurrency(r.summary.projectedNetWorth) }}</span>
+            <span class="summary-card__change positive">
+              +{{ formatCurrency(r.summary.totalGrowth) }}
+              ({{ (r.summary.percentageGrowth * 100) | number:'1.1-1' }}%)
+            </span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Avg Annual Growth</span>
+            <span class="summary-card__value">{{ (r.summary.averageAnnualGrowthRate * 100) | number:'1.1-1' }}%</span>
+          </div>
+        </div>
+
+        <!-- Key Milestones -->
+        <div class="milestones-section">
+          <h3>Key Milestones</h3>
+          <div class="milestones">
+            @for (milestone of keyMilestones(); track milestone.label) {
+              <div class="milestone">
+                <span class="milestone__label">{{ milestone.label }}</span>
+                <span class="milestone__value">Age {{ milestone.age }}</span>
+                <span class="milestone__years">({{ milestone.years }} years)</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- FIRE Status -->
+        <div class="fire-status" [class.achievable]="r.milestones.fireAchievable">
+          <h4>Financial Independence</h4>
+          <p>{{ r.milestones.fireStatus }}</p>
+          @if (r.milestones.fireAchievable && r.milestones.netWorthAtFire) {
+            <p class="fire-status__details">
+              Net worth at FIRE: {{ formatCurrency(r.milestones.netWorthAtFire) }}
+            </p>
+          }
+        </div>
+
+        <!-- Insights -->
+        <div class="insights-section">
+          <h3>Insights</h3>
+          <ul class="insights">
+            @for (insight of r.insights; track insight) {
+              <li>{{ insight }}</li>
+            }
+          </ul>
+        </div>
+
+        <!-- Net Worth at Key Points -->
+        <div class="key-points">
+          <h3>Net Worth Over Time</h3>
+          <div class="key-points__grid">
+            <div class="key-point">
+              <span class="key-point__label">In 1 Year</span>
+              <span class="key-point__value">{{ formatCurrency(r.summary.netWorthIn1Year) }}</span>
+            </div>
+            <div class="key-point">
+              <span class="key-point__label">In 5 Years</span>
+              <span class="key-point__value">{{ formatCurrency(r.summary.netWorthIn5Years) }}</span>
+            </div>
+            <div class="key-point">
+              <span class="key-point__label">In 10 Years</span>
+              <span class="key-point__value">{{ formatCurrency(r.summary.netWorthIn10Years) }}</span>
+            </div>
+            <div class="key-point">
+              <span class="key-point__label">In 20 Years</span>
+              <span class="key-point__value">{{ formatCurrency(r.summary.netWorthIn20Years) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Asset Allocation -->
+        <div class="allocation-section">
+          <h3>Asset Allocation at Retirement (Age {{ r.retirementAllocation.age }})</h3>
+          <div class="allocation-bars">
+            <div class="allocation-bar">
+              <span class="allocation-bar__label">Super</span>
+              <div class="allocation-bar__fill allocation-bar__fill--super"
+                   [style.width.%]="r.retirementAllocation.superPercent"></div>
+              <span class="allocation-bar__value">{{ r.retirementAllocation.superPercent | number:'1.0-0' }}%</span>
+            </div>
+            <div class="allocation-bar">
+              <span class="allocation-bar__label">Property</span>
+              <div class="allocation-bar__fill allocation-bar__fill--property"
+                   [style.width.%]="r.retirementAllocation.propertyEquityPercent"></div>
+              <span class="allocation-bar__value">{{ r.retirementAllocation.propertyEquityPercent | number:'1.0-0' }}%</span>
+            </div>
+            <div class="allocation-bar">
+              <span class="allocation-bar__label">Shares</span>
+              <div class="allocation-bar__fill allocation-bar__fill--shares"
+                   [style.width.%]="r.retirementAllocation.sharesPercent"></div>
+              <span class="allocation-bar__value">{{ r.retirementAllocation.sharesPercent | number:'1.0-0' }}%</span>
+            </div>
+            <div class="allocation-bar">
+              <span class="allocation-bar__label">Cash</span>
+              <div class="allocation-bar__fill allocation-bar__fill--cash"
+                   [style.width.%]="r.retirementAllocation.cashPercent"></div>
+              <span class="allocation-bar__value">{{ r.retirementAllocation.cashPercent | number:'1.0-0' }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Year-by-Year Table -->
+        <div class="table-section">
+          <div class="table-section__header">
+            <h3>Year-by-Year Breakdown</h3>
+            <button class="btn btn--secondary btn--small" (click)="toggleFullTable()">
+              {{ showFullTable() ? 'Show Key Years' : 'Show All Years' }}
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table class="projection-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Age</th>
+                  <th class="text-right">Net Worth</th>
+                  <th class="text-right">Super</th>
+                  <th class="text-right">Property</th>
+                  <th class="text-right">Shares</th>
+                  <th class="text-right">Cash</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (year of getDisplayYears(); track year.year) {
+                  <tr [class.milestone-row]="year.isMortgagePaidOff || year.isSuperAccessible || year.isRetired">
+                    <td>{{ year.year }}</td>
+                    <td>{{ year.age }}</td>
+                    <td class="text-right mono">{{ formatCurrency(year.netWorth) }}</td>
+                    <td class="text-right mono">{{ formatCurrency(year.superBalance) }}</td>
+                    <td class="text-right mono">{{ formatCurrency(year.pporEquity) }}</td>
+                    <td class="text-right mono">{{ formatCurrency(year.sharesValue) }}</td>
+                    <td class="text-right mono">{{ formatCurrency(year.cashBalance) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Save Scenario Modal -->
+  @if (showSaveModal()) {
+    <div class="modal-overlay" (click)="closeSaveModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h3>Save Projection Scenario</h3>
+        <div class="form-group">
+          <label for="scenarioName">Scenario Name</label>
+          <input
+            type="text"
+            id="scenarioName"
+            [value]="scenarioName()"
+            (input)="scenarioName.set($any($event.target).value)"
+            placeholder="e.g., Base Case, Aggressive Savings"
+          />
+        </div>
+        <div class="modal__actions">
+          <button class="btn btn--secondary" (click)="closeSaveModal()">Cancel</button>
+          <button
+            class="btn btn--primary"
+            (click)="saveScenario()"
+            [disabled]="isSaving() || !scenarioName()"
+          >
+            {{ isSaving() ? 'Saving...' : 'Save' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Saved Scenarios Sidebar (if any exist) -->
+  @if (scenarios().length > 0) {
+    <aside class="scenarios-sidebar">
+      <h4>Saved Scenarios</h4>
+      <ul class="scenarios-list">
+        @for (scenario of scenarios(); track scenario.id) {
+          <li class="scenario-item" (click)="loadScenario(scenario)">
+            <span class="scenario-item__name">{{ scenario.name }}</span>
+            <span class="scenario-item__date">{{ scenario.updatedAt | date:'shortDate' }}</span>
+          </li>
+        }
+      </ul>
+    </aside>
+  }
+</div>

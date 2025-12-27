@@ -1,0 +1,579 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.upload-section {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+
+  @include respond-to(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.upload-zone {
+  @include card;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  border: 2px dashed $color-border;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.02);
+  }
+
+  &--dragover {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.05);
+    transform: scale(1.01);
+  }
+
+  &--uploading {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  &__content {
+    text-align: center;
+  }
+
+  &__icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__text {
+    font-size: $font-size-lg;
+    color: $color-text-primary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__hint {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+}
+
+.upload-options {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.05);
+  border: 1px solid rgba($color-primary, 0.1);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &__icon {
+    font-size: 20px;
+  }
+
+  p {
+    margin: 0;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+.section-title {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.statements-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.statement-card {
+  @include card;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
+
+  &__icon {
+    font-size: 24px;
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__filename {
+    font-weight: 500;
+    color: $color-text-primary;
+  }
+
+  &__meta {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+
+    .inflow {
+      color: $color-accent;
+    }
+
+    .outflow {
+      color: $color-negative;
+    }
+  }
+
+  &__status {
+    min-width: 100px;
+    text-align: center;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 500;
+
+  &.status--success {
+    background: rgba($color-accent, 0.1);
+    color: $color-accent-dark;
+  }
+
+  &.status--warning {
+    background: rgba($color-warning, 0.1);
+    color: #b85c1a; // Darker shade of warning color
+  }
+
+  &.status--error {
+    background: rgba($color-negative, 0.1);
+    color: $color-negative;
+  }
+}
+
+// Transactions View
+
+.transactions-view {
+  .transactions-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+
+    h3 {
+      margin: 0;
+      flex: 1;
+    }
+
+    .meta {
+      color: $color-text-muted;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+.transactions-table-wrapper {
+  overflow-x: auto;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+    border-bottom: 1px solid $color-border;
+  }
+
+  th {
+    font-weight: 600;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .date-cell {
+    white-space: nowrap;
+    width: 80px;
+  }
+
+  .description-cell {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mono {
+  font-family: $font-family-mono;
+}
+
+.positive {
+  color: $color-accent;
+}
+
+.negative {
+  color: $color-negative;
+}
+
+.category-select {
+  padding: $spacing-xs $spacing-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  width: 150px;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+}
+
+.income-label {
+  color: $color-accent;
+  font-size: $font-size-sm;
+}
+
+// Analyse All Section
+
+.analyse-all-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  background: linear-gradient(135deg, rgba($color-primary, 0.05), rgba($color-accent, 0.05));
+  border-radius: $radius-lg;
+  border: 1px solid rgba($color-primary, 0.1);
+}
+
+.analyse-hint {
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  margin: 0;
+}
+
+// Statement Card Actions
+
+.statement-card__actions {
+  display: flex;
+  gap: $spacing-xs;
+  align-items: center;
+}
+
+// Analysis Modal
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: $spacing-md;
+}
+
+.modal {
+  background: $color-surface;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+
+  &--large {
+    max-width: 800px;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-lg;
+    border-bottom: 1px solid $color-border;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-xl;
+      color: $color-text-primary;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: $color-text-muted;
+    padding: 0;
+    line-height: 1;
+
+    &:hover {
+      color: $color-text-primary;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  &__footer {
+    padding: $spacing-md $spacing-lg;
+    border-top: 1px solid $color-border;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+  }
+}
+
+// Analysis Summary Cards
+
+.analysis-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.analysis-card {
+  background: $color-background;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  text-align: center;
+
+  &__label {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+}
+
+// Analysis Sections
+
+.analysis-section {
+  margin-bottom: $spacing-xl;
+
+  h3 {
+    font-size: $font-size-lg;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+.section-hint {
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  margin: 0 0 $spacing-md;
+}
+
+// Spending Bars
+
+.spending-bars {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.spending-bar {
+  &__label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: $spacing-xs;
+    font-size: $font-size-sm;
+
+    span:first-child {
+      color: $color-text-primary;
+      font-weight: 500;
+    }
+
+    span:last-child {
+      color: $color-text-secondary;
+      font-family: $font-family-mono;
+    }
+  }
+
+  &__track {
+    height: 8px;
+    background: $color-border;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: linear-gradient(90deg, $color-primary, $color-primary-light);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+}
+
+// Insights List
+
+.insights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba($color-primary, 0.03);
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+}
+
+.insight-icon {
+  flex-shrink: 0;
+}
+
+// Suggestions List
+
+.suggestions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba($color-accent, 0.05);
+  border-radius: $radius-md;
+  border-left: 3px solid $color-accent;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+}
+
+.suggestion-icon {
+  flex-shrink: 0;
+}
+
+// Merchants List
+
+.merchants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.merchant-tag {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  background: $color-background;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+// Privacy Notice
+
+.privacy-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.03);
+  border-radius: $radius-md;
+  margin-top: $spacing-lg;
+
+  p {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    line-height: 1.5;
+  }
+}
+
+.privacy-icon {
+  flex-shrink: 0;
+}
+
+// Transactions Header Actions
+
+.transactions-header__actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}

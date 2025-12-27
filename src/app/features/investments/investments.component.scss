@@ -1,0 +1,170 @@
+@use '../../../styles/variables' as *;
+
+// Holdings table
+.holdings-table-wrapper {
+  overflow-x: auto;
+}
+
+.holdings-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+    border-bottom: 1px solid $color-border;
+  }
+
+  th {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $color-text-muted;
+    background: $color-background;
+  }
+
+  tbody tr:hover {
+    background: rgba($color-primary, 0.02);
+  }
+
+  tfoot {
+    td {
+      background: $color-background;
+      border-top: 2px solid $color-border;
+    }
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mono {
+  font-family: $font-family-mono;
+}
+
+.ticker-badge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  background: $color-primary;
+  color: white;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+}
+
+.security-name {
+  display: block;
+  font-size: $font-size-sm;
+}
+
+.security-type {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+// Summary card modifiers
+.summary-card--positive {
+  background: linear-gradient(135deg, rgba($color-accent, 0.05), rgba($color-accent, 0.02));
+  border-color: rgba($color-accent, 0.2);
+}
+
+.summary-card--negative {
+  background: linear-gradient(135deg, rgba($color-negative, 0.05), rgba($color-negative, 0.02));
+  border-color: rgba($color-negative, 0.2);
+}
+
+.positive {
+  color: $color-accent;
+}
+
+.negative {
+  color: $color-negative;
+}
+
+// Quote preview
+.quote-preview {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background: rgba($color-primary, 0.05);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+
+  &__symbol {
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+  }
+
+  &__price {
+    font-family: $font-family-mono;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__change {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+}
+
+.form-hint--warning {
+  color: $color-warning;
+}
+
+// Form group for ticker autocomplete
+.form-group--ticker {
+  flex: 2;
+}
+
+// Advanced options toggle
+.advanced-toggle {
+  margin: $spacing-md 0;
+  padding-top: $spacing-md;
+  border-top: 1px solid $color-border;
+
+  .btn--link {
+    background: none;
+    border: none;
+    color: $color-primary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    .toggle-icon {
+      font-weight: bold;
+    }
+  }
+}
+
+.advanced-options {
+  padding: $spacing-md;
+  background: $color-background;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+// Reuse common styles
+@import '../properties/properties.component';
+@import '../super-accounts/super-accounts.component';

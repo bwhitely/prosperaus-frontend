@@ -3,37 +3,198 @@
   <p>Your financial snapshot at a glance</p>
 </div>
 
-<div class="card-grid">
-  <div class="stat-card stat-card--primary">
-    <div class="stat-card__label">Net Worth</div>
-    <div class="stat-card__value currency">$0</div>
-    <div class="stat-card__change">Add assets to get started</div>
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading your financial data...</p>
   </div>
-
-  <div class="stat-card">
-    <div class="stat-card__label">Total Assets</div>
-    <div class="stat-card__value currency">$0</div>
+} @else if (error()) {
+  <div class="error-container">
+    <p class="error-message">{{ error() }}</p>
+    <button class="btn btn--primary" (click)="loadNetWorth()">Try Again</button>
   </div>
+} @else {
+  <div class="card-grid">
+    <div class="stat-card stat-card--primary">
+      <div class="stat-card__label">Net Worth</div>
+      <div class="stat-card__value currency" [class.positive]="netWorth()!.netWorth >= 0" [class.negative]="netWorth()!.netWorth < 0">
+        {{ netWorth()!.netWorth | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </div>
+      @if (!hasAssets()) {
+        <div class="stat-card__change">Add assets to get started</div>
+      }
+    </div>
 
-  <div class="stat-card">
-    <div class="stat-card__label">Total Liabilities</div>
-    <div class="stat-card__value currency">$0</div>
-  </div>
-</div>
+    <div class="stat-card">
+      <div class="stat-card__label">Total Assets</div>
+      <div class="stat-card__value currency">
+        {{ netWorth()!.totalAssets | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </div>
+    </div>
 
-<div class="card mt-lg">
-  <div class="card__header">
-    <h3>Get Started</h3>
-  </div>
-  <div class="card__body">
-    <p class="text-secondary mb-md">
-      Welcome to AusFinance! This platform helps you track your wealth, optimise your tax position,
-      and plan for financial independence using Australian tax rules.
-    </p>
-
-    <div class="d-flex flex-wrap gap-sm">
-      <a routerLink="/profile" class="btn btn--primary">Complete Your Profile</a>
-      <a routerLink="/equity-recycling" class="btn btn--secondary">Try Equity Recycling Calculator</a>
+    <div class="stat-card">
+      <div class="stat-card__label">Total Liabilities</div>
+      <div class="stat-card__value currency">
+        {{ netWorth()!.totalLiabilities | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </div>
     </div>
   </div>
-</div>
+
+  @if (hasAssets()) {
+    <!-- Asset Breakdown -->
+    <div class="dashboard-grid mt-lg">
+      <div class="card">
+        <div class="card__header">
+          <h3>Asset Breakdown</h3>
+        </div>
+        <div class="card__body">
+          <div class="breakdown-list">
+            @if (netWorth()!.assetBreakdown.propertyValue > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Property</span>
+                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.propertyValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.assetBreakdown.superBalance > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Superannuation</span>
+                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.superBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.assetBreakdown.investmentValue > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Investments</span>
+                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.investmentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.assetBreakdown.cashBalance > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Cash</span>
+                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.cashBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header">
+          <h3>Asset Allocation</h3>
+        </div>
+        <div class="card__body">
+          <div class="allocation-chart">
+            @for (allocation of netWorth()!.assetAllocation; track allocation.category) {
+              <div class="allocation-bar">
+                <div class="allocation-bar__header">
+                  <span class="allocation-bar__label">{{ allocation.category }}</span>
+                  <span class="allocation-bar__percent">{{ allocation.percentage | number:'1.1-1' }}%</span>
+                </div>
+                <div class="allocation-bar__track">
+                  <div class="allocation-bar__fill" [style.width.%]="allocation.percentage"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liability Breakdown -->
+    @if (netWorth()!.totalLiabilities > 0) {
+      <div class="card mt-lg">
+        <div class="card__header">
+          <h3>Liability Breakdown</h3>
+        </div>
+        <div class="card__body">
+          <div class="breakdown-list breakdown-list--horizontal">
+            @if (netWorth()!.liabilityBreakdown.mortgageBalance > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Mortgages</span>
+                <span class="breakdown-value breakdown-value--negative">{{ netWorth()!.liabilityBreakdown.mortgageBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.liabilityBreakdown.creditCardBalance > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Credit Cards</span>
+                <span class="breakdown-value breakdown-value--negative">{{ netWorth()!.liabilityBreakdown.creditCardBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.liabilityBreakdown.personalLoans > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Personal Loans</span>
+                <span class="breakdown-value breakdown-value--negative">{{ netWorth()!.liabilityBreakdown.personalLoans | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.liabilityBreakdown.carLoans > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Car Loans</span>
+                <span class="breakdown-value breakdown-value--negative">{{ netWorth()!.liabilityBreakdown.carLoans | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.liabilityBreakdown.hecsHelp > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">HECS/HELP</span>
+                <span class="breakdown-value breakdown-value--negative">{{ netWorth()!.liabilityBreakdown.hecsHelp | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+            @if (netWorth()!.liabilityBreakdown.otherLiabilities > 0) {
+              <div class="breakdown-item">
+                <span class="breakdown-label">Other</span>
+                <span class="breakdown-value breakdown-value--negative">{{ netWorth()!.liabilityBreakdown.otherLiabilities | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  } @else {
+    <!-- Getting Started Card -->
+    <div class="card mt-lg">
+      <div class="card__header">
+        <h3>Get Started</h3>
+      </div>
+      <div class="card__body">
+        <p class="text-secondary mb-md">
+          Welcome to AusFinance! This platform helps you track your wealth, optimise your tax position,
+          and plan for financial independence using Australian tax rules.
+        </p>
+
+        <div class="d-flex flex-wrap gap-sm">
+          <a routerLink="/profile" class="btn btn--primary">Complete Your Profile</a>
+          <a routerLink="/equity-recycling" class="btn btn--secondary">Try Equity Recycling Calculator</a>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Quick Actions -->
+  <div class="card mt-lg">
+    <div class="card__header">
+      <h3>Quick Actions</h3>
+    </div>
+    <div class="card__body">
+      <div class="quick-actions">
+        <a routerLink="/properties" class="quick-action">
+          <span class="quick-action__icon">🏠</span>
+          <span class="quick-action__label">Add Property</span>
+        </a>
+        <a routerLink="/investments" class="quick-action">
+          <span class="quick-action__icon">📈</span>
+          <span class="quick-action__label">Add Investment</span>
+        </a>
+        <a routerLink="/super" class="quick-action">
+          <span class="quick-action__icon">💰</span>
+          <span class="quick-action__label">Add Super Account</span>
+        </a>
+        <a routerLink="/cash-liabilities" class="quick-action">
+          <span class="quick-action__icon">🏦</span>
+          <span class="quick-action__label">Cash & Liabilities</span>
+        </a>
+        <a routerLink="/fire-calculator" class="quick-action">
+          <span class="quick-action__icon">🔥</span>
+          <span class="quick-action__label">FIRE Calculator</span>
+        </a>
+      </div>
+    </div>
+  </div>
+}

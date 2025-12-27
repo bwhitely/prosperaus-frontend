@@ -1,0 +1,371 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <h1>Cash & Liabilities</h1>
+    <p>Track your savings and debts</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<!-- Summary Cards -->
+<div class="summary-cards">
+  <div class="summary-card summary-card--positive">
+    <span class="summary-card__label">Total Cash</span>
+    <span class="summary-card__value positive">{{ getTotalCash() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+  </div>
+  <div class="summary-card summary-card--negative">
+    <span class="summary-card__label">Total Liabilities</span>
+    <span class="summary-card__value negative">{{ getTotalLiabilities() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+  </div>
+  <div class="summary-card">
+    <span class="summary-card__label">Net Position</span>
+    <span class="summary-card__value" [class.positive]="getTotalCash() - getTotalLiabilities() >= 0" [class.negative]="getTotalCash() - getTotalLiabilities() < 0">
+      {{ getTotalCash() - getTotalLiabilities() | currency:'AUD':'symbol-narrow':'1.0-0' }}
+    </span>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab" [class.tab--active]="activeTab() === 'cash'" (click)="setTab('cash')">
+    Cash Accounts ({{ cashAccounts().length }})
+  </button>
+  <button class="tab" [class.tab--active]="activeTab() === 'liabilities'" (click)="setTab('liabilities')">
+    Liabilities ({{ liabilities().length }})
+  </button>
+</div>
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading...</p>
+  </div>
+} @else {
+  <!-- Cash Accounts Tab -->
+  @if (activeTab() === 'cash') {
+    <div class="tab-content">
+      <div class="tab-header">
+        <h3>Cash Accounts</h3>
+        <button class="btn btn--primary" (click)="openAddCashModal()">+ Add Account</button>
+      </div>
+
+      @if (cashAccounts().length === 0) {
+        <div class="empty-state empty-state--small">
+          <p>No cash accounts yet. Add your savings and everyday accounts.</p>
+          <button class="btn btn--primary" (click)="openAddCashModal()">Add First Account</button>
+        </div>
+      } @else {
+        <div class="items-list">
+          @for (account of cashAccounts(); track account.id) {
+            <div class="item-card">
+              <div class="item-card__info">
+                <div class="item-card__name">{{ account.accountName }}</div>
+                <div class="item-card__details">
+                  {{ getAccountTypeLabel(account.accountType) }}
+                  @if (account.institution) {
+                    &bull; {{ account.institution }}
+                  }
+                  @if (account.totalInterestRate) {
+                    &bull; {{ account.totalInterestRate * 100 | number:'1.2-2' }}% p.a.
+                  } @else if (account.interestRate) {
+                    &bull; {{ account.interestRate * 100 | number:'1.2-2' }}% p.a.
+                  }
+                  @if (account.accountType === 'offset') {
+                    <span class="badge">Offset</span>
+                  }
+                  @if (account.accountType === 'term_deposit' && account.maturityDate) {
+                    <span class="badge badge--info">Matures: {{ account.maturityDate }}</span>
+                  }
+                </div>
+              </div>
+              <div class="item-card__value positive">
+                {{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </div>
+              <div class="item-card__actions">
+                <button class="btn btn--icon btn--sm" (click)="openEditCashModal(account)">Edit</button>
+                <button class="btn btn--icon btn--sm btn--danger" (click)="deleteCashAccount(account)">Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Liabilities Tab -->
+  @if (activeTab() === 'liabilities') {
+    <div class="tab-content">
+      <div class="tab-header">
+        <h3>Liabilities</h3>
+        <button class="btn btn--primary" (click)="openAddLiabilityModal()">+ Add Liability</button>
+      </div>
+
+      @if (liabilities().length === 0) {
+        <div class="empty-state empty-state--small">
+          <p>No liabilities tracked. Add any debts like personal loans, car loans, or credit cards.</p>
+          <button class="btn btn--primary" (click)="openAddLiabilityModal()">Add First Liability</button>
+        </div>
+      } @else {
+        <div class="items-list">
+          @for (liability of liabilities(); track liability.id) {
+            <div class="item-card">
+              <div class="item-card__info">
+                <div class="item-card__name">{{ liability.name }}</div>
+                <div class="item-card__details">
+                  {{ getLiabilityTypeLabel(liability.liabilityType) }}
+                  @if (liability.institution) {
+                    &bull; {{ liability.institution }}
+                  }
+                  @if (liability.interestRate) {
+                    &bull; {{ liability.interestRate * 100 | number:'1.2-2' }}% p.a.
+                  }
+                  @if (liability.minimumRepayment) {
+                    &bull; Min: {{ liability.minimumRepayment | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
+                  }
+                  @if (liability.isCreditCard && liability.creditLimit) {
+                    <span class="badge badge--info">Limit: {{ liability.creditLimit | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                  }
+                </div>
+              </div>
+              <div class="item-card__value negative">
+                {{ liability.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </div>
+              <div class="item-card__actions">
+                <button class="btn btn--icon btn--sm" (click)="openEditLiabilityModal(liability)">Edit</button>
+                <button class="btn btn--icon btn--sm btn--danger" (click)="deleteLiability(liability)">Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- Cash Account Modal -->
+@if (showCashModal()) {
+  <div class="modal-overlay" (click)="closeCashModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingCash() ? 'Edit' : 'Add' }} Cash Account</h2>
+        <button class="modal__close" (click)="closeCashModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="cashForm" (ngSubmit)="saveCashAccount()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="accountName">Account Name *</label>
+            <input type="text" id="accountName" formControlName="accountName" placeholder="e.g., Emergency Fund">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="balance">Balance *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="balance" formControlName="balance">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="accountType">Account Type</label>
+              <select id="accountType" formControlName="accountType">
+                @for (type of accountTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="institution">Institution</label>
+              <input type="text" id="institution" formControlName="institution" placeholder="e.g., ING">
+            </div>
+
+            <div class="form-group">
+              <label for="interestRate">Interest Rate</label>
+              <div class="input-suffix">
+                <input type="number" id="interestRate" formControlName="interestRate" step="0.01">
+                <span class="suffix">% p.a.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Savings Account Bonus Rate -->
+          @if (cashForm.get('accountType')?.value === 'savings') {
+            <div class="form-row">
+              <div class="form-group">
+                <label for="bonusRate">Bonus Rate</label>
+                <div class="input-suffix">
+                  <input type="number" id="bonusRate" formControlName="bonusRate" step="0.01">
+                  <span class="suffix">% p.a.</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="bonusConditions">Bonus Conditions</label>
+                <input type="text" id="bonusConditions" formControlName="bonusConditions" placeholder="e.g., Deposit $1000/month">
+              </div>
+            </div>
+          }
+
+          <!-- Term Deposit Fields -->
+          @if (cashForm.get('accountType')?.value === 'term_deposit') {
+            <div class="form-row">
+              <div class="form-group">
+                <label for="principal">Principal</label>
+                <div class="input-prefix">
+                  <span class="prefix">$</span>
+                  <input type="number" id="principal" formControlName="principal">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="maturityDate">Maturity Date</label>
+                <input type="date" id="maturityDate" formControlName="maturityDate">
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeCashModal()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="cashForm.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingCash() ? 'Update' : 'Add') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Liability Modal -->
+@if (showLiabilityModal()) {
+  <div class="modal-overlay" (click)="closeLiabilityModal()">
+    <div class="modal modal--large" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingLiability() ? 'Edit' : 'Add' }} Liability</h2>
+        <button class="modal__close" (click)="closeLiabilityModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="liabilityForm" (ngSubmit)="saveLiability()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="liabilityName">Name *</label>
+            <input type="text" id="liabilityName" formControlName="name" placeholder="e.g., Car Loan">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="liabilityBalance">Balance *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="liabilityBalance" formControlName="balance">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="liabilityType">Type</label>
+              <select id="liabilityType" formControlName="liabilityType">
+                @for (type of liabilityTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="liabilityInstitution">Institution</label>
+              <input type="text" id="liabilityInstitution" formControlName="institution" placeholder="e.g., ANZ">
+            </div>
+
+            <div class="form-group">
+              <label for="liabilityInterestRate">Interest Rate</label>
+              <div class="input-suffix">
+                <input type="number" id="liabilityInterestRate" formControlName="interestRate" step="0.01">
+                <span class="suffix">% p.a.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="minimumRepayment">Minimum Monthly Payment</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="minimumRepayment" formControlName="minimumRepayment">
+            </div>
+          </div>
+
+          <!-- Credit Card Specific Fields -->
+          @if (liabilityForm.get('liabilityType')?.value === 'credit_card') {
+            <div class="form-section">
+              <h4>Credit Card Details</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="creditLimit">Credit Limit</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="creditLimit" formControlName="creditLimit">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="annualFee">Annual Fee</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="annualFee" formControlName="annualFee">
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="dueDate">Due Date (day of month)</label>
+                  <input type="number" id="dueDate" formControlName="dueDate" min="1" max="31">
+                </div>
+                <div class="form-group">
+                  <label for="statementDate">Statement Date (day of month)</label>
+                  <input type="number" id="statementDate" formControlName="statementDate" min="1" max="31">
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Loan Specific Fields -->
+          @if (liabilityForm.get('liabilityType')?.value !== 'credit_card') {
+            <div class="form-section">
+              <h4>Loan Details</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="originalAmount">Original Loan Amount</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="originalAmount" formControlName="originalAmount">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="termMonths">Term (months)</label>
+                  <input type="number" id="termMonths" formControlName="termMonths">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" formControlName="startDate">
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeLiabilityModal()">Cancel</button>
+          <button type="submit" class="btn btn--primary" [disabled]="liabilityForm.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingLiability() ? 'Update' : 'Add') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,0 +1,321 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <h1>CGT Helper</h1>
+    <p>Track and optimise your capital gains tax position</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading CGT data...</p>
+  </div>
+} @else if (summary()) {
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-card__label">Financial Year</span>
+      <span class="summary-card__value">{{ summary()!.financialYearDisplay }}</span>
+    </div>
+    <div class="summary-card" [class.summary-card--positive]="summary()!.netUnrealisedPosition >= 0" [class.summary-card--negative]="summary()!.netUnrealisedPosition < 0">
+      <span class="summary-card__label">Unrealised Position</span>
+      <span class="summary-card__value" [class.positive]="summary()!.netUnrealisedPosition >= 0" [class.negative]="summary()!.netUnrealisedPosition < 0">
+        {{ summary()!.netUnrealisedPosition | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </span>
+    </div>
+    <div class="summary-card" [class.summary-card--positive]="summary()!.netRealisedPosition >= 0" [class.summary-card--negative]="summary()!.netRealisedPosition < 0">
+      <span class="summary-card__label">Realised This Year</span>
+      <span class="summary-card__value" [class.positive]="summary()!.netRealisedPosition >= 0" [class.negative]="summary()!.netRealisedPosition < 0">
+        {{ summary()!.netRealisedPosition | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </span>
+    </div>
+    <div class="summary-card summary-card--negative">
+      <span class="summary-card__label">Estimated CGT Payable</span>
+      <span class="summary-card__value negative">
+        {{ summary()!.estimatedCgtPayable | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      </span>
+      <span class="summary-card__subtext">at {{ summary()!.marginalTaxRateUsed * 100 | number:'1.0-0' }}% marginal rate</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="activeTab() === 'summary'" (click)="setTab('summary')">
+      Summary
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'optimise'" (click)="setTab('optimise')">
+      Optimisation
+    </button>
+    @if (selectedHolding()) {
+      <button class="tab" [class.tab--active]="activeTab() === 'holding'" (click)="setTab('holding')">
+        {{ selectedHolding()!.ticker }}
+      </button>
+    }
+  </div>
+
+  <!-- Summary Tab -->
+  @if (activeTab() === 'summary') {
+    <div class="tab-content">
+      <!-- Unrealised Gains Section -->
+      <div class="card">
+        <div class="card__header">
+          <h3>Unrealised Gains & Losses</h3>
+        </div>
+        <div class="card__body">
+          <div class="breakdown-row">
+            <span class="breakdown-label">Total Unrealised Gains</span>
+            <span class="breakdown-value positive">{{ summary()!.totalUnrealisedGains | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Total Unrealised Losses</span>
+            <span class="breakdown-value negative">{{ summary()!.totalUnrealisedLosses | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="breakdown-row breakdown-row--highlight">
+            <span class="breakdown-label">Estimated Taxable Gain (after discount)</span>
+            <span class="breakdown-value">{{ summary()!.estimatedTaxableUnrealisedGains | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Realised Gains Section -->
+      <div class="card mt-md">
+        <div class="card__header">
+          <h3>Realised Gains & Losses ({{ summary()!.financialYearDisplay }})</h3>
+        </div>
+        <div class="card__body">
+          <div class="breakdown-row">
+            <span class="breakdown-label">Total Realised Gains</span>
+            <span class="breakdown-value positive">{{ summary()!.totalRealisedGains | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">Total Realised Losses</span>
+            <span class="breakdown-value negative">{{ summary()!.totalRealisedLosses | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label">CGT Discount Applied</span>
+            <span class="breakdown-value">{{ summary()!.cgtDiscountApplied | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="breakdown-row breakdown-row--highlight">
+            <span class="breakdown-label">Taxable Capital Gains</span>
+            <span class="breakdown-value">{{ summary()!.taxableRealisedGains | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Holdings Breakdown -->
+      @if (summary()!.holdingSummaries.length > 0) {
+        <div class="card mt-md">
+          <div class="card__header">
+            <h3>Holdings Breakdown</h3>
+          </div>
+          <div class="card__body">
+            <div class="holdings-list">
+              @for (holding of summary()!.holdingSummaries; track holding.holdingId) {
+                <div class="holding-row" (click)="selectHolding(holding)">
+                  <div class="holding-info">
+                    <span class="holding-ticker">{{ holding.ticker }}</span>
+                    <span class="holding-name">{{ holding.securityName }}</span>
+                    <span class="holding-meta">{{ holding.parcelsCount }} parcel(s), {{ holding.discountEligibleParcels }} eligible for discount</span>
+                  </div>
+                  <div class="holding-values">
+                    <span class="holding-gain" [class.positive]="!holding.hasLoss" [class.negative]="holding.hasLoss">
+                      {{ holding.unrealisedGain | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                    </span>
+                    <span class="holding-taxable">Taxable: {{ holding.estimatedTaxableGain | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                  </div>
+                  <span class="holding-arrow">&rarr;</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="card mt-md">
+          <div class="card__body">
+            <div class="empty-state">
+              <p>No investment holdings found.</p>
+              <a routerLink="/investments" class="btn btn--primary">Add Investments</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Optimisation Tab -->
+  @if (activeTab() === 'optimise' && optimisation()) {
+    <div class="tab-content">
+      <!-- Recommendations -->
+      <div class="card">
+        <div class="card__header">
+          <h3>Recommendations</h3>
+        </div>
+        <div class="card__body">
+          @for (recommendation of optimisation()!.recommendations; track $index) {
+            <div class="recommendation-item">
+              <span class="recommendation-icon">💡</span>
+              <span class="recommendation-text">{{ recommendation }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Tax Loss Harvesting Opportunities -->
+      @if (optimisation()!.lossHarvestingOpportunities.length > 0) {
+        <div class="card mt-md">
+          <div class="card__header">
+            <h3>Tax Loss Harvesting Opportunities</h3>
+          </div>
+          <div class="card__body">
+            @for (opportunity of optimisation()!.lossHarvestingOpportunities; track opportunity.holdingId) {
+              <div class="opportunity-item">
+                <div class="opportunity-header">
+                  <span class="opportunity-ticker">{{ opportunity.ticker }}</span>
+                  <span class="opportunity-loss negative">Loss: {{ opportunity.currentLoss | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+                <div class="opportunity-savings">
+                  Potential tax savings: <strong class="positive">{{ opportunity.estimatedTaxSavings | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong>
+                </div>
+                <p class="opportunity-recommendation">{{ opportunity.recommendation }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Approaching CGT Discount Eligibility -->
+      @if (optimisation()!.approachingDiscountEligibility.length > 0) {
+        <div class="card mt-md">
+          <div class="card__header">
+            <h3>Approaching CGT Discount Eligibility</h3>
+            <p class="card__subtitle">Holdings that will become eligible for 50% CGT discount soon</p>
+          </div>
+          <div class="card__body">
+            @for (item of optimisation()!.approachingDiscountEligibility; track item.parcelId) {
+              <div class="eligibility-item">
+                <div class="eligibility-header">
+                  <span class="eligibility-ticker">{{ item.ticker }}</span>
+                  <span class="eligibility-units">{{ item.units | number:'1.0-2' }} units</span>
+                </div>
+                <div class="eligibility-dates">
+                  <span>Purchased: {{ item.purchaseDate }}</span>
+                  <span class="eligibility-countdown">{{ item.daysUntilEligible }} days until eligible</span>
+                </div>
+                @if (item.potentialTaxSavings > 0) {
+                  <div class="eligibility-savings">
+                    Wait to save: <strong class="positive">{{ item.potentialTaxSavings | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Holding Detail Tab -->
+  @if (activeTab() === 'holding' && selectedHolding()) {
+    <div class="tab-content">
+      <button class="btn btn--secondary btn--sm mb-md" (click)="backToSummary()">&larr; Back to Summary</button>
+
+      <div class="card">
+        <div class="card__header">
+          <h3>{{ selectedHolding()!.ticker }} - {{ selectedHolding()!.securityName }}</h3>
+        </div>
+        <div class="card__body">
+          <div class="holding-detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Total Units</span>
+              <span class="detail-value">{{ selectedHolding()!.totalUnits | number:'1.0-4' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Cost Base</span>
+              <span class="detail-value">{{ selectedHolding()!.totalCostBase | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Current Value</span>
+              <span class="detail-value">{{ selectedHolding()!.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Unrealised Gain/Loss</span>
+              <span class="detail-value" [class.positive]="!selectedHolding()!.hasLoss" [class.negative]="selectedHolding()!.hasLoss">
+                {{ selectedHolding()!.unrealisedGain | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </span>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="cgt-breakdown">
+            <h4>CGT Breakdown</h4>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Discountable Gain (held > 12 months)</span>
+              <span class="breakdown-value">{{ selectedHolding()!.discountableGain | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Non-Discountable Gain (held < 12 months)</span>
+              <span class="breakdown-value">{{ selectedHolding()!.nonDiscountableGain | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-row--highlight">
+              <span class="breakdown-label">Estimated Taxable Gain</span>
+              <span class="breakdown-value">{{ selectedHolding()!.estimatedTaxableGain | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Estimated CGT Payable</span>
+              <span class="breakdown-value negative">{{ selectedHolding()!.estimatedCgtPayable | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parcel Breakdown -->
+      @if (selectedHolding()!.parcels.length > 0) {
+        <div class="card mt-md">
+          <div class="card__header">
+            <h3>Purchase Parcels</h3>
+          </div>
+          <div class="card__body">
+            <div class="parcels-table">
+              <div class="parcels-header">
+                <span>Purchase Date</span>
+                <span>Units</span>
+                <span>Cost Base</span>
+                <span>Current Value</span>
+                <span>Gain/Loss</span>
+                <span>Days Held</span>
+                <span>Discount</span>
+              </div>
+              @for (parcel of selectedHolding()!.parcels; track parcel.parcelId) {
+                <div class="parcels-row">
+                  <span>{{ parcel.purchaseDate }}</span>
+                  <span>{{ parcel.units | number:'1.0-4' }}</span>
+                  <span>{{ parcel.costBase | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                  <span>{{ parcel.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                  <span [class.positive]="parcel.unrealisedGain >= 0" [class.negative]="parcel.unrealisedGain < 0">
+                    {{ parcel.unrealisedGain | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                  </span>
+                  <span>{{ parcel.daysHeld }} days</span>
+                  <span>
+                    @if (parcel.cgtDiscountEligible) {
+                      <span class="badge badge--success">50% Eligible</span>
+                    } @else {
+                      <span class="badge">Not Yet</span>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}

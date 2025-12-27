@@ -1,0 +1,231 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <h1>Super Accounts</h1>
+    <p>Track your superannuation balances and contributions</p>
+  </div>
+  <button class="btn btn--primary" (click)="openAddModal()">
+    + Add Super Account
+  </button>
+</div>
+
+@if (error()) {
+  <div class="alert alert--error">
+    {{ error() }}
+    <button class="alert__close" (click)="error.set(null)">&times;</button>
+  </div>
+}
+
+<!-- Summary Cards -->
+@if (accounts().length > 0) {
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-card__label">Total Super Balance</span>
+      <span class="summary-card__value">{{ getTotalBalance() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="summary-card__label">YTD Concessional</span>
+      <span class="summary-card__value">{{ getTotalConcessionalYtd() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="summary-card summary-card--highlight">
+      <span class="summary-card__label">Concessional Cap Remaining</span>
+      <span class="summary-card__value positive">{{ getConcessionalRemaining() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+      <span class="summary-card__hint">of $30,000 cap</span>
+    </div>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Loading super accounts...</p>
+  </div>
+} @else if (accounts().length === 0) {
+  <div class="empty-state">
+    <div class="empty-state__icon">💰</div>
+    <h3>No super accounts yet</h3>
+    <p>Add your superannuation accounts to track your retirement savings.</p>
+    <button class="btn btn--primary" (click)="openAddModal()">
+      Add Your First Account
+    </button>
+  </div>
+} @else {
+  <div class="accounts-list">
+    @for (account of accounts(); track account.id) {
+      <div class="account-card">
+        <div class="account-card__header">
+          <div class="account-card__title">
+            <h3>{{ account.fundName }}</h3>
+          </div>
+          <div class="account-card__actions">
+            <button class="btn btn--icon" (click)="openEditModal(account)" title="Edit">
+              ✏️
+            </button>
+            <button class="btn btn--icon btn--danger" (click)="delete(account)" title="Delete">
+              🗑️
+            </button>
+          </div>
+        </div>
+
+        <div class="account-card__body">
+          <div class="account-balance">
+            <span class="account-balance__label">Current Balance</span>
+            <span class="account-balance__value">{{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            @if (account.balanceDate) {
+              <span class="account-balance__date">as at {{ account.balanceDate | date:'dd MMM yyyy' }}</span>
+            }
+          </div>
+
+          <div class="contributions-grid">
+            <div class="contribution">
+              <span class="contribution__label">Employer YTD</span>
+              <span class="contribution__value">{{ account.employerContributionsYtd | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="contribution">
+              <span class="contribution__label">Salary Sacrifice YTD</span>
+              <span class="contribution__value">{{ account.salarySacrificeYtd | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="contribution">
+              <span class="contribution__label">Personal Concessional YTD</span>
+              <span class="contribution__value">{{ account.personalConcessionalYtd | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="contribution contribution--total">
+              <span class="contribution__label">Total Concessional YTD</span>
+              <span class="contribution__value">{{ account.totalConcessionalYtd | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          </div>
+
+          @if (account.hasInsurance) {
+            <div class="insurance-badge">
+              Insurance: {{ account.insurancePremiumPa | currency:'AUD':'symbol-narrow':'1.0-0' }}/year
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Modal -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <h2>{{ editingAccount() ? 'Edit Super Account' : 'Add Super Account' }}</h2>
+        <button class="modal__close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="modal__body">
+          <div class="form-group">
+            <label for="fundName">Fund Name *</label>
+            <input type="text" id="fundName" formControlName="fundName"
+                   placeholder="e.g., AustralianSuper" list="fundsList">
+            <datalist id="fundsList">
+              @for (fund of commonFunds; track fund) {
+                <option [value]="fund">
+              }
+            </datalist>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="balance">Current Balance *</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="balance" formControlName="balance">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="balanceDate">Balance Date</label>
+              <input type="date" id="balanceDate" formControlName="balanceDate">
+            </div>
+          </div>
+
+          <button type="button" class="btn btn--link" (click)="toggleAdvanced()">
+            {{ showAdvanced() ? 'Hide' : 'Show' }} Contribution Details
+          </button>
+
+          @if (showAdvanced()) {
+            <div class="form-section">
+              <h4>YTD Contributions</h4>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="employerContributionsYtd">Employer (SG)</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="employerContributionsYtd" formControlName="employerContributionsYtd">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="salarySacrificeYtd">Salary Sacrifice</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="salarySacrificeYtd" formControlName="salarySacrificeYtd">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="personalConcessionalYtd">Personal Concessional</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="personalConcessionalYtd" formControlName="personalConcessionalYtd">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="nonConcessionalYtd">Non-Concessional</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="nonConcessionalYtd" formControlName="nonConcessionalYtd">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="totalSuperBalancePrevFy">Total Super Balance (30 June previous FY)</label>
+                <div class="input-prefix">
+                  <span class="prefix">$</span>
+                  <input type="number" id="totalSuperBalancePrevFy" formControlName="totalSuperBalancePrevFy">
+                </div>
+                <span class="form-hint">Required for carry-forward contribution eligibility</span>
+              </div>
+
+              <h4>Insurance</h4>
+
+              <div class="form-group form-group--checkbox">
+                <label>
+                  <input type="checkbox" formControlName="hasInsurance">
+                  I have insurance through this super fund
+                </label>
+              </div>
+
+              @if (form.get('hasInsurance')?.value) {
+                <div class="form-group">
+                  <label for="insurancePremiumPa">Annual Premium</label>
+                  <div class="input-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="insurancePremiumPa" formControlName="insurancePremiumPa">
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal__footer">
+          <button type="button" class="btn btn--secondary" (click)="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Saving...' : (editingAccount() ? 'Update' : 'Add') }} Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
