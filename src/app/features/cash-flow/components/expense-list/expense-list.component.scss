@@ -23,7 +23,7 @@
 .expenses-list {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 }
 
 .category-group {
@@ -31,9 +31,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: $spacing-sm $spacing-md;
-    margin-bottom: $spacing-sm;
-    border-left: 4px solid;
+    padding: $spacing-xs $spacing-sm;
+    margin-bottom: $spacing-xs;
+    border-left: 3px solid;
     background: rgba($color-primary, 0.03);
     border-radius: 0 $radius-sm $radius-sm 0;
   }
@@ -41,17 +41,19 @@
   .category-info {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    gap: $spacing-xs;
   }
 
   .category-name {
     font-weight: 600;
+    font-size: $font-size-sm;
     color: $color-text-primary;
   }
 
   .category-total {
     font-family: $font-family-mono;
     font-weight: 500;
+    font-size: $font-size-sm;
     color: $color-text-secondary;
   }
 }
@@ -61,8 +63,9 @@
   border-collapse: collapse;
 
   td {
-    padding: $spacing-sm $spacing-md;
+    padding: $spacing-xs $spacing-sm;
     border-bottom: 1px solid $color-border;
+    font-size: $font-size-sm;
 
     &:last-child {
       border-bottom: none;
@@ -81,7 +84,7 @@
 .expense-name-cell {
   display: flex;
   align-items: center;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
 }
 
 .expense-name {
@@ -90,16 +93,16 @@
 
 .one-off-badge {
   display: inline-block;
-  padding: 2px $spacing-xs;
+  padding: 1px $spacing-xs;
   background: rgba($color-text-muted, 0.1);
   color: $color-text-muted;
   border-radius: $radius-sm;
-  font-size: $font-size-xs;
+  font-size: 10px;
 }
 
 .monthly-amount {
   color: $color-text-secondary;
-  font-size: $font-size-sm;
+  font-size: $font-size-xs;
 }
 
 .text-right {
@@ -117,23 +120,29 @@
 .actions-cell {
   text-align: right;
   white-space: nowrap;
-  width: 80px;
+  width: 60px;
 }
 
 .total-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-md $spacing-lg;
+  padding: $spacing-sm $spacing-md;
   background: $color-surface;
   border: 1px solid $color-border;
   border-radius: $radius-md;
   font-weight: 600;
+  font-size: $font-size-sm;
 
   .total-amount {
     font-family: $font-family-mono;
-    font-size: $font-size-lg;
+    font-size: $font-size-base;
   }
+}
+
+// Compact card for expenses
+.card {
+  padding: $spacing-sm;
 }
 
 .checkbox-label {
@@ -148,15 +157,128 @@
   }
 }
 
-.modal--sm {
-  max-width: 400px;
+// Inline Form styles
+.inline-form {
+  margin-bottom: $spacing-lg;
+  border: 2px solid $color-primary;
+  background: $color-surface;
+
+  &__header {
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.05);
+    border-bottom: 1px solid $color-border;
+
+    mat-card-title {
+      margin: 0;
+      font-size: $font-size-lg;
+      color: $color-primary;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__footer {
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.02);
+    border-top: 1px solid $color-border;
+  }
 }
 
-input[type="color"] {
-  width: 50px;
-  height: 38px;
-  padding: 2px;
-  border: 1px solid $color-border;
-  border-radius: $radius-sm;
-  cursor: pointer;
+.full-width {
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: $spacing-md;
+
+  > * {
+    flex: 1;
+  }
+}
+
+.form-hint {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: 0;
+  margin-bottom: $spacing-md;
+}
+
+.color-picker-field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  input[type="color"] {
+    width: 60px;
+    height: 40px;
+    padding: 2px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    cursor: pointer;
+  }
+}
+
+.empty-state-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: $spacing-2xl;
+    gap: $spacing-sm;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $color-text-muted;
+  }
+
+  h3 {
+    margin: 0;
+    color: $color-text-primary;
+  }
+
+  p {
+    color: $color-text-secondary;
+    margin: 0 0 $spacing-md;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2xl;
+  gap: $spacing-md;
+  color: $color-text-secondary;
+}
+
+.expense-table-content {
+  padding: $spacing-sm !important;
+}
+
+.edit-btn {
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+
+  .mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
 }

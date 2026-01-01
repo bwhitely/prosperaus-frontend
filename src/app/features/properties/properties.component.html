@@ -3,9 +3,11 @@
     <h1>Properties</h1>
     <p>Manage your property portfolio and mortgages</p>
   </div>
-  <button class="btn btn--primary" (click)="openAddPropertyModal()">
-    + Add Property
-  </button>
+  @if (!showPropertyForm() && !showMortgageForm()) {
+    <button class="btn btn--primary" (click)="openAddPropertyForm()">
+      + Add Property
+    </button>
+  }
 </div>
 
 @if (error()) {
@@ -15,21 +17,208 @@
   </div>
 }
 
+<!-- Property Inline Form -->
+@if (showPropertyForm()) {
+  <div class="card inline-form">
+    <div class="inline-form__header">
+      <h3>{{ editingProperty() ? 'Edit Property' : 'Add Property' }}</h3>
+    </div>
+
+    <form [formGroup]="propertyForm" (ngSubmit)="saveProperty()">
+      <div class="inline-form__body">
+        <div class="form-group">
+          <label for="name">Property Name *</label>
+          <input type="text" id="name" formControlName="name" placeholder="e.g., Family Home">
+          @if (propertyForm.get('name')?.invalid && propertyForm.get('name')?.touched) {
+            <span class="form-error">Property name is required</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="currentValue">Current Value *</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="currentValue" formControlName="currentValue">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="propertyType">Property Type</label>
+            <select id="propertyType" formControlName="propertyType">
+              @for (type of propertyTypes; track type.value) {
+                <option [value]="type.value">{{ type.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" id="address" formControlName="address" placeholder="123 Example St, Suburb VIC 3000">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="purchasePrice">Purchase Price</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="purchasePrice" formControlName="purchasePrice">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="purchaseDate">Purchase Date</label>
+            <input type="date" id="purchaseDate" formControlName="purchaseDate">
+          </div>
+        </div>
+
+        <div class="form-group form-group--checkbox">
+          <label>
+            <input type="checkbox" formControlName="isInvestment">
+            This is an investment property
+          </label>
+        </div>
+
+        @if (propertyForm.get('isInvestment')?.value) {
+          <div class="form-row">
+            <div class="form-group">
+              <label for="weeklyRent">Weekly Rent</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="weeklyRent" formControlName="weeklyRent">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="annualExpenses">Annual Expenses</label>
+              <div class="input-prefix">
+                <span class="prefix">$</span>
+                <input type="number" id="annualExpenses" formControlName="annualExpenses">
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="inline-form__footer">
+        <button type="button" class="btn btn--secondary" (click)="closePropertyForm()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="propertyForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : (editingProperty() ? 'Update' : 'Add') }} Property
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+<!-- Mortgage Inline Form -->
+@if (showMortgageForm()) {
+  <div class="card inline-form">
+    <div class="inline-form__header">
+      <h3>{{ editingMortgage() ? 'Edit Mortgage' : 'Add Mortgage' }}</h3>
+    </div>
+
+    <form [formGroup]="mortgageForm" (ngSubmit)="saveMortgage()">
+      <div class="inline-form__body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="lender">Lender</label>
+            <input type="text" id="lender" formControlName="lender" placeholder="e.g., Commonwealth Bank">
+          </div>
+
+          <div class="form-group">
+            <label for="loanName">Loan Name</label>
+            <input type="text" id="loanName" formControlName="loanName" placeholder="e.g., Home Loan">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="currentBalance">Current Balance *</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="currentBalance" formControlName="currentBalance">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="offsetBalance">Offset Balance</label>
+            <div class="input-prefix">
+              <span class="prefix">$</span>
+              <input type="number" id="offsetBalance" formControlName="offsetBalance">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="interestRate">Interest Rate *</label>
+            <div class="input-suffix">
+              <input type="number" id="interestRate" formControlName="interestRate" step="0.01">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="repaymentType">Repayment Type</label>
+            <select id="repaymentType" formControlName="repaymentType">
+              <option value="principal_and_interest">Principal & Interest</option>
+              <option value="interest_only">Interest Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group form-group--checkbox">
+          <label>
+            <input type="checkbox" formControlName="isFixed">
+            Fixed rate loan
+          </label>
+        </div>
+
+        @if (mortgageForm.get('isFixed')?.value) {
+          <div class="form-group">
+            <label for="fixedRateExpiry">Fixed Rate Expiry</label>
+            <input type="date" id="fixedRateExpiry" formControlName="fixedRateExpiry">
+          </div>
+        }
+
+        <div class="form-group form-group--checkbox">
+          <label>
+            <input type="checkbox" formControlName="isDeductible">
+            Interest is tax deductible (investment loan)
+          </label>
+        </div>
+      </div>
+
+      <div class="inline-form__footer">
+        <button type="button" class="btn btn--secondary" (click)="closeMortgageForm()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="mortgageForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : (editingMortgage() ? 'Update' : 'Add') }} Mortgage
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
 @if (isLoading()) {
   <div class="loading-container">
     <div class="loading-spinner"></div>
     <p>Loading properties...</p>
   </div>
-} @else if (properties().length === 0) {
+} @else if (properties().length === 0 && !showPropertyForm()) {
   <div class="empty-state">
     <div class="empty-state__icon">🏠</div>
     <h3>No properties yet</h3>
     <p>Add your first property to start tracking your real estate portfolio.</p>
-    <button class="btn btn--primary" (click)="openAddPropertyModal()">
+    <button class="btn btn--primary" (click)="openAddPropertyForm()">
       Add Your First Property
     </button>
   </div>
-} @else {
+} @else if (properties().length > 0) {
   <div class="properties-grid">
     @for (property of properties(); track property.id) {
       <div class="property-card">
@@ -41,7 +230,7 @@
             }
           </div>
           <div class="property-card__actions">
-            <button class="btn btn--icon" (click)="openEditPropertyModal(property)" title="Edit">
+            <button class="btn btn--icon" (click)="openEditPropertyForm(property)" title="Edit">
               ✏️
             </button>
             <button class="btn btn--icon btn--danger" (click)="deleteProperty(property)" title="Delete">
@@ -85,7 +274,7 @@
         <div class="property-card__mortgages">
           <div class="mortgages-header">
             <h4>Mortgages</h4>
-            <button class="btn btn--sm btn--secondary" (click)="openAddMortgageModal(property.id)">
+            <button class="btn btn--sm btn--secondary" (click)="openAddMortgageForm(property.id)">
               + Add
             </button>
           </div>
@@ -112,7 +301,7 @@
                     </span>
                   </div>
                   <div class="mortgage-item__actions">
-                    <button class="btn btn--icon btn--sm" (click)="openEditMortgageModal(mortgage)" title="Edit">
+                    <button class="btn btn--icon btn--sm" (click)="openEditMortgageForm(mortgage)" title="Edit">
                       ✏️
                     </button>
                     <button class="btn btn--icon btn--sm btn--danger" (click)="deleteMortgage(mortgage)" title="Delete">
@@ -126,198 +315,5 @@
         </div>
       </div>
     }
-  </div>
-}
-
-<!-- Property Modal -->
-@if (showPropertyModal()) {
-  <div class="modal-overlay" (click)="closePropertyModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h2>{{ editingProperty() ? 'Edit Property' : 'Add Property' }}</h2>
-        <button class="modal__close" (click)="closePropertyModal()">&times;</button>
-      </div>
-
-      <form [formGroup]="propertyForm" (ngSubmit)="saveProperty()">
-        <div class="modal__body">
-          <div class="form-group">
-            <label for="name">Property Name *</label>
-            <input type="text" id="name" formControlName="name" placeholder="e.g., Family Home">
-            @if (propertyForm.get('name')?.invalid && propertyForm.get('name')?.touched) {
-              <span class="form-error">Property name is required</span>
-            }
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="currentValue">Current Value *</label>
-              <div class="input-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="currentValue" formControlName="currentValue">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="propertyType">Property Type</label>
-              <select id="propertyType" formControlName="propertyType">
-                @for (type of propertyTypes; track type.value) {
-                  <option [value]="type.value">{{ type.label }}</option>
-                }
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" formControlName="address" placeholder="123 Example St, Suburb VIC 3000">
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="purchasePrice">Purchase Price</label>
-              <div class="input-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="purchasePrice" formControlName="purchasePrice">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="purchaseDate">Purchase Date</label>
-              <input type="date" id="purchaseDate" formControlName="purchaseDate">
-            </div>
-          </div>
-
-          <div class="form-group form-group--checkbox">
-            <label>
-              <input type="checkbox" formControlName="isInvestment">
-              This is an investment property
-            </label>
-          </div>
-
-          @if (propertyForm.get('isInvestment')?.value) {
-            <div class="form-row">
-              <div class="form-group">
-                <label for="weeklyRent">Weekly Rent</label>
-                <div class="input-prefix">
-                  <span class="prefix">$</span>
-                  <input type="number" id="weeklyRent" formControlName="weeklyRent">
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="annualExpenses">Annual Expenses</label>
-                <div class="input-prefix">
-                  <span class="prefix">$</span>
-                  <input type="number" id="annualExpenses" formControlName="annualExpenses">
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-
-        <div class="modal__footer">
-          <button type="button" class="btn btn--secondary" (click)="closePropertyModal()">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn--primary" [disabled]="propertyForm.invalid || isSubmitting()">
-            {{ isSubmitting() ? 'Saving...' : (editingProperty() ? 'Update' : 'Add') }} Property
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-<!-- Mortgage Modal -->
-@if (showMortgageModal()) {
-  <div class="modal-overlay" (click)="closeMortgageModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h2>{{ editingMortgage() ? 'Edit Mortgage' : 'Add Mortgage' }}</h2>
-        <button class="modal__close" (click)="closeMortgageModal()">&times;</button>
-      </div>
-
-      <form [formGroup]="mortgageForm" (ngSubmit)="saveMortgage()">
-        <div class="modal__body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="lender">Lender</label>
-              <input type="text" id="lender" formControlName="lender" placeholder="e.g., Commonwealth Bank">
-            </div>
-
-            <div class="form-group">
-              <label for="loanName">Loan Name</label>
-              <input type="text" id="loanName" formControlName="loanName" placeholder="e.g., Home Loan">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="currentBalance">Current Balance *</label>
-              <div class="input-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="currentBalance" formControlName="currentBalance">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="offsetBalance">Offset Balance</label>
-              <div class="input-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="offsetBalance" formControlName="offsetBalance">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="interestRate">Interest Rate *</label>
-              <div class="input-suffix">
-                <input type="number" id="interestRate" formControlName="interestRate" step="0.01">
-                <span class="suffix">%</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="repaymentType">Repayment Type</label>
-              <select id="repaymentType" formControlName="repaymentType">
-                <option value="principal_and_interest">Principal & Interest</option>
-                <option value="interest_only">Interest Only</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group form-group--checkbox">
-            <label>
-              <input type="checkbox" formControlName="isFixed">
-              Fixed rate loan
-            </label>
-          </div>
-
-          @if (mortgageForm.get('isFixed')?.value) {
-            <div class="form-group">
-              <label for="fixedRateExpiry">Fixed Rate Expiry</label>
-              <input type="date" id="fixedRateExpiry" formControlName="fixedRateExpiry">
-            </div>
-          }
-
-          <div class="form-group form-group--checkbox">
-            <label>
-              <input type="checkbox" formControlName="isDeductible">
-              Interest is tax deductible (investment loan)
-            </label>
-          </div>
-        </div>
-
-        <div class="modal__footer">
-          <button type="button" class="btn btn--secondary" (click)="closeMortgageModal()">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn--primary" [disabled]="mortgageForm.invalid || isSubmitting()">
-            {{ isSubmitting() ? 'Saving...' : (editingMortgage() ? 'Update' : 'Add') }} Mortgage
-          </button>
-        </div>
-      </form>
-    </div>
   </div>
 }

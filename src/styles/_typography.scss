@@ -1,12 +1,13 @@
 @use 'variables' as *;
 
 // ===========================================
-// BASE TYPOGRAPHY
+// BASE TYPOGRAPHY - Refined Luxury
 // ===========================================
 html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -15,24 +16,41 @@ body {
   font-weight: $font-weight-normal;
   line-height: $line-height-normal;
   color: $color-text-primary;
+  background-color: $color-background;
+  letter-spacing: $letter-spacing-normal;
 }
 
 // ===========================================
-// HEADINGS
+// HEADINGS - Elegant Display Typography
 // ===========================================
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: $font-weight-semibold;
   line-height: $line-height-tight;
   color: $color-text-primary;
+  letter-spacing: $letter-spacing-tight;
+}
+
+// Large headings use display font
+h1, h2 {
+  font-family: $font-family-display;
+  font-weight: $font-weight-medium;
 }
 
 h1 {
-  font-size: $font-size-4xl;
+  font-size: $font-size-5xl;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-4xl;
+  }
 }
 
 h2 {
   font-size: $font-size-3xl;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-2xl;
+  }
 }
 
 h3 {
@@ -49,6 +67,35 @@ h5 {
 
 h6 {
   font-size: $font-size-base;
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-wide;
+}
+
+// ===========================================
+// DISPLAY CLASSES - For hero sections
+// ===========================================
+.display-1 {
+  font-family: $font-family-display;
+  font-size: $font-size-7xl;
+  font-weight: $font-weight-medium;
+  line-height: 1.1;
+  letter-spacing: $letter-spacing-tight;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-5xl;
+  }
+}
+
+.display-2 {
+  font-family: $font-family-display;
+  font-size: $font-size-6xl;
+  font-weight: $font-weight-medium;
+  line-height: 1.15;
+  letter-spacing: $letter-spacing-tight;
+
+  @media (max-width: $breakpoint-md) {
+    font-size: $font-size-4xl;
+  }
 }
 
 // ===========================================
@@ -62,7 +109,13 @@ p {
   }
 }
 
-small {
+.lead {
+  font-size: $font-size-xl;
+  line-height: $line-height-relaxed;
+  color: $color-text-secondary;
+}
+
+small, .text-small {
   font-size: $font-size-sm;
 }
 
@@ -76,12 +129,12 @@ a {
 
   &:hover {
     color: $color-primary-dark;
-    text-decoration: underline;
   }
 
   &:focus-visible {
     outline: 2px solid $color-primary;
     outline-offset: 2px;
+    border-radius: $radius-sm;
   }
 }
 
@@ -98,29 +151,75 @@ ul, ol {
 }
 
 // ===========================================
-// MONOSPACE / CODE
+// NUMBERS - Tabular figures for alignment
+// ===========================================
+.mono {
+  font-family: $font-family-mono;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+// ===========================================
+// CODE
 // ===========================================
 code, pre {
-  font-family: $font-family-mono;
-  font-size: $font-size-sm;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
 }
 
 code {
-  background: $color-background;
-  padding: 0.125rem 0.25rem;
+  font-size: $font-size-sm;
+  background: $color-surface;
+  padding: 0.125rem 0.375rem;
   border-radius: $radius-sm;
+  border: 1px solid $color-border;
 }
 
 pre {
-  background: $color-background;
+  background: $color-surface;
   padding: $spacing-md;
   border-radius: $radius-md;
+  border: 1px solid $color-border;
   overflow-x: auto;
 
   code {
     background: none;
     padding: 0;
+    border: none;
   }
+}
+
+// ===========================================
+// SPECIAL TEXT STYLES
+// ===========================================
+
+// Primary accent text (purple)
+.text-primary-accent,
+.text-gold {  // legacy alias
+  color: $color-primary;
+}
+
+// Gradient primary text
+.text-gradient-primary,
+.text-gradient-gold {  // legacy alias
+  background: $gradient-primary;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Secondary/Teal accent text
+.text-secondary-accent,
+.text-emerald {  // legacy alias
+  color: $color-accent;
+}
+
+// Label style - small uppercase
+.label {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-wider;
+  color: $color-text-muted;
 }
 
 // ===========================================
@@ -139,11 +238,19 @@ pre {
 }
 
 .text-accent {
-  color: $color-accent;
+  color: $color-emerald;
 }
 
 .text-negative {
   color: $color-negative;
+}
+
+.text-positive {
+  color: $color-emerald;
+}
+
+.text-xs {
+  font-size: $font-size-xs;
 }
 
 .text-sm {
@@ -158,12 +265,24 @@ pre {
   font-size: $font-size-xl;
 }
 
+.text-2xl {
+  font-size: $font-size-2xl;
+}
+
 .text-center {
   text-align: center;
 }
 
 .text-right {
   text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.font-normal {
+  font-weight: $font-weight-normal;
 }
 
 .font-medium {
@@ -180,4 +299,23 @@ pre {
 
 .font-mono {
   font-family: $font-family-mono;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.font-display {
+  font-family: $font-family-display;
+}
+
+.uppercase {
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-wide;
+}
+
+.tracking-wide {
+  letter-spacing: $letter-spacing-wide;
+}
+
+.tracking-wider {
+  letter-spacing: $letter-spacing-wider;
 }

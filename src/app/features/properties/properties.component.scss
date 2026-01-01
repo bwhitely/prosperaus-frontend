@@ -260,50 +260,22 @@
   }
 }
 
-// Modal
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: $z-index-modal-backdrop;
-  padding: $spacing-md;
-}
-
-.modal {
+// Inline Form
+.inline-form {
+  margin-bottom: $spacing-lg;
+  border: 2px solid $color-primary;
   background: $color-surface;
   border-radius: $radius-lg;
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  z-index: $z-index-modal;
 
   &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $spacing-lg;
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.05);
     border-bottom: 1px solid $color-border;
 
-    h2 {
+    h3 {
       margin: 0;
-      font-size: $font-size-xl;
-    }
-  }
-
-  &__close {
-    background: none;
-    border: none;
-    font-size: $font-size-2xl;
-    cursor: pointer;
-    color: $color-text-muted;
-    line-height: 1;
-
-    &:hover {
-      color: $color-text-primary;
+      font-size: $font-size-lg;
+      color: $color-primary;
     }
   }
 
@@ -319,6 +291,12 @@
     border-top: 1px solid $color-border;
     background: $color-background;
   }
+}
+
+.card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
 }
 
 // Form enhancements

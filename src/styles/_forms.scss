@@ -2,7 +2,7 @@
 @use 'mixins' as *;
 
 // ===========================================
-// FORM GROUP
+// FORM GROUP - Dark Theme
 // ===========================================
 .form-group {
   margin-bottom: $spacing-md;
@@ -24,20 +24,31 @@
 
   select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right $spacing-sm center;
     padding-right: $spacing-xl;
+    cursor: pointer;
+  }
+
+  // Ticker form group (smaller width)
+  &--ticker {
+    max-width: 150px;
   }
 }
 
 // ===========================================
 // FORM HELPER TEXT
 // ===========================================
-.form-helper {
+.form-helper,
+.form-hint {
   font-size: $font-size-sm;
   color: $color-text-muted;
   margin-top: $spacing-xs;
+
+  &--warning {
+    color: $color-warning;
+  }
 }
 
 .form-error {
@@ -57,11 +68,14 @@
 
   input[type="checkbox"],
   input[type="radio"] {
-    width: 1rem;
-    height: 1rem;
-    margin-top: 0.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.125rem;
     cursor: pointer;
-    accent-color: $color-primary;
+    accent-color: $color-gold;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
   }
 
   label {
@@ -96,10 +110,11 @@
     display: flex;
     align-items: center;
     padding: $spacing-sm $spacing-md;
-    background: $color-background;
+    background: $color-surface-elevated;
     border: 1px solid $color-border;
-    color: $color-text-secondary;
+    color: $color-text-muted;
     font-size: $font-size-sm;
+    font-family: $font-family-mono;
 
     &:first-child {
       border-radius: $radius-md 0 0 $radius-md;
@@ -110,6 +125,29 @@
       border-radius: 0 $radius-md $radius-md 0;
       border-left: none;
     }
+  }
+}
+
+// ===========================================
+// INPUT WITH PREFIX (currency, percentage)
+// ===========================================
+.input-prefix {
+  position: relative;
+
+  .prefix {
+    position: absolute;
+    left: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $color-text-muted;
+    font-family: $font-family-mono;
+    font-weight: $font-weight-medium;
+    pointer-events: none;
+  }
+
+  input {
+    padding-left: $spacing-xl;
+    font-family: $font-family-mono;
   }
 }
 
@@ -172,6 +210,105 @@
   &--3 {
     @include respond-to(lg) {
       grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &--4 {
+    @include respond-to(lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+// ===========================================
+// INPUT SECTION (grouped form fields)
+// ===========================================
+.input-section {
+  @include card;
+  margin-bottom: $spacing-md;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+
+    h4 {
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      margin: 0;
+    }
+  }
+
+  &__icon {
+    font-size: $font-size-lg;
+  }
+}
+
+// ===========================================
+// ADVANCED OPTIONS TOGGLE
+// ===========================================
+.advanced-toggle {
+  margin: $spacing-md 0;
+  padding-top: $spacing-md;
+  border-top: 1px solid $color-border;
+
+  .toggle-icon {
+    margin-left: $spacing-xs;
+  }
+}
+
+.advanced-options {
+  padding-top: $spacing-md;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ===========================================
+// QUOTE PREVIEW (for stock/ticker lookups)
+// ===========================================
+.quote-preview {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background: $color-surface-elevated;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+
+  &__symbol {
+    font-weight: $font-weight-semibold;
+    color: $color-gold;
+  }
+
+  &__price {
+    font-family: $font-family-mono;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__change {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+
+    &.positive {
+      color: $color-emerald;
+    }
+
+    &.negative {
+      color: $color-negative;
     }
   }
 }

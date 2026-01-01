@@ -69,54 +69,121 @@
     </div>
   }
 
-  <!-- Allocation Charts Grid -->
+  <!-- Country & Asset Type Allocation Charts -->
   <div class="analysis-grid">
-    <!-- Geography Allocation -->
+    <!-- Country Allocation -->
     <div class="card analysis-card">
       <div class="card__header">
-        <h2>Geographic Allocation</h2>
+        <h2>Country Allocation</h2>
       </div>
       <div class="card__body">
-        <div class="allocation-chart">
-          @for (entry of geographyEntries(); track entry.key; let i = $index) {
-            <div class="allocation-bar">
-              <div class="allocation-bar__label">
-                <span class="allocation-bar__name">{{ getGeographyLabel(entry.key) }}</span>
-                <span class="allocation-bar__value">{{ entry.value.percentage | number:'1.0-0' }}%</span>
-              </div>
-              <div class="allocation-bar__track">
-                <div class="allocation-bar__fill" [style.width.%]="entry.value.percentage" [style.background-color]="getAllocationColor(i)"></div>
-              </div>
-              <span class="allocation-bar__amount">{{ entry.value.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        @if (countryEntries().length > 0) {
+          <div class="pie-chart-container">
+            <svg viewBox="0 0 200 200" class="pie-chart">
+              @for (slice of countryPieSlices(); track slice.key) {
+                <path
+                  [attr.d]="slice.path"
+                  [attr.fill]="slice.color"
+                  class="pie-slice"
+                >
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}%</title>
+                </path>
+              }
+              <!-- Center circle for donut effect -->
+              <circle cx="100" cy="100" r="45" class="pie-center" />
+            </svg>
+            <div class="pie-legend">
+              @for (slice of countryPieSlices(); track slice.key) {
+                <div class="pie-legend__item">
+                  <span class="pie-legend__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend__label">{{ slice.label }}</span>
+                  <span class="pie-legend__value">{{ slice.percentage | number:'1.1-1' }}%</span>
+                </div>
+              }
             </div>
-          }
-        </div>
+          </div>
+        } @else {
+          <p class="no-data">No country allocation data available</p>
+        }
       </div>
     </div>
 
-    <!-- Asset Class Allocation -->
+    <!-- Asset Type Allocation -->
     <div class="card analysis-card">
       <div class="card__header">
-        <h2>Asset Class Allocation</h2>
+        <h2>Asset Type</h2>
       </div>
       <div class="card__body">
-        <div class="allocation-chart">
-          @for (entry of assetClassEntries(); track entry.key; let i = $index) {
-            <div class="allocation-bar">
-              <div class="allocation-bar__label">
-                <span class="allocation-bar__name">{{ getAssetClassLabel(entry.key) }}</span>
-                <span class="allocation-bar__value">{{ entry.value.percentage | number:'1.0-0' }}%</span>
-              </div>
-              <div class="allocation-bar__track">
-                <div class="allocation-bar__fill" [style.width.%]="entry.value.percentage" [style.background-color]="getAllocationColor(i)"></div>
-              </div>
-              <span class="allocation-bar__amount">{{ entry.value.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        @if (hasAssetTypes()) {
+          <div class="pie-chart-container">
+            <svg viewBox="0 0 200 200" class="pie-chart">
+              @for (slice of assetTypePieSlices(); track slice.key) {
+                <path
+                  [attr.d]="slice.path"
+                  [attr.fill]="slice.color"
+                  class="pie-slice"
+                >
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}%</title>
+                </path>
+              }
+              <!-- Center circle for donut effect -->
+              <circle cx="100" cy="100" r="45" class="pie-center" />
+            </svg>
+            <div class="pie-legend">
+              @for (slice of assetTypePieSlices(); track slice.key) {
+                <div class="pie-legend__item">
+                  <span class="pie-legend__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend__label">{{ slice.label }}</span>
+                  <span class="pie-legend__value">{{ slice.percentage | number:'1.1-1' }}%</span>
+                </div>
+              }
             </div>
-          }
-        </div>
+          </div>
+        } @else {
+          <p class="no-data">No asset type data available</p>
+        }
       </div>
     </div>
   </div>
+
+  <!-- GICS Sector Allocation (Full Width) -->
+  @if (hasGicsSectors()) {
+    <div class="card">
+      <div class="card__header">
+        <h2>GICS Sector Allocation</h2>
+        <span class="card__subtitle">Equity sector breakdown based on Global Industry Classification Standard</span>
+      </div>
+      <div class="card__body">
+        <div class="gics-allocation">
+          <div class="gics-chart-container">
+            <svg viewBox="0 0 200 200" class="pie-chart pie-chart--large">
+              @for (slice of gicsSectorPieSlices(); track slice.key) {
+                <path
+                  [attr.d]="slice.path"
+                  [attr.fill]="slice.color"
+                  class="pie-slice"
+                >
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}%</title>
+                </path>
+              }
+              <circle cx="100" cy="100" r="45" class="pie-center" />
+            </svg>
+          </div>
+          <div class="gics-legend">
+            @for (entry of gicsSectorEntries(); track entry.code; let i = $index) {
+              <div class="gics-legend__item">
+                <span class="gics-legend__color" [style.background-color]="getGicsSectorColor(entry.code, i)"></span>
+                <span class="gics-legend__code">{{ entry.code }}</span>
+                <span class="gics-legend__name">{{ entry.name }}</span>
+                <span class="gics-legend__value">{{ entry.percentage | number:'1.1-1' }}%</span>
+                <span class="gics-legend__amount">{{ entry.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Fee & Franking Analysis -->
   <div class="analysis-grid">
@@ -159,31 +226,6 @@
     </div>
   </div>
 
-  <!-- Category Breakdown -->
-  @if (categoryEntries().length > 0) {
-    <div class="card">
-      <div class="card__header">
-        <h2>Category Breakdown</h2>
-      </div>
-      <div class="card__body">
-        <div class="allocation-chart allocation-chart--wide">
-          @for (entry of categoryEntries(); track entry.key; let i = $index) {
-            <div class="allocation-bar">
-              <div class="allocation-bar__label">
-                <span class="allocation-bar__name">{{ getCategoryLabel(entry.key) }}</span>
-                <span class="allocation-bar__value">{{ entry.value.percentage | number:'1.0-0' }}%</span>
-              </div>
-              <div class="allocation-bar__track">
-                <div class="allocation-bar__fill" [style.width.%]="entry.value.percentage" [style.background-color]="getAllocationColor(i)"></div>
-              </div>
-              <span class="allocation-bar__amount">{{ entry.value.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-  }
-
   <!-- Individual Holdings Table -->
   <div class="card">
     <div class="card__header">
@@ -199,6 +241,7 @@
             <th class="text-right">Value</th>
             <th class="text-right">Gain/Loss</th>
             <th class="text-right">MER</th>
+            <th class="text-right">Div Yield</th>
             <th class="text-right">Franking</th>
           </tr>
         </thead>
@@ -224,6 +267,13 @@
                 }
               </td>
               <td class="text-right mono">{{ formatMer(holding.mer) }}</td>
+              <td class="text-right mono">
+                @if (holding.estimatedDividendYield !== null) {
+                  {{ holding.estimatedDividendYield * 100 | number:'1.1-1' }}%
+                } @else {
+                  -
+                }
+              </td>
               <td class="text-right mono">
                 @if (holding.estimatedFrankingPercentage !== null) {
                   {{ holding.estimatedFrankingPercentage * 100 | number:'1.0-0' }}%

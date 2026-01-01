@@ -1,6 +1,16 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PropertyAnalyserService } from '../../core/services/property-analyser.service';
 import { PropertyAnalysisRequest, PropertyAnalysisResponse, YearProjection, CgtScenario } from '../../shared/models/property-analysis.model';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
@@ -9,7 +19,20 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-property-analyser',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatTabsModule,
+    MatProgressSpinnerModule,
+    MatCheckboxModule,
+    MatTooltipModule
+  ],
   templateUrl: './property-analyser.component.html',
   styleUrl: './property-analyser.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,7 +48,7 @@ export class PropertyAnalyserComponent {
   result = signal<PropertyAnalysisResponse | null>(null);
   isLoading = signal(false);
   error = signal<string | null>(null);
-  activeTab = signal<'summary' | 'cashflow' | 'projections' | 'comparison' | 'cgt'>('summary');
+  activeTab = 0; // Tab index for mat-tab-group
   showAdvanced = signal(false);
 
   // Computed values for display
@@ -155,8 +178,8 @@ export class PropertyAnalyserComponent {
     });
   }
 
-  setTab(tab: 'summary' | 'cashflow' | 'projections' | 'comparison' | 'cgt'): void {
-    this.activeTab.set(tab);
+  setTab(index: number): void {
+    this.activeTab = index;
   }
 
   toggleAdvanced(): void {
@@ -173,9 +196,13 @@ export class PropertyAnalyserComponent {
     }).format(value);
   }
 
+  /**
+   * Format a value that is already a percentage (e.g., 80 for 80%).
+   * The backend returns yields, LVR, etc. already multiplied by 100.
+   */
   formatPercent(value: number | undefined | null): string {
     if (value === undefined || value === null) return '0%';
-    return `${(value * 100).toFixed(2)}%`;
+    return `${value.toFixed(2)}%`;
   }
 
   getInsightIcon(insight: string): string {

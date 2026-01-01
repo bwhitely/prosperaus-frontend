@@ -1,7 +1,18 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe, PercentPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { InvestmentService } from '../../core/services/investment.service';
 import { InvestmentHoldingRequest, InvestmentHoldingResponse, StockQuote, SecuritySearchResult } from '../../shared/models/investment.model';
 import { TickerAutocompleteComponent } from '../../shared/components/ticker-autocomplete/ticker-autocomplete.component';
@@ -9,7 +20,24 @@ import { TickerAutocompleteComponent } from '../../shared/components/ticker-auto
 @Component({
   selector: 'app-investments',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, PercentPipe, TickerAutocompleteComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CurrencyPipe,
+    DatePipe,
+    PercentPipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatTooltipModule,
+    TickerAutocompleteComponent
+  ],
   templateUrl: './investments.component.html',
   styleUrl: './investments.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,7 +51,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  showModal = signal(false);
+  showForm = signal(false);
   editingHolding = signal<InvestmentHoldingResponse | null>(null);
   isSubmitting = signal(false);
 
@@ -34,6 +62,10 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
 
   // Advanced options toggle
   showAdvancedOptions = signal(false);
+
+  // Price refresh
+  isRefreshingPrices = signal(false);
+  refreshProgress = signal({ current: 0, total: 0 });
 
   form: FormGroup = this.fb.group({
     ticker: ['', [Validators.required, Validators.maxLength(10)]],
@@ -159,15 +191,15 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     return (this.getTotalGainLoss() / costBase) * 100;
   }
 
-  openAddModal(): void {
+  openAddForm(): void {
     this.editingHolding.set(null);
     this.form.reset({ securityType: 'etf' });
     this.lastQuote.set(null);
     this.quoteError.set(null);
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  openEditModal(holding: InvestmentHoldingResponse): void {
+  openEditForm(holding: InvestmentHoldingResponse): void {
     this.editingHolding.set(holding);
     this.form.patchValue({
       ticker: holding.ticker,
@@ -178,11 +210,11 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
       acquisitionDate: holding.acquisitionDate || '',
       currentPrice: holding.currentPrice
     });
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  closeModal(): void {
-    this.showModal.set(false);
+  closeForm(): void {
+    this.showForm.set(false);
     this.editingHolding.set(null);
     this.lastQuote.set(null);
     this.quoteError.set(null);
@@ -228,7 +260,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     operation.subscribe({
       next: () => {
         this.loadHoldings();
-        this.closeModal();
+        this.closeForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {
@@ -253,5 +285,97 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     if (value > 0) return 'positive';
     if (value < 0) return 'negative';
     return '';
+  }
+
+  /**
+   * Refresh prices for all holdings from EODHD API.
+   * Fetches quotes in parallel and updates each holding.
+   */
+  refreshAllPrices(): void {
+    const holdingsList = this.holdings();
+    if (holdingsList.length === 0 || this.isRefreshingPrices()) return;
+
+    this.isRefreshingPrices.set(true);
+    this.refreshProgress.set({ current: 0, total: holdingsList.length });
+    this.error.set(null);
+
+    // Create an array of quote fetch observables
+    const quoteRequests = holdingsList.map(holding =>
+      this.investmentService.getQuote(holding.ticker).pipe(
+        map(quote => ({ holding, quote, success: true as const })),
+        catchError(() => of({ holding, quote: null, success: false as const }))
+      )
+    );
+
+    // Execute all in parallel
+    forkJoin(quoteRequests).subscribe({
+      next: (results) => {
+        let updatedCount = 0;
+        let current = 0;
+
+        // Update each holding that got a successful quote
+        const updateRequests = results
+          .filter(r => r.success && r.quote)
+          .map(r => {
+            const request: InvestmentHoldingRequest = {
+              ticker: r.holding.ticker,
+              securityName: r.holding.securityName,
+              securityType: r.holding.securityType,
+              units: r.holding.units,
+              costBase: r.holding.costBase,
+              acquisitionDate: r.holding.acquisitionDate,
+              currentPrice: r.quote!.price
+            };
+            return this.investmentService.update(r.holding.id, request).pipe(
+              map(() => {
+                current++;
+                this.refreshProgress.set({ current, total: holdingsList.length });
+                return true;
+              }),
+              catchError(() => of(false))
+            );
+          });
+
+        if (updateRequests.length === 0) {
+          this.isRefreshingPrices.set(false);
+          this.error.set('Could not fetch prices for any holdings');
+          return;
+        }
+
+        forkJoin(updateRequests).subscribe({
+          next: (updateResults) => {
+            updatedCount = updateResults.filter(Boolean).length;
+            this.loadHoldings();
+            this.isRefreshingPrices.set(false);
+          },
+          error: () => {
+            this.error.set('Failed to update some prices');
+            this.isRefreshingPrices.set(false);
+            this.loadHoldings();
+          }
+        });
+      },
+      error: () => {
+        this.error.set('Failed to refresh prices');
+        this.isRefreshingPrices.set(false);
+      }
+    });
+  }
+
+  /**
+   * Format the price update timestamp for display.
+   */
+  formatPriceDate(dateString: string | undefined): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+
+    return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
   }
 }

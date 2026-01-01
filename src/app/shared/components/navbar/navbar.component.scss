@@ -2,8 +2,11 @@
 @use '../../../../styles/mixins' as *;
 
 .navbar {
-  background: $color-surface;
+  background: $color-surface !important;
   border-bottom: 1px solid $color-border;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: auto !important;
   position: sticky;
   top: 0;
   z-index: $z-index-sticky;
@@ -11,26 +14,39 @@
   &__container {
     @include flex-between;
     height: 64px;
+    width: 100%;
   }
 
-  // Logo
+  // ===========================================
+  // LOGO / WORDMARK
+  // ===========================================
   &__logo {
     display: flex;
     align-items: center;
     text-decoration: none;
+    font-family: $font-family-display;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    letter-spacing: $letter-spacing-tight;
+    transition: opacity $transition-base;
 
     &:hover {
       text-decoration: none;
+      opacity: 0.8;
     }
   }
 
-  &__logo-text {
-    font-size: $font-size-xl;
-    font-weight: $font-weight-bold;
+  &__logo-prosper {
+    color: $color-text-primary;
+  }
+
+  &__logo-aus {
     color: $color-primary;
   }
 
-  // Navigation links
+  // ===========================================
+  // NAVIGATION LINKS
+  // ===========================================
   &__nav {
     display: flex;
     align-items: center;
@@ -38,89 +54,50 @@
   }
 
   &__link {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-sm $spacing-md;
-    border-radius: $radius-md;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    color: $color-text-secondary;
-    text-decoration: none;
-    transition: all $transition-base;
-    background: none;
-    border: none;
-    cursor: pointer;
+    color: $color-text-secondary !important;
+    font-weight: $font-weight-medium !important;
+    font-size: $font-size-sm !important;
+    border-radius: $radius-md !important;
 
     &:hover {
-      color: $color-text-primary;
-      background: $color-background;
-      text-decoration: none;
+      color: $color-text-primary !important;
+      background: $color-surface-hover !important;
     }
 
     &.active {
-      color: $color-primary;
-      background: rgba($color-primary, 0.05);
+      color: $color-primary !important;
+      background: rgba($color-primary, 0.08) !important;
+    }
+
+    .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-left: 2px;
     }
   }
 
-  // Dropdown
-  &__dropdown {
-    position: relative;
-  }
-
-  &__dropdown-trigger {
-    display: flex;
-    align-items: center;
-  }
-
-  &__dropdown-icon {
-    width: 1rem;
-    height: 1rem;
-    margin-left: $spacing-xs;
-  }
-
-  &__dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 220px;
-    background: $color-surface;
-    border: 1px solid $color-border;
-    border-radius: $radius-md;
-    box-shadow: $shadow-lg;
-    padding: $spacing-xs;
-    padding-top: $spacing-sm;
-    z-index: $z-index-dropdown;
-
-    // Invisible bridge to prevent mouseleave when moving from trigger to menu
-    &::before {
-      content: '';
-      position: absolute;
-      top: -8px;
-      left: 0;
-      right: 0;
-      height: 8px;
-    }
-  }
-
-  &__dropdown-item {
-    display: block;
+  // ===========================================
+  // MENU STYLING
+  // ===========================================
+  &__menu-header {
     padding: $spacing-sm $spacing-md;
-    border-radius: $radius-sm;
     font-size: $font-size-sm;
-    color: $color-text-secondary;
-    text-decoration: none;
-    transition: all $transition-base;
+    color: $color-text-muted;
+    border-bottom: 1px solid $color-border;
+  }
 
-    &:hover {
-      color: $color-text-primary;
-      background: $color-background;
-      text-decoration: none;
+  &__menu-item--danger {
+    color: $color-negative !important;
+
+    .mat-icon {
+      color: $color-negative !important;
     }
   }
 
-  // Actions
+  // ===========================================
+  // ACTIONS
+  // ===========================================
   &__actions {
     display: flex;
     align-items: center;
@@ -128,131 +105,115 @@
   }
 
   &__avatar {
-    @include flex-center;
-    width: 40px;
-    height: 40px;
-    border-radius: $radius-full;
-    background: $color-background;
-    color: $color-text-secondary;
-    transition: all $transition-base;
+    color: $color-text-secondary !important;
+    border: 1px solid $color-border !important;
 
     &:hover {
-      background: $color-primary;
-      color: white;
-    }
-
-    svg {
-      width: 20px;
-      height: 20px;
+      background: $color-primary !important;
+      border-color: $color-primary !important;
+      color: $color-text-inverse !important;
     }
   }
 
-  // Mobile toggle
-  &__mobile-toggle {
-    @include flex-center;
-    width: 40px;
-    height: 40px;
-    border-radius: $radius-md;
-    background: none;
-    border: none;
-    color: $color-text-secondary;
-    cursor: pointer;
-    transition: all $transition-base;
-
-    &:hover {
-      background: $color-background;
-      color: $color-text-primary;
-    }
-
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-  }
-
-  // Mobile menu
+  // ===========================================
+  // MOBILE MENU
+  // ===========================================
   &__mobile-menu {
-    padding: $spacing-md;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     background: $color-surface;
     border-top: 1px solid $color-border;
-  }
-
-  &__mobile-link {
-    display: block;
+    box-shadow: $shadow-lg;
     padding: $spacing-md;
-    border-radius: $radius-md;
-    font-size: $font-size-base;
-    font-weight: $font-weight-medium;
-    color: $color-text-secondary;
-    text-decoration: none;
-    transition: all $transition-base;
-    background: none;
-    border: none;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
-
-    &:hover {
-      background: $color-background;
-      color: $color-text-primary;
-      text-decoration: none;
-    }
-
-    &.active {
-      color: $color-primary;
-      background: rgba($color-primary, 0.05);
-    }
-
-    &--primary {
-      background: $color-primary;
-      color: white;
-
-      &:hover {
-        background: $color-primary-dark;
-        color: white;
-      }
-    }
-
-    &--danger {
-      color: $color-negative;
-
-      &:hover {
-        background: rgba($color-negative, 0.1);
-      }
-    }
+    animation: mobileMenuSlide 0.2s $ease-out-expo;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
   }
 
   &__mobile-header {
-    padding: $spacing-md;
-    font-size: $font-size-sm;
-    color: $color-text-muted;
-    border-bottom: 1px solid $color-border;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__dropdown-header {
     padding: $spacing-sm $spacing-md;
     font-size: $font-size-sm;
     color: $color-text-muted;
     border-bottom: 1px solid $color-border;
-    margin-bottom: $spacing-xs;
+    margin-bottom: $spacing-sm;
   }
 
-  &__dropdown-menu--right {
-    right: 0;
-    left: auto;
+  &__mobile-section {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-wider;
+    padding: $spacing-md $spacing-md $spacing-xs;
+    margin-top: $spacing-sm;
   }
 
-  &__dropdown-item--danger {
-    color: $color-negative;
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    cursor: pointer;
+  &__mobile-link {
+    display: flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    padding: $spacing-sm $spacing-md !important;
+    color: $color-text-secondary !important;
+    font-weight: $font-weight-medium !important;
+    border-radius: $radius-md !important;
+
+    .mat-icon {
+      margin-right: $spacing-sm;
+      color: $color-text-muted;
+    }
 
     &:hover {
-      background: rgba($color-negative, 0.1);
+      background: $color-surface-hover !important;
+      color: $color-text-primary !important;
+    }
+
+    &.active {
+      color: $color-primary !important;
+      background: rgba($color-primary, 0.08) !important;
+
+      .mat-icon {
+        color: $color-primary;
+      }
+    }
+
+    &--primary {
+      margin-top: $spacing-sm !important;
+      justify-content: center !important;
+    }
+
+    &--danger {
+      color: $color-negative !important;
+
+      .mat-icon {
+        color: $color-negative !important;
+      }
+
+      &:hover {
+        background: $color-negative-muted !important;
+      }
     }
   }
+}
+
+// ===========================================
+// ANIMATIONS
+// ===========================================
+@keyframes mobileMenuSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ===========================================
+// GLOBAL MENU STYLING
+// ===========================================
+::ng-deep .mat-mdc-menu-panel {
+  min-width: 200px !important;
 }

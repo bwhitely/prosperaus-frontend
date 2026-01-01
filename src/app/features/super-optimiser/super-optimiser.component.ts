@@ -1,6 +1,16 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { SuperOptimiserService } from '../../core/services/super-optimiser.service';
 import {
   SuperOptimisationRequest,
@@ -12,7 +22,23 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-super-optimiser',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe, PercentPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CurrencyPipe,
+    DecimalPipe,
+    PercentPipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
+    MatIconModule,
+    MatExpansionModule
+  ],
   templateUrl: './super-optimiser.component.html',
   styleUrl: './super-optimiser.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -14,6 +14,116 @@
   }
 }
 
+// Income Summary Cards
+.income-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+
+  &__card {
+    @include card;
+    text-align: center;
+    padding: $spacing-md;
+
+    &--tax {
+      border-top: 3px solid $color-negative;
+    }
+
+    &--net {
+      border-top: 3px solid $color-accent;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+  }
+}
+
+// Income Breakdown Section
+.income-breakdown {
+  @include card;
+  margin-bottom: $spacing-lg;
+  padding: 0;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.03);
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  &__periods {
+    display: flex;
+    gap: $spacing-xl;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-weight: 500;
+
+    span {
+      width: 100px;
+      text-align: right;
+    }
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-sm $spacing-lg;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &--tax {
+      background: rgba($color-negative, 0.03);
+    }
+
+    &--net {
+      background: rgba($color-accent, 0.05);
+    }
+  }
+
+  &__label {
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  &__values {
+    display: flex;
+    gap: $spacing-xl;
+
+    span {
+      width: 100px;
+      text-align: right;
+    }
+  }
+}
+
 .income-table-wrapper {
   overflow-x: auto;
 }
@@ -40,17 +150,6 @@
     &:hover {
       background: rgba($color-primary, 0.02);
     }
-
-    &.inactive {
-      opacity: 0.6;
-    }
-  }
-
-  tfoot {
-    td {
-      padding-top: $spacing-md;
-      border-bottom: none;
-    }
   }
 }
 
@@ -69,24 +168,6 @@
   font-weight: 500;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-sm;
-  border-radius: $radius-sm;
-  font-size: $font-size-xs;
-  font-weight: 500;
-
-  &--active {
-    background: rgba($color-accent, 0.1);
-    color: $color-accent-dark;
-  }
-
-  &--inactive {
-    background: rgba($color-text-muted, 0.1);
-    color: $color-text-muted;
-  }
-}
-
 .text-right {
   text-align: right;
 }
@@ -97,6 +178,10 @@
 
 .positive {
   color: $color-accent;
+}
+
+.negative {
+  color: $color-negative;
 }
 
 .actions-cell {
@@ -113,5 +198,148 @@
   input[type="checkbox"] {
     width: 18px;
     height: 18px;
+  }
+}
+
+// Inline Form Styles
+.inline-form {
+  margin-bottom: $spacing-lg;
+  border: 2px solid $color-primary;
+  background: $color-surface;
+
+  &__header {
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.05);
+    border-bottom: 1px solid $color-border;
+
+    h3 {
+      margin: 0;
+      font-size: $font-size-lg;
+      color: $color-primary;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.02);
+    border-top: 1px solid $color-border;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: $spacing-md;
+
+  label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    font-size: $font-size-base;
+    background: $color-surface;
+    color: $color-text-primary;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    }
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+}
+
+.input-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .prefix {
+    position: absolute;
+    left: $spacing-md;
+    color: $color-text-muted;
+    font-weight: 500;
+  }
+
+  input {
+    padding-left: $spacing-xl;
+  }
+}
+
+.form-hint {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $spacing-xs;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  font-weight: 500;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: $color-primary;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($color-primary, 5%);
+    }
+  }
+
+  &--secondary {
+    background: transparent;
+    color: $color-text-secondary;
+    border: 1px solid $color-border;
+
+    &:hover:not(:disabled) {
+      background: rgba($color-primary, 0.05);
+      border-color: $color-primary;
+      color: $color-primary;
+    }
   }
 }

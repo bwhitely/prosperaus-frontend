@@ -1,0 +1,144 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.legal-page {
+  padding: $spacing-xl 0 $spacing-3xl;
+  min-height: 100vh;
+  background: $color-background;
+
+  &__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-bottom: $spacing-xl;
+
+    a {
+      color: $color-text-muted;
+      text-decoration: none;
+      transition: color $transition-base;
+
+      &:hover {
+        color: $color-gold;
+      }
+    }
+  }
+
+  &__content {
+    @include card;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  &__header {
+    margin-bottom: $spacing-xl;
+    padding-bottom: $spacing-lg;
+    border-bottom: 1px solid $color-border;
+
+    h1 {
+      font-family: $font-family-display;
+      font-size: $font-size-3xl;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      margin-bottom: $spacing-sm;
+    }
+  }
+
+  &__updated {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__footer {
+    max-width: 800px;
+    margin: $spacing-xl auto 0;
+    text-align: center;
+  }
+}
+
+.legal-section {
+  margin-bottom: $spacing-xl;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+
+  h3 {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+    margin-top: $spacing-lg;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+    margin-bottom: $spacing-md;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul {
+    margin: $spacing-md 0;
+    padding-left: $spacing-lg;
+
+    li {
+      color: $color-text-secondary;
+      line-height: $line-height-relaxed;
+      margin-bottom: $spacing-xs;
+    }
+  }
+
+  a {
+    color: $color-gold;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  strong {
+    color: $color-text-primary;
+  }
+}
+
+.legal-warning {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  background: $color-warning-muted;
+  border: 1px solid rgba($color-warning, 0.3);
+  border-radius: $radius-lg;
+  margin: $spacing-md 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: $color-warning;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  strong {
+    display: block;
+    color: $color-warning;
+    margin-bottom: $spacing-xs;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+}

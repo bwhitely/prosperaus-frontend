@@ -3,14 +3,6 @@
 .page-header {
   margin-bottom: $spacing-xl;
 
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: $spacing-lg;
-    flex-wrap: wrap;
-  }
-
   h1 {
     font-size: $font-size-3xl;
     font-weight: 700;
@@ -25,18 +17,28 @@
   }
 }
 
+// Error alert with Material styling
 .alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: $spacing-md;
   border-radius: $radius-md;
   margin-bottom: $spacing-lg;
 
   &--error {
-    background: rgba($color-negative, 0.1);
+    background: $color-negative-muted;
     border: 1px solid rgba($color-negative, 0.3);
     color: $color-negative;
   }
+
+  button {
+    flex-shrink: 0;
+    margin-left: $spacing-sm;
+  }
 }
 
+// Main layout
 .optimiser-layout {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -47,33 +49,35 @@
   }
 }
 
-.card {
-  background: $color-surface;
-  border: 1px solid $color-border;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $spacing-lg $spacing-lg $spacing-sm;
-    border-bottom: 1px solid $color-border;
-
-    h2, h3 {
-      font-size: $font-size-lg;
-      font-weight: 600;
-      color: $color-text-primary;
-      margin: 0;
-    }
+// Input section styling
+.input-section {
+  mat-card {
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
   }
 
-  &__body {
-    padding: $spacing-lg;
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding-bottom: $spacing-md;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
+  }
+
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0;
   }
 }
 
+// Loading badge
 .loading-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
   font-size: $font-size-sm;
   color: $color-primary;
   background: rgba($color-primary, 0.1);
@@ -81,7 +85,7 @@
   border-radius: $radius-sm;
 }
 
-// Form Styles
+// Form sections
 .form-section {
   margin-bottom: $spacing-lg;
   padding-bottom: $spacing-lg;
@@ -99,106 +103,49 @@
     color: $color-text-primary;
     margin: 0 0 $spacing-md;
   }
+
+  h4 {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-sm;
+  }
+
+  p.section-hint {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin: 0 0 $spacing-md;
+  }
 }
 
+// Form row grid
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: $spacing-md;
+  margin-bottom: $spacing-md;
 
   @media (max-width: $breakpoint-sm) {
     grid-template-columns: 1fr;
   }
-}
 
-.form-group {
-  margin-bottom: $spacing-md;
-
-  label {
-    display: block;
-    font-size: $font-size-sm;
-    font-weight: 500;
-    color: $color-text-secondary;
-    margin-bottom: $spacing-xs;
-  }
-
-  input, select {
+  mat-form-field {
     width: 100%;
-    padding: $spacing-sm $spacing-md;
-    border: 1px solid $color-border;
-    border-radius: $radius-md;
-    font-size: $font-size-base;
-    font-family: $font-family-base;
-    background: $color-surface;
-    transition: border-color 0.15s ease;
 
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    // Ensure hints have enough space and don't get clipped
+    &::ng-deep .mat-mdc-form-field-hint-wrapper {
+      padding: 0;
     }
 
-    &::placeholder {
-      color: $color-text-muted;
-    }
-  }
-
-  select {
-    cursor: pointer;
-  }
-
-  .help-text {
-    display: block;
-    font-size: $font-size-xs;
-    color: $color-text-muted;
-    margin-top: $spacing-xs;
-  }
-}
-
-.input-prefix {
-  display: flex;
-  align-items: center;
-  border: 1px solid $color-border;
-  border-radius: $radius-md;
-  overflow: hidden;
-
-  &:focus-within {
-    border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
-  }
-
-  span {
-    padding: $spacing-sm $spacing-md;
-    background: $color-background;
-    color: $color-text-secondary;
-    font-weight: 500;
-  }
-
-  input {
-    border: none;
-    border-radius: 0;
-
-    &:focus {
-      box-shadow: none;
+    &::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      margin-top: 4px;
     }
   }
 }
 
-.checkbox-group {
-  label {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    cursor: pointer;
-    font-size: $font-size-base;
-    color: $color-text-primary;
-
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-  }
+// Ensure form fields with hints have extra bottom margin
+mat-form-field:has(mat-hint) {
+  margin-bottom: $spacing-xs;
 }
 
 // Cap Progress
@@ -223,30 +170,14 @@
       font-size: $font-size-sm;
       font-weight: 600;
       font-family: $font-family-mono;
+      font-variant-numeric: tabular-nums;
       color: $color-text-primary;
     }
   }
 
-  .progress-bar-container {
+  mat-progress-bar {
     height: 8px;
-    background: $color-border;
     border-radius: 4px;
-    overflow: hidden;
-
-    .progress-bar {
-      height: 100%;
-      background: $color-accent;
-      border-radius: 4px;
-      transition: width 0.3s ease;
-
-      &.near-limit {
-        background: $color-warning;
-      }
-
-      &.warning {
-        background: $color-negative;
-      }
-    }
   }
 
   .cap-remaining {
@@ -257,88 +188,71 @@
   }
 }
 
-// Section Toggles
-.section-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: $spacing-md;
-  margin: $spacing-md 0;
-  background: $color-background;
+// Expansion panels (Spouse, Advanced)
+.section-panel {
+  margin-top: $spacing-md;
+  border-radius: $radius-md !important;
+  box-shadow: none !important;
   border: 1px solid $color-border;
-  border-radius: $radius-md;
-  font-size: $font-size-sm;
-  font-weight: 500;
-  color: $color-text-secondary;
-  cursor: pointer;
-  transition: all 0.15s ease;
 
-  &:hover {
-    background: darken($color-background, 2%);
-    color: $color-text-primary;
+  &::ng-deep {
+    .mat-expansion-panel-header {
+      padding: $spacing-md;
+    }
+
+    .mat-expansion-panel-body {
+      padding: $spacing-md;
+    }
   }
 
-  .toggle-icon {
-    font-size: $font-size-lg;
-    font-weight: 400;
-  }
-}
-
-.section-hint {
-  font-size: $font-size-sm;
-  color: $color-text-muted;
-  margin: 0 0 $spacing-md;
-}
-
-.advanced-section,
-.spouse-section {
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  mat-panel-description {
+    color: $color-text-muted;
+    font-size: $font-size-sm;
   }
 }
 
-// Results Section
-.loading-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: $spacing-2xl;
-  text-align: center;
+// Results section
+.results-section {
+  mat-card {
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    margin-bottom: $spacing-lg;
+  }
 
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid $color-border;
-    border-top-color: $color-primary;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  mat-card-header {
+    padding-bottom: $spacing-sm;
     margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
   }
 
-  p {
-    color: $color-text-secondary;
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text-primary;
     margin: 0;
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+// Loading card
+.loading-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
+
+    p {
+      margin-top: $spacing-md;
+      color: $color-text-secondary;
+    }
+  }
 }
 
-// Warnings Card
+// Warnings
 .warnings-card {
-  background: rgba($color-warning, 0.1);
+  background: $color-warning-muted;
   border: 1px solid rgba($color-warning, 0.3);
   border-radius: $radius-lg;
   padding: $spacing-md;
@@ -355,23 +269,16 @@
       margin-bottom: $spacing-sm;
     }
 
-    .warning-icon {
+    mat-icon {
       flex-shrink: 0;
+      font-size: 20px;
       width: 20px;
       height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: $color-warning;
-      color: white;
-      border-radius: 50%;
-      font-size: $font-size-xs;
-      font-weight: 700;
     }
   }
 }
 
-// Summary Cards
+// Summary cards
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -384,58 +291,52 @@
 }
 
 .summary-card {
-  background: $color-surface;
-  border: 1px solid $color-border;
-  border-radius: $radius-lg;
-  padding: $spacing-lg;
   text-align: center;
+  border-radius: $radius-lg;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-lg;
+  }
 
   .label {
-    display: block;
     font-size: $font-size-sm;
     color: $color-text-secondary;
     margin-bottom: $spacing-xs;
   }
 
   .value {
-    display: block;
     font-size: $font-size-2xl;
     font-weight: 700;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     color: $color-text-primary;
     margin-bottom: $spacing-xs;
 
     &.positive {
-      color: $color-accent;
+      color: $color-positive;
     }
   }
 
   .subtext {
-    display: block;
     font-size: $font-size-xs;
     color: $color-text-muted;
   }
 
   &.primary-card {
-    border-color: $color-primary;
-    border-width: 2px;
+    border: 2px solid $color-primary;
   }
 
   &.savings-card {
-    background: rgba($color-accent, 0.05);
-    border-color: rgba($color-accent, 0.3);
+    background: $color-positive-muted;
+    border: 1px solid rgba($color-positive, 0.3);
   }
-}
 
-// Strategy Card
-.strategy-card {
-  margin-bottom: $spacing-lg;
-
-  .strategy-summary {
-    font-size: $font-size-base;
-    line-height: 1.6;
-    color: $color-text-primary;
-    margin: 0;
+  &.contribution-room-card {
+    background: $color-info-muted;
+    border: 1px solid rgba($color-info, 0.3);
   }
 }
 
@@ -457,8 +358,8 @@
   background: $color-background;
 
   &.priority-high {
-    border-left-color: $color-accent;
-    background: rgba($color-accent, 0.05);
+    border-left-color: $color-positive;
+    background: $color-positive-muted;
   }
 
   &.priority-medium {
@@ -495,7 +396,7 @@
   }
 
   &.priority-high .rec-priority {
-    background: $color-accent;
+    background: $color-positive;
     color: white;
   }
 
@@ -531,13 +432,14 @@
 
     .benefit-value {
       font-weight: 600;
-      color: $color-accent;
+      color: $color-positive;
       font-family: $font-family-mono;
+      font-variant-numeric: tabular-nums;
     }
   }
 }
 
-// Details Card
+// Details card
 .details-card {
   margin-bottom: $spacing-lg;
 }
@@ -558,7 +460,7 @@
   border-radius: $radius-md;
 
   &.warning-section {
-    background: rgba($color-warning, 0.05);
+    background: $color-warning-muted;
     border: 1px solid rgba($color-warning, 0.2);
   }
 
@@ -590,7 +492,7 @@
   }
 
   &.highlight {
-    background: rgba($color-accent, 0.1);
+    background: $color-positive-muted;
     margin: $spacing-xs (-$spacing-sm);
     padding: $spacing-xs $spacing-sm;
     border-radius: $radius-sm;
@@ -614,10 +516,11 @@
     font-size: $font-size-sm;
     font-weight: 600;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     color: $color-text-primary;
 
     &.positive {
-      color: $color-accent;
+      color: $color-positive;
     }
 
     &.negative {
@@ -626,12 +529,20 @@
   }
 }
 
-// Info Note
+// Info note
 .info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
   padding: $spacing-md;
-  background: rgba($color-primary, 0.05);
-  border: 1px solid rgba($color-primary, 0.1);
+  background: $color-info-muted;
+  border: 1px solid rgba($color-info, 0.2);
   border-radius: $radius-md;
+
+  mat-icon {
+    flex-shrink: 0;
+    color: $color-info;
+  }
 
   p {
     margin: 0;

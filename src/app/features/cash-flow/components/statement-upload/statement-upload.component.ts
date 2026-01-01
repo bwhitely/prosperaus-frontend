@@ -9,11 +9,14 @@ import {
   ExpenseCategoryResponse,
   StatementAnalysisResponse
 } from '../../../../shared/models/cash-flow.model';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-statement-upload',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatIconModule, MatButtonModule, MatTooltip],
   templateUrl: './statement-upload.component.html',
   styleUrl: './statement-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

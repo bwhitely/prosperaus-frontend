@@ -29,3 +29,25 @@ export interface NetWorthResponse {
   assetAllocation: AssetAllocation[];
   calculatedAt: string;
 }
+
+export interface NetWorthHistoryDataPoint {
+  date: string;
+  netWorth: number;
+  totalAssets: number;
+  totalLiabilities: number;
+}
+
+export interface NetWorthHistorySummary {
+  startValue: number;
+  endValue: number;
+  change: number;
+  changePercent: number;
+  startDate: string;
+  endDate: string;
+  dataPointCount: number;
+}
+
+export interface NetWorthHistoryResponse {
+  dataPoints: NetWorthHistoryDataPoint[];
+  summary: NetWorthHistorySummary;
+}

@@ -1,13 +1,34 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, Output, EventEmitter, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IncomeService } from '../../../../core/services/income.service';
 import { IncomeSourceRequest, IncomeSourceResponse, IncomeFrequency } from '../../../../shared/models/cash-flow.model';
+import { MatTooltip } from "@angular/material/tooltip";
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+
+// Australian FY25-26 Tax Brackets (Stage 3 tax cuts)
+interface TaxBracket {
+  min: number;
+  max: number;
+  rate: number;
+  base: number;
+}
+
+const TAX_BRACKETS: TaxBracket[] = [
+  { min: 0, max: 18200, rate: 0, base: 0 },
+  { min: 18201, max: 45000, rate: 0.16, base: 0 },
+  { min: 45001, max: 135000, rate: 0.30, base: 4288 },
+  { min: 135001, max: 190000, rate: 0.37, base: 31288 },
+  { min: 190001, max: Infinity, rate: 0.45, base: 51638 }
+];
+
+const MEDICARE_LEVY_RATE = 0.02;
 
 @Component({
   selector: 'app-income-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, MatTooltip, MatIconModule, MatButtonModule],
   templateUrl: './income-list.component.html',
   styleUrl: './income-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,19 +43,24 @@ export class IncomeListComponent implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  showModal = signal(false);
+  showForm = signal(false);
   editingSource = signal<IncomeSourceResponse | null>(null);
   isSubmitting = signal(false);
+
+  // Computed totals
+  totalAnnualGross = computed(() =>
+    this.incomeSources().reduce((sum, s) => sum + this.getAnnualAmount(s), 0)
+  );
+
+  totalAnnualTax = computed(() => this.calculateTax(this.totalAnnualGross()));
+
+  totalAnnualNet = computed(() => this.totalAnnualGross() - this.totalAnnualTax());
 
   form: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     sourceType: ['salary', Validators.required],
     grossAmount: [null, [Validators.required, Validators.min(0.01)]],
     frequency: ['monthly', Validators.required],
-    taxWithheld: [0],
-    isActive: [true],
-    startDate: [''],
-    endDate: [''],
     notes: ['']
   });
 
@@ -79,41 +105,71 @@ export class IncomeListComponent implements OnInit {
     });
   }
 
-  getTotalMonthly(): number {
-    return this.incomeSources()
-      .filter(s => s.isActive)
-      .reduce((sum, s) => sum + s.monthlyAmount, 0);
+  // Calculate Australian income tax for a given annual income
+  calculateTax(annualIncome: number): number {
+    if (annualIncome <= 0) return 0;
+
+    let tax = 0;
+
+    // Find the applicable tax bracket
+    for (const bracket of TAX_BRACKETS) {
+      if (annualIncome >= bracket.min && annualIncome <= bracket.max) {
+        tax = bracket.base + (annualIncome - bracket.min + 1) * bracket.rate;
+        break;
+      }
+    }
+
+    // Add Medicare Levy (2%)
+    tax += annualIncome * MEDICARE_LEVY_RATE;
+
+    return Math.round(tax);
   }
 
-  openAddModal(): void {
+  // Convert income to annual amount based on frequency
+  getAnnualAmount(source: IncomeSourceResponse): number {
+    const multipliers: Record<string, number> = {
+      'weekly': 52,
+      'fortnightly': 26,
+      'monthly': 12,
+      'quarterly': 4,
+      'annually': 1
+    };
+    return source.grossAmount * (multipliers[source.frequency] || 12);
+  }
+
+  // Get amounts at different frequencies for display
+  getIncomeBreakdown(source: IncomeSourceResponse): { fortnightly: number; monthly: number; annually: number } {
+    const annual = this.getAnnualAmount(source);
+    return {
+      fortnightly: annual / 26,
+      monthly: annual / 12,
+      annually: annual
+    };
+  }
+
+  openAddForm(): void {
     this.editingSource.set(null);
     this.form.reset({
       sourceType: 'salary',
-      frequency: 'monthly',
-      taxWithheld: 0,
-      isActive: true
+      frequency: 'monthly'
     });
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  openEditModal(source: IncomeSourceResponse): void {
+  openEditForm(source: IncomeSourceResponse): void {
     this.editingSource.set(source);
     this.form.patchValue({
       name: source.name,
       sourceType: source.sourceType,
       grossAmount: source.grossAmount,
       frequency: source.frequency,
-      taxWithheld: source.taxWithheld || 0,
-      isActive: source.isActive,
-      startDate: source.startDate || '',
-      endDate: source.endDate || '',
       notes: source.notes || ''
     });
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  closeModal(): void {
-    this.showModal.set(false);
+  closeForm(): void {
+    this.showForm.set(false);
     this.editingSource.set(null);
   }
 
@@ -128,10 +184,7 @@ export class IncomeListComponent implements OnInit {
       sourceType: formValue.sourceType,
       grossAmount: formValue.grossAmount,
       frequency: formValue.frequency,
-      taxWithheld: formValue.taxWithheld || undefined,
-      isActive: formValue.isActive,
-      startDate: formValue.startDate || undefined,
-      endDate: formValue.endDate || undefined,
+      isActive: true, // Always active
       notes: formValue.notes || undefined
     };
 
@@ -143,7 +196,7 @@ export class IncomeListComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadIncomeSources();
-        this.closeModal();
+        this.closeForm();
         this.isSubmitting.set(false);
         this.changed.emit();
       },

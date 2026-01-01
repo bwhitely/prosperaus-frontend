@@ -1,6 +1,17 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe, PercentPipe, DecimalPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, PercentPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectionService } from '../../core/services/projection.service';
 import { ScenarioService } from '../../core/services/scenario.service';
 import {
@@ -14,7 +25,25 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-projections',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, PercentPipe, DecimalPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CurrencyPipe,
+    PercentPipe,
+    DecimalPipe,
+    DatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatCheckboxModule,
+    MatTooltipModule
+  ],
   templateUrl: './projections.component.html',
   styleUrl: './projections.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -159,6 +188,110 @@ export class ProjectionsComponent implements OnInit {
     return milestones;
   });
 
+  // Line graph computed properties
+  graphDimensions = {
+    width: 600,
+    height: 300,
+    padding: { top: 20, right: 30, bottom: 50, left: 80 }
+  };
+
+  graphData = computed(() => {
+    const r = this.result();
+    if (!r || r.yearlyBreakdown.length === 0) return null;
+
+    const data = r.yearlyBreakdown;
+    const { width, height, padding } = this.graphDimensions;
+
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+
+    const minYear = data[0].year;
+    const maxYear = data[data.length - 1].year;
+    const minNetWorth = 0;
+    const maxNetWorth = Math.max(...data.map(d => d.netWorth)) * 1.1;
+
+    const xScale = (year: number) =>
+      padding.left + ((year - minYear) / (maxYear - minYear)) * chartWidth;
+
+    const yScale = (netWorth: number) =>
+      padding.top + chartHeight - ((netWorth - minNetWorth) / (maxNetWorth - minNetWorth)) * chartHeight;
+
+    // Generate path
+    const pathPoints = data.map((d, i) => {
+      const x = xScale(d.year);
+      const y = yScale(d.netWorth);
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ');
+
+    // Generate area path (for gradient fill)
+    const areaPath = pathPoints +
+      ` L ${xScale(maxYear)} ${padding.top + chartHeight}` +
+      ` L ${xScale(minYear)} ${padding.top + chartHeight} Z`;
+
+    // Generate data points for key years
+    const keyYears = [0, 1, 5, 10, 15, 20, 25, 30];
+    const dataPoints = data
+      .filter((_, i) => keyYears.includes(i) || i === data.length - 1)
+      .map(d => ({
+        x: xScale(d.year),
+        y: yScale(d.netWorth),
+        year: d.year,
+        age: d.age,
+        netWorth: d.netWorth
+      }));
+
+    // Generate Y axis labels
+    const yAxisSteps = 5;
+    const yAxisLabels = Array.from({ length: yAxisSteps + 1 }, (_, i) => {
+      const value = minNetWorth + (maxNetWorth - minNetWorth) * (i / yAxisSteps);
+      return {
+        value,
+        y: yScale(value),
+        label: this.formatCompactCurrency(value)
+      };
+    });
+
+    // Generate X axis labels
+    const xAxisLabels = data
+      .filter((_, i) => i % 5 === 0 || i === data.length - 1)
+      .map(d => ({
+        year: d.year,
+        x: xScale(d.year),
+        label: `Yr ${d.year}`
+      }));
+
+    // Grid lines
+    const horizontalGridLines = yAxisLabels.map(l => ({
+      y: l.y,
+      x1: padding.left,
+      x2: width - padding.right
+    }));
+
+    return {
+      pathPoints,
+      areaPath,
+      dataPoints,
+      yAxisLabels,
+      xAxisLabels,
+      horizontalGridLines,
+      chartArea: {
+        x: padding.left,
+        y: padding.top,
+        width: chartWidth,
+        height: chartHeight
+      }
+    };
+  });
+
+  formatCompactCurrency(value: number): string {
+    if (value >= 1000000) {
+      return `$${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `$${(value / 1000).toFixed(0)}K`;
+    }
+    return `$${value.toFixed(0)}`;
+  }
+
   get incomeSources(): FormArray {
     return this.form.get('incomeSources') as FormArray;
   }
@@ -184,13 +317,13 @@ export class ProjectionsComponent implements OnInit {
     setTimeout(() => this.calculate(), 200);
   }
 
-  toggleSection(section: string): void {
+  setSectionExpanded(section: string, expanded: boolean): void {
     this.expandedSections.update(set => {
       const newSet = new Set(set);
-      if (newSet.has(section)) {
-        newSet.delete(section);
-      } else {
+      if (expanded) {
         newSet.add(section);
+      } else {
+        newSet.delete(section);
       }
       return newSet;
     });

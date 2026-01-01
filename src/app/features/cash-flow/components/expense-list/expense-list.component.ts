@@ -1,6 +1,16 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExpenseService } from '../../../../core/services/expense.service';
 import {
   UserExpenseRequest,
@@ -13,9 +23,23 @@ import {
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CurrencyPipe,
+    MatButtonModule,
+    MatCardModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule
+  ],
   templateUrl: './expense-list.component.html',
-  styleUrl: './expense-list.component.scss',
+  styleUrls: ['./expense-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExpenseListComponent implements OnInit {
@@ -29,13 +53,13 @@ export class ExpenseListComponent implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  // Expense modal
-  showExpenseModal = signal(false);
+  // Expense form
+  showExpenseForm = signal(false);
   editingExpense = signal<UserExpenseResponse | null>(null);
   isSubmitting = signal(false);
 
-  // Category modal
-  showCategoryModal = signal(false);
+  // Category form
+  showCategoryForm = signal(false);
   editingCategory = signal<ExpenseCategoryResponse | null>(null);
   isCategorySubmitting = signal(false);
 
@@ -135,16 +159,16 @@ export class ExpenseListComponent implements OnInit {
 
   // Expense methods
 
-  openAddExpenseModal(): void {
+  openAddExpenseForm(): void {
     this.editingExpense.set(null);
     this.expenseForm.reset({
       frequency: 'monthly',
       isRecurring: true
     });
-    this.showExpenseModal.set(true);
+    this.showExpenseForm.set(true);
   }
 
-  openEditExpenseModal(expense: UserExpenseResponse): void {
+  openEditExpenseForm(expense: UserExpenseResponse): void {
     this.editingExpense.set(expense);
     this.expenseForm.patchValue({
       name: expense.name,
@@ -156,11 +180,11 @@ export class ExpenseListComponent implements OnInit {
       endDate: expense.endDate || '',
       notes: expense.notes || ''
     });
-    this.showExpenseModal.set(true);
+    this.showExpenseForm.set(true);
   }
 
-  closeExpenseModal(): void {
-    this.showExpenseModal.set(false);
+  closeExpenseForm(): void {
+    this.showExpenseForm.set(false);
     this.editingExpense.set(null);
   }
 
@@ -189,7 +213,7 @@ export class ExpenseListComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadData();
-        this.closeExpenseModal();
+        this.closeExpenseForm();
         this.isSubmitting.set(false);
         this.changed.emit();
       },
@@ -216,16 +240,16 @@ export class ExpenseListComponent implements OnInit {
 
   // Category methods
 
-  openCategoryModal(): void {
+  openCategoryForm(): void {
     this.editingCategory.set(null);
     this.categoryForm.reset({
       color: '#4A90A4',
       displayOrder: 0
     });
-    this.showCategoryModal.set(true);
+    this.showCategoryForm.set(true);
   }
 
-  openEditCategoryModal(category: ExpenseCategoryResponse): void {
+  openEditCategoryForm(category: ExpenseCategoryResponse): void {
     if (category.isSystemDefault) return; // Can't edit system defaults
     this.editingCategory.set(category);
     this.categoryForm.patchValue({
@@ -234,11 +258,11 @@ export class ExpenseListComponent implements OnInit {
       color: category.color || '#4A90A4',
       displayOrder: category.displayOrder
     });
-    this.showCategoryModal.set(true);
+    this.showCategoryForm.set(true);
   }
 
-  closeCategoryModal(): void {
-    this.showCategoryModal.set(false);
+  closeCategoryForm(): void {
+    this.showCategoryForm.set(false);
     this.editingCategory.set(null);
   }
 
@@ -263,7 +287,7 @@ export class ExpenseListComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadData();
-        this.closeCategoryModal();
+        this.closeCategoryForm();
         this.isCategorySubmitting.set(false);
       },
       error: (err) => {

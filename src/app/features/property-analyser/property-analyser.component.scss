@@ -1,115 +1,61 @@
 @use '../../../styles/variables' as *;
-@use '../../../styles/mixins' as *;
 
-.property-analyser {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: $spacing-lg;
-}
-
+// Page header
 .page-header {
   margin-bottom: $spacing-xl;
 
-  h1 {
-    font-size: $font-size-3xl;
-    font-weight: 700;
-    color: $color-text-primary;
-    margin: 0 0 $spacing-xs;
-  }
+  &__content {
+    h1 {
+      font-size: $font-size-3xl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-xs;
+    }
 
-  p {
-    font-size: $font-size-base;
-    color: $color-text-secondary;
-    margin: 0;
+    .subtitle {
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      margin: 0;
+    }
   }
 }
 
-.analyser-grid {
+// Two-column layout
+.analyser-layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 400px 1fr;
   gap: $spacing-xl;
+  align-items: start;
 
-  @include respond-to(lg) {
-    grid-template-columns: 420px 1fr;
-  }
-
-  @media (max-width: $breakpoint-md) {
+  @media (max-width: $breakpoint-lg) {
     grid-template-columns: 1fr;
   }
 }
 
-// Form Panel
+// Form panel
 .form-panel {
-  @include card;
-  height: fit-content;
-  position: sticky;
-  top: $spacing-lg;
-}
-
-.property-form {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
+  mat-card {
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+  }
 }
 
 .form-section {
-  padding-bottom: $spacing-md;
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-lg;
   border-bottom: 1px solid $color-border;
 
-  &:last-child {
+  &--last {
     border-bottom: none;
+    margin-bottom: 0;
     padding-bottom: 0;
   }
-}
 
-.section-title {
-  font-size: $font-size-sm;
-  font-weight: 600;
-  color: $color-primary;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 $spacing-md;
-}
-
-.form-group {
-  margin-bottom: $spacing-md;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  label {
-    display: block;
-    font-size: $font-size-sm;
-    font-weight: 500;
-    color: $color-text-secondary;
-    margin-bottom: $spacing-xs;
-  }
-
-  input, select {
-    width: 100%;
-    padding: $spacing-sm $spacing-md;
-    border: 1px solid $color-border;
-    border-radius: $radius-md;
+  h3 {
     font-size: $font-size-base;
-    background: $color-surface;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-      box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
-    }
-
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-  }
-
-  select {
-    cursor: pointer;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-md;
   }
 }
 
@@ -117,260 +63,181 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: $spacing-md;
-}
+  margin-bottom: $spacing-sm;
 
-.input-with-prefix,
-.input-with-suffix {
-  position: relative;
-  display: flex;
-  align-items: center;
-
-  input {
-    flex: 1;
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
   }
 
-  .prefix,
-  .suffix {
-    position: absolute;
-    font-size: $font-size-sm;
-    color: $color-text-muted;
-    pointer-events: none;
-  }
-
-  .prefix {
-    left: $spacing-md;
-  }
-
-  .suffix {
-    right: $spacing-md;
+  mat-form-field {
+    width: 100%;
   }
 }
 
-.input-with-prefix input {
-  padding-left: $spacing-xl;
+.full-width {
+  width: 100%;
 }
 
-.input-with-suffix input {
-  padding-right: $spacing-2xl;
-}
-
-.checkbox-group {
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    cursor: pointer;
-
-    input[type="checkbox"] {
-      width: auto;
-      cursor: pointer;
-    }
-
-    span {
-      font-size: $font-size-sm;
-      color: $color-text-primary;
-    }
-  }
-}
-
-// Results Panel
+// Results panel
 .results-panel {
-  @include card;
   min-height: 400px;
 }
 
-.loading-state,
-.error-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  text-align: center;
-  color: $color-text-secondary;
-}
+// Loading/Error/Empty cards
+.loading-card,
+.error-card,
+.empty-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid $color-border;
-  border-top-color: $color-primary;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: $spacing-md;
-}
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: $spacing-md;
+      color: $color-primary;
+    }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.error-state {
-  color: $color-negative;
-
-  .btn {
-    margin-top: $spacing-md;
+    p {
+      margin: 0 0 $spacing-md;
+      color: $color-text-secondary;
+    }
   }
 }
 
-// Summary Cards
+.error-card {
+  mat-card-content mat-icon {
+    color: $color-negative;
+  }
+}
+
+// Summary cards
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: $spacing-md;
   margin-bottom: $spacing-lg;
 
-  @include respond-to(lg) {
-    grid-template-columns: repeat(4, 1fr);
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
   }
 }
 
 .summary-card {
-  background: $color-background;
-  border-radius: $radius-md;
-  padding: $spacing-md;
   text-align: center;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
 
-  &.negative {
-    background: rgba($color-negative, 0.05);
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-lg;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      margin-bottom: $spacing-xs;
+      color: $color-primary;
+    }
   }
 
   .label {
-    display: block;
     font-size: $font-size-xs;
-    font-weight: 600;
+    font-weight: 500;
     color: $color-text-secondary;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
     margin-bottom: $spacing-xs;
   }
 
   .value {
-    display: block;
     font-size: $font-size-xl;
     font-weight: 700;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     color: $color-text-primary;
-
-    &.positive {
-      color: $color-accent;
-    }
-
-    &.negative {
-      color: $color-negative;
-    }
+    margin-bottom: $spacing-xs;
   }
 
   .sublabel {
-    display: block;
     font-size: $font-size-xs;
     color: $color-text-muted;
-    margin-top: $spacing-xs;
+  }
+
+  &.negative {
+    border-top: 3px solid $color-warning;
+
+    mat-card-content mat-icon {
+      color: $color-warning;
+    }
   }
 }
 
-// Insights Section
-.insights-section {
+// Insights card
+.insights-card {
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
   margin-bottom: $spacing-lg;
-  padding: $spacing-md;
-  background: rgba($color-primary, 0.03);
-  border-radius: $radius-md;
 
-  h3 {
-    font-size: $font-size-sm;
-    font-weight: 600;
-    color: $color-primary;
-    margin: 0 0 $spacing-sm;
+  mat-card-header {
+    padding-bottom: $spacing-sm;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
+
+    mat-card-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      margin: 0;
+    }
   }
 }
 
 .insights-list {
   list-style: none;
-  margin: 0;
   padding: 0;
-}
+  margin: 0;
 
-.insight-item {
-  padding: $spacing-xs 0;
-  padding-left: $spacing-lg;
-  font-size: $font-size-sm;
-  color: $color-text-primary;
-  position: relative;
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0;
+    color: $color-text-secondary;
+    border-bottom: 1px solid $color-border;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: $color-text-muted;
-  }
+    &:last-child {
+      border-bottom: none;
+    }
 
-  &.warning::before {
-    background: $color-warning;
-  }
-
-  &.check::before {
-    background: $color-accent;
-  }
-
-  &.alert::before {
-    background: $color-negative;
-  }
-
-  &.info::before {
-    background: $color-primary;
+    mat-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $color-primary;
+    }
   }
 }
 
-// Tabs
-.tabs {
-  display: flex;
-  gap: $spacing-xs;
-  margin-bottom: $spacing-lg;
-  border-bottom: 1px solid $color-border;
-  padding-bottom: $spacing-xs;
-  overflow-x: auto;
+// Tabs card
+.tabs-card {
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
 }
 
-.tab {
-  padding: $spacing-sm $spacing-md;
-  font-size: $font-size-sm;
-  font-weight: 500;
-  color: $color-text-secondary;
-  background: none;
-  border: none;
-  border-radius: $radius-sm;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-
-  &:hover {
-    color: $color-primary;
-    background: rgba($color-primary, 0.05);
-  }
-
-  &.active {
-    color: $color-primary;
-    background: rgba($color-primary, 0.1);
-    font-weight: 600;
-  }
-}
-
-// Tab Content
 .tab-content {
-  animation: fadeIn 0.2s ease;
+  padding: $spacing-lg;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-// Detail Sections
+// Detail sections
 .detail-section {
   margin-bottom: $spacing-lg;
 
@@ -383,22 +250,22 @@
     font-weight: 600;
     color: $color-text-primary;
     margin: 0 0 $spacing-md;
-    padding-bottom: $spacing-sm;
-    border-bottom: 1px solid $color-border;
   }
 }
 
 .detail-grid {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-sm 0;
+  padding: $spacing-sm;
+  background: $color-background;
+  border-radius: $radius-sm;
 
   .label {
     font-size: $font-size-sm;
@@ -406,33 +273,23 @@
   }
 
   .value {
-    font-size: $font-size-sm;
-    font-weight: 600;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
     color: $color-text-primary;
-
-    &.positive {
-      color: $color-accent;
-    }
-
-    &.negative {
-      color: $color-negative;
-    }
   }
 
   &.highlight {
-    background: rgba($color-accent, 0.05);
-    padding: $spacing-sm $spacing-md;
-    margin: 0 (-$spacing-md);
-    border-radius: $radius-sm;
+    background: rgba($color-positive, 0.1);
+    border: 1px solid rgba($color-positive, 0.2);
   }
 }
 
-// Cash Flow Table
+// Cash flow table
 .cashflow-table {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: $spacing-lg;
 }
 
 .cashflow-section {
@@ -440,6 +297,8 @@
     font-size: $font-size-sm;
     font-weight: 600;
     color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin: 0 0 $spacing-sm;
   }
 }
@@ -450,45 +309,43 @@
   align-items: center;
   padding: $spacing-xs 0;
   font-size: $font-size-sm;
+  color: $color-text-secondary;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   .amount {
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     font-weight: 500;
-
-    &.positive {
-      color: $color-accent;
-    }
-
-    &.negative {
-      color: $color-negative;
-    }
   }
 
   &.subtotal {
+    font-weight: 600;
+    color: $color-text-primary;
     border-top: 1px solid $color-border;
     padding-top: $spacing-sm;
     margin-top: $spacing-xs;
-    font-weight: 600;
   }
 
   &.total {
+    font-weight: 700;
+    font-size: $font-size-base;
+    color: $color-text-primary;
     background: $color-background;
-    padding: $spacing-sm $spacing-md;
-    margin: 0 (-$spacing-md);
+    padding: $spacing-sm;
     border-radius: $radius-sm;
-    font-weight: 600;
+    margin-bottom: $spacing-sm;
   }
 }
 
-// Projections Table
-.projections-table-wrapper {
+// Data tables
+.table-container {
   overflow-x: auto;
-  margin: 0 (-$spacing-md);
-  padding: 0 $spacing-md;
 }
 
-.projections-table,
-.cgt-table,
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -497,6 +354,7 @@
   th, td {
     padding: $spacing-sm $spacing-md;
     text-align: right;
+    border-bottom: 1px solid $color-border;
     white-space: nowrap;
 
     &:first-child {
@@ -505,194 +363,224 @@
   }
 
   th {
-    background: $color-background;
+    font-size: $font-size-xs;
     font-weight: 600;
-    color: $color-text-secondary;
-    border-bottom: 2px solid $color-border;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $color-text-muted;
+    background: $color-background;
   }
 
-  td {
-    border-bottom: 1px solid $color-border;
+  .mono {
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
   }
 
-  .positive {
-    color: $color-accent;
-  }
+  tbody tr {
+    transition: background 0.15s;
 
-  .negative {
-    color: $color-negative;
-  }
-
-  tbody tr:hover {
-    background: rgba($color-primary, 0.02);
+    &:hover {
+      background: rgba($color-primary, 0.02);
+    }
   }
 }
 
+// Projection summary
 .projection-summary {
-  display: flex;
-  gap: $spacing-lg;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
   margin-top: $spacing-lg;
+  padding-top: $spacing-lg;
+  border-top: 1px solid $color-border;
+}
+
+.summary-item {
+  text-align: center;
   padding: $spacing-md;
   background: $color-background;
   border-radius: $radius-md;
 
-  .summary-item {
-    .label {
-      display: block;
-      font-size: $font-size-xs;
-      color: $color-text-secondary;
-      margin-bottom: $spacing-xs;
-    }
+  .label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
 
-    .value {
-      font-size: $font-size-lg;
-      font-weight: 700;
-      font-family: $font-family-mono;
-
-      &.positive {
-        color: $color-accent;
-      }
-
-      &.negative {
-        color: $color-negative;
-      }
-    }
+  .value {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-primary;
   }
 }
 
-// ETF Comparison
+// Comparison section
 .comparison-intro {
-  font-size: $font-size-sm;
   color: $color-text-secondary;
   margin-bottom: $spacing-lg;
 }
 
 .comparison-result {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: $spacing-lg;
-  background: $color-background;
-  border-radius: $radius-md;
   margin-bottom: $spacing-lg;
+  background: $color-background;
+  border-radius: $radius-lg;
+
+  .winner-badge {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-lg;
+    font-weight: 700;
+    color: $color-text-primary;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .difference {
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-secondary;
+  }
 
   &.property-wins {
-    background: rgba($color-accent, 0.1);
+    background: rgba($color-positive, 0.1);
+    border: 1px solid rgba($color-positive, 0.2);
 
     .winner-badge {
-      color: $color-accent;
+      color: $color-positive;
+
+      mat-icon {
+        color: $color-positive;
+      }
     }
   }
 
   &.etf-wins {
-    background: rgba($color-primary, 0.1);
+    background: rgba($color-secondary, 0.1);
+    border: 1px solid rgba($color-secondary, 0.2);
 
     .winner-badge {
-      color: $color-primary;
+      color: $color-secondary;
+
+      mat-icon {
+        color: $color-secondary;
+      }
     }
-  }
-
-  .winner-badge {
-    font-size: $font-size-xl;
-    font-weight: 700;
-    margin-bottom: $spacing-xs;
-  }
-
-  .difference {
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
   }
 }
 
 .comparison-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: $spacing-md;
   margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .comparison-card {
-  padding: $spacing-md;
-  border-radius: $radius-md;
-  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  text-align: center;
+
+  mat-card-content {
+    padding: $spacing-lg;
+  }
 
   h5 {
-    font-size: $font-size-sm;
+    font-size: $font-size-base;
     font-weight: 600;
+    color: $color-text-primary;
     margin: 0 0 $spacing-md;
-  }
-
-  &.property h5 {
-    color: $color-accent;
-  }
-
-  &.etf h5 {
-    color: $color-primary;
   }
 
   .metric {
-    display: flex;
-    justify-content: space-between;
-    padding: $spacing-xs 0;
+    margin-bottom: $spacing-sm;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     .label {
-      font-size: $font-size-sm;
-      color: $color-text-secondary;
+      display: block;
+      font-size: $font-size-xs;
+      color: $color-text-muted;
+      margin-bottom: 2px;
     }
 
     .value {
-      font-size: $font-size-sm;
+      font-size: $font-size-lg;
       font-weight: 600;
       font-family: $font-family-mono;
+      font-variant-numeric: tabular-nums;
+      color: $color-text-primary;
     }
+  }
+
+  &.property {
+    border-top: 3px solid $color-positive;
+  }
+
+  &.etf {
+    border-top: 3px solid $color-secondary;
   }
 }
 
-.etf-yearly-table {
+.etf-yearly-section {
   h5 {
-    font-size: $font-size-sm;
+    font-size: $font-size-base;
     font-weight: 600;
-    color: $color-text-secondary;
+    color: $color-text-primary;
     margin: 0 0 $spacing-md;
   }
 }
 
-// CGT Section
+// CGT section
 .cgt-intro {
-  font-size: $font-size-sm;
   color: $color-text-secondary;
   margin-bottom: $spacing-lg;
 }
 
-.cgt-table-wrapper {
-  overflow-x: auto;
-  margin: 0 (-$spacing-md);
-  padding: 0 $spacing-md;
-}
-
 .cgt-note {
-  margin-top: $spacing-lg;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
   padding: $spacing-md;
-  background: rgba($color-warning, 0.1);
+  background: $color-info-muted;
+  border: 1px solid rgba($color-info, 0.2);
   border-radius: $radius-md;
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
+  margin-top: $spacing-lg;
 
-  strong {
-    color: $color-warning;
+  mat-icon {
+    flex-shrink: 0;
+    color: $color-info;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.5;
   }
 }
 
-// Button styles
-.btn {
-  @include button-base;
+// Color utilities
+.positive {
+  color: $color-positive !important;
+}
 
-  &--primary {
-    background: $color-primary;
-    color: white;
-    border: none;
-
-    &:hover:not(:disabled) {
-      background: $color-primary-dark;
-    }
-  }
+.negative {
+  color: $color-negative !important;
 }

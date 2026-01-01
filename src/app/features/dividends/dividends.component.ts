@@ -19,6 +19,9 @@ import { InvestmentHoldingResponse } from '../../shared/models/investment.model'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DividendsComponent implements OnInit {
+  // 30% company tax rate factor: 0.30 / (1 - 0.30) = 0.4286
+  // This represents how much franking credit is available per dollar of franked dividend
+  private readonly FRANKING_CREDIT_FACTOR = 0.4286;
   private fb = inject(FormBuilder);
   private distributionService = inject(DistributionService);
   private investmentService = inject(InvestmentService);
@@ -30,7 +33,7 @@ export class DividendsComponent implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  showModal = signal(false);
+  showForm = signal(false);
   editing = signal<DistributionResponse | null>(null);
   isSubmitting = signal(false);
 
@@ -105,17 +108,17 @@ export class DividendsComponent implements OnInit {
     });
   }
 
-  openAddModal(): void {
+  openAddForm(): void {
     this.editing.set(null);
     this.distributionForm.reset({
       distributionType: 'dividend',
       frankingPercentage: 100,
       isDrp: false
     });
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  openEditModal(distribution: DistributionResponse): void {
+  openEditForm(distribution: DistributionResponse): void {
     this.editing.set(distribution);
     this.distributionForm.patchValue({
       holdingId: distribution.holdingId,
@@ -130,11 +133,11 @@ export class DividendsComponent implements OnInit {
       drpPrice: distribution.drpPrice,
       notes: distribution.notes || ''
     });
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  closeModal(): void {
-    this.showModal.set(false);
+  closeForm(): void {
+    this.showForm.set(false);
     this.editing.set(null);
   }
 
@@ -166,7 +169,7 @@ export class DividendsComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadData();
-        this.closeModal();
+        this.closeForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {
@@ -193,5 +196,20 @@ export class DividendsComponent implements OnInit {
     const year = this.selectedYear();
     if (!year) return this.distributions();
     return this.distributions().filter(d => d.financialYear === year);
+  }
+
+  // Calculate the franked portion of dividends from total franking credits
+  getFrankedDividends(): number {
+    const s = this.summary();
+    if (!s) return 0;
+    // Franking credits = franked dividends × factor, so franked dividends = credits / factor
+    return s.totalFrankingCredits / this.FRANKING_CREDIT_FACTOR;
+  }
+
+  // Calculate the unfranked portion of dividends
+  getUnfrankedDividends(): number {
+    const s = this.summary();
+    if (!s) return 0;
+    return s.totalDividends - this.getFrankedDividends();
   }
 }

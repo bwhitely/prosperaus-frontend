@@ -1,661 +1,634 @@
-<div class="property-analyser">
-  <header class="page-header">
+<div class="page-header">
+  <div class="page-header__content">
     <h1>Investment Property Analyser</h1>
-    <p>Model cash flow, tax benefits, and compare against ETF alternatives</p>
-  </header>
+    <p class="subtitle">Model cash flow, tax benefits, and compare against ETF alternatives</p>
+  </div>
+</div>
 
-  <div class="analyser-grid">
-    <!-- Input Form -->
-    <div class="form-panel">
-      <form [formGroup]="form" class="property-form">
-        <!-- Purchase Details -->
-        <section class="form-section">
-          <h3 class="section-title">Purchase Details</h3>
+<div class="analyser-layout">
+  <!-- Input Form -->
+  <div class="form-panel">
+    <mat-card>
+      <mat-card-content>
+        <form [formGroup]="form">
+          <!-- Purchase Details -->
+          <section class="form-section">
+            <h3>Purchase Details</h3>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Purchase Price</mat-label>
+              <span matTextPrefix>$&nbsp;</span>
+              <input matInput type="number" formControlName="purchasePrice">
+            </mat-form-field>
 
-          <div class="form-group">
-            <label for="purchasePrice">Purchase Price</label>
-            <div class="input-with-prefix">
-              <span class="prefix">$</span>
-              <input type="number" id="purchasePrice" formControlName="purchasePrice" />
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Deposit Amount</mat-label>
+              <span matTextPrefix>$&nbsp;</span>
+              <input matInput type="number" formControlName="depositAmount">
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Stamp Duty</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="stampDuty">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Other Costs</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="otherPurchaseCosts">
+              </mat-form-field>
             </div>
-          </div>
+          </section>
 
-          <div class="form-group">
-            <label for="depositAmount">Deposit Amount</label>
-            <div class="input-with-prefix">
-              <span class="prefix">$</span>
-              <input type="number" id="depositAmount" formControlName="depositAmount" />
-            </div>
-          </div>
+          <!-- Loan Details -->
+          <section class="form-section">
+            <h3>Loan Details</h3>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Interest Rate</mat-label>
+                <input matInput type="number" formControlName="interestRate" step="0.1">
+                <span matTextSuffix>&nbsp;%</span>
+              </mat-form-field>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="stampDuty">Stamp Duty</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="stampDuty" formControlName="stampDuty" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="otherPurchaseCosts">Other Costs</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="otherPurchaseCosts" formControlName="otherPurchaseCosts" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Loan Details -->
-        <section class="form-section">
-          <h3 class="section-title">Loan Details</h3>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="interestRate">Interest Rate</label>
-              <div class="input-with-suffix">
-                <input type="number" id="interestRate" formControlName="interestRate" step="0.1" />
-                <span class="suffix">%</span>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Loan Term</mat-label>
+                <input matInput type="number" formControlName="loanTermYears">
+                <span matTextSuffix>&nbsp;years</span>
+              </mat-form-field>
             </div>
 
-            <div class="form-group">
-              <label for="loanTermYears">Loan Term</label>
-              <div class="input-with-suffix">
-                <input type="number" id="loanTermYears" formControlName="loanTermYears" />
-                <span class="suffix">years</span>
-              </div>
+            <mat-checkbox formControlName="isInterestOnly" color="primary">
+              Interest-only loan
+            </mat-checkbox>
+
+            @if (form.get('isInterestOnly')?.value) {
+              <mat-form-field appearance="outline" class="full-width" style="margin-top: 12px;">
+                <mat-label>Interest-only Period</mat-label>
+                <input matInput type="number" formControlName="interestOnlyPeriodYears">
+                <span matTextSuffix>&nbsp;years</span>
+              </mat-form-field>
+            }
+          </section>
+
+          <!-- Rental Income -->
+          <section class="form-section">
+            <h3>Rental Income</h3>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Weekly Rent</mat-label>
+              <span matTextPrefix>$&nbsp;</span>
+              <input matInput type="number" formControlName="weeklyRent">
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Vacancy Rate</mat-label>
+                <input matInput type="number" formControlName="vacancyRate" step="0.5">
+                <span matTextSuffix>&nbsp;%</span>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Rent Growth</mat-label>
+                <input matInput type="number" formControlName="rentGrowthRate" step="0.5">
+                <span matTextSuffix>&nbsp;%</span>
+              </mat-form-field>
             </div>
-          </div>
+          </section>
 
-          <div class="form-group checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="isInterestOnly" />
-              <span>Interest-only loan</span>
-            </label>
-          </div>
+          <!-- Annual Expenses -->
+          <section class="form-section">
+            <h3>Annual Expenses</h3>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Council Rates</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="councilRates">
+              </mat-form-field>
 
-          @if (form.get('isInterestOnly')?.value) {
-            <div class="form-group">
-              <label for="interestOnlyPeriodYears">Interest-only Period</label>
-              <div class="input-with-suffix">
-                <input type="number" id="interestOnlyPeriodYears" formControlName="interestOnlyPeriodYears" />
-                <span class="suffix">years</span>
-              </div>
-            </div>
-          }
-        </section>
-
-        <!-- Rental Income -->
-        <section class="form-section">
-          <h3 class="section-title">Rental Income</h3>
-
-          <div class="form-group">
-            <label for="weeklyRent">Weekly Rent</label>
-            <div class="input-with-prefix">
-              <span class="prefix">$</span>
-              <input type="number" id="weeklyRent" formControlName="weeklyRent" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="vacancyRate">Vacancy Rate</label>
-              <div class="input-with-suffix">
-                <input type="number" id="vacancyRate" formControlName="vacancyRate" step="0.5" />
-                <span class="suffix">%</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="rentGrowthRate">Rent Growth</label>
-              <div class="input-with-suffix">
-                <input type="number" id="rentGrowthRate" formControlName="rentGrowthRate" step="0.5" />
-                <span class="suffix">%</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Annual Expenses -->
-        <section class="form-section">
-          <h3 class="section-title">Annual Expenses</h3>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="councilRates">Council Rates</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="councilRates" formControlName="councilRates" />
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Water Rates</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="waterRates">
+              </mat-form-field>
             </div>
 
-            <div class="form-group">
-              <label for="waterRates">Water Rates</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="waterRates" formControlName="waterRates" />
-              </div>
-            </div>
-          </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Strata Fees</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="strataFees">
+              </mat-form-field>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="strataFees">Strata Fees</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="strataFees" formControlName="strataFees" />
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Insurance</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="insurance">
+              </mat-form-field>
             </div>
 
-            <div class="form-group">
-              <label for="insurance">Insurance</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="insurance" formControlName="insurance" />
-              </div>
-            </div>
-          </div>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Maintenance</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="maintenance">
+              </mat-form-field>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="maintenance">Maintenance</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="maintenance" formControlName="maintenance" />
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Management Fee</mat-label>
+                <input matInput type="number" formControlName="managementFeeRate" step="0.5">
+                <span matTextSuffix>&nbsp;%</span>
+              </mat-form-field>
             </div>
 
-            <div class="form-group">
-              <label for="managementFeeRate">Management Fee</label>
-              <div class="input-with-suffix">
-                <input type="number" id="managementFeeRate" formControlName="managementFeeRate" step="0.5" />
-                <span class="suffix">%</span>
-              </div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Other Expenses</mat-label>
+              <span matTextPrefix>$&nbsp;</span>
+              <input matInput type="number" formControlName="otherExpenses">
+            </mat-form-field>
+          </section>
+
+          <!-- Tax & Growth -->
+          <section class="form-section">
+            <h3>Tax & Growth</h3>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Marginal Tax Rate</mat-label>
+              <mat-select formControlName="marginalTaxRate">
+                @for (bracket of taxBrackets; track bracket.value) {
+                  <mat-option [value]="bracket.value">{{ bracket.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Capital Growth</mat-label>
+                <input matInput type="number" formControlName="capitalGrowthRate" step="0.5">
+                <span matTextSuffix>&nbsp;%</span>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Annual Depreciation</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="annualDepreciation">
+              </mat-form-field>
             </div>
-          </div>
+          </section>
 
-          <div class="form-group">
-            <label for="otherExpenses">Other Expenses</label>
-            <div class="input-with-prefix">
-              <span class="prefix">$</span>
-              <input type="number" id="otherExpenses" formControlName="otherExpenses" />
+          <!-- Comparison Settings -->
+          <section class="form-section form-section--last">
+            <h3>Comparison</h3>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>ETF Return Rate</mat-label>
+                <input matInput type="number" formControlName="etfReturnRate" step="0.5">
+                <span matTextSuffix>&nbsp;%</span>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Projection Years</mat-label>
+                <input matInput type="number" formControlName="projectionYears" min="1" max="30">
+                <span matTextSuffix>&nbsp;years</span>
+              </mat-form-field>
             </div>
-          </div>
-        </section>
+          </section>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
-        <!-- Tax & Growth -->
-        <section class="form-section">
-          <h3 class="section-title">Tax & Growth</h3>
-
-          <div class="form-group">
-            <label for="marginalTaxRate">Marginal Tax Rate</label>
-            <select id="marginalTaxRate" formControlName="marginalTaxRate">
-              @for (bracket of taxBrackets; track bracket.value) {
-                <option [value]="bracket.value">{{ bracket.label }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="capitalGrowthRate">Capital Growth</label>
-              <div class="input-with-suffix">
-                <input type="number" id="capitalGrowthRate" formControlName="capitalGrowthRate" step="0.5" />
-                <span class="suffix">%</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="annualDepreciation">Annual Depreciation</label>
-              <div class="input-with-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="annualDepreciation" formControlName="annualDepreciation" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Comparison Settings -->
-        <section class="form-section">
-          <h3 class="section-title">Comparison</h3>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="etfReturnRate">ETF Return Rate</label>
-              <div class="input-with-suffix">
-                <input type="number" id="etfReturnRate" formControlName="etfReturnRate" step="0.5" />
-                <span class="suffix">%</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="projectionYears">Projection Years</label>
-              <div class="input-with-suffix">
-                <input type="number" id="projectionYears" formControlName="projectionYears" min="1" max="30" />
-                <span class="suffix">years</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </form>
-    </div>
-
-    <!-- Results Panel -->
-    <div class="results-panel">
-      @if (isLoading()) {
-        <div class="loading-state">
-          <div class="spinner"></div>
+  <!-- Results Panel -->
+  <div class="results-panel">
+    @if (isLoading()) {
+      <mat-card class="loading-card">
+        <mat-card-content>
+          <mat-spinner diameter="48"></mat-spinner>
           <p>Analysing property...</p>
-        </div>
-      } @else if (error()) {
-        <div class="error-state">
+        </mat-card-content>
+      </mat-card>
+    } @else if (error()) {
+      <mat-card class="error-card">
+        <mat-card-content>
+          <mat-icon>error</mat-icon>
           <p>{{ error() }}</p>
-          <button class="btn btn--primary" (click)="calculate()">Retry</button>
-        </div>
-      } @else if (result(); as r) {
-        <!-- Summary Cards -->
-        <div class="summary-cards">
-          <div class="summary-card" [class.negative]="r.isNegativelyGeared">
+          <button mat-flat-button color="primary" (click)="calculate()">Retry</button>
+        </mat-card-content>
+      </mat-card>
+    } @else if (result(); as r) {
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <mat-card class="summary-card" [class.negative]="r.isNegativelyGeared">
+          <mat-card-content>
+            <mat-icon>{{ r.isNegativelyGeared ? 'trending_down' : 'trending_up' }}</mat-icon>
             <span class="label">{{ r.isNegativelyGeared ? 'Negatively Geared' : 'Positively Geared' }}</span>
             <span class="value" [class.negative]="r.netPositionAfterTax < 0">
               {{ formatCurrency(r.netPositionAfterTax) }}
             </span>
             <span class="sublabel">Net position after tax (Year 1)</span>
-          </div>
+          </mat-card-content>
+        </mat-card>
 
-          <div class="summary-card">
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <mat-icon>{{ weeklyNetCostFormatted()?.isOutOfPocket ? 'payments' : 'savings' }}</mat-icon>
             <span class="label">{{ weeklyNetCostFormatted()?.label }}</span>
             <span class="value" [class.positive]="!weeklyNetCostFormatted()?.isOutOfPocket" [class.negative]="weeklyNetCostFormatted()?.isOutOfPocket">
               {{ formatCurrency(weeklyNetCostFormatted()?.value ?? 0) }}
             </span>
             <span class="sublabel">After tax benefits</span>
-          </div>
+          </mat-card-content>
+        </mat-card>
 
-          <div class="summary-card">
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <mat-icon>percent</mat-icon>
             <span class="label">Gross Yield</span>
             <span class="value">{{ formatPercent(r.grossYield) }}</span>
             <span class="sublabel">Annual rent / price</span>
-          </div>
+          </mat-card-content>
+        </mat-card>
 
-          <div class="summary-card">
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <mat-icon>account_balance</mat-icon>
             <span class="label">Cash-on-Cash Return</span>
             <span class="value" [class.negative]="r.cashOnCashReturn < 0">{{ formatPercent(r.cashOnCashReturn) }}</span>
             <span class="sublabel">Cash flow / upfront costs</span>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
 
-        <!-- Insights -->
-        @if (r.insights && r.insights.length > 0) {
-          <div class="insights-section">
-            <h3>Key Insights</h3>
+      <!-- Insights -->
+      @if (r.insights && r.insights.length > 0) {
+        <mat-card class="insights-card">
+          <mat-card-header>
+            <mat-card-title>Key Insights</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
             <ul class="insights-list">
               @for (insight of r.insights; track insight) {
-                <li class="insight-item" [class]="getInsightIcon(insight)">
-                  {{ insight }}
+                <li>
+                  <mat-icon>{{ getInsightIcon(insight) === 'warning' ? 'warning' : getInsightIcon(insight) === 'check' ? 'check_circle' : 'info' }}</mat-icon>
+                  <span>{{ insight }}</span>
                 </li>
               }
             </ul>
-          </div>
-        }
+          </mat-card-content>
+        </mat-card>
+      }
 
-        <!-- Tabs -->
-        <div class="tabs">
-          <button
-            class="tab"
-            [class.active]="activeTab() === 'summary'"
-            (click)="setTab('summary')">
-            Loan & Costs
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab() === 'cashflow'"
-            (click)="setTab('cashflow')">
-            Cash Flow
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab() === 'projections'"
-            (click)="setTab('projections')">
-            Projections
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab() === 'comparison'"
-            (click)="setTab('comparison')">
-            vs ETF
-          </button>
-          <button
-            class="tab"
-            [class.active]="activeTab() === 'cgt'"
-            (click)="setTab('cgt')">
-            CGT
-          </button>
-        </div>
+      <!-- Tabs -->
+      <mat-card class="tabs-card">
+        <mat-tab-group [(selectedIndex)]="activeTab">
+          <!-- Loan & Costs Tab -->
+          <mat-tab label="Loan & Costs">
+            <div class="tab-content">
+              <div class="detail-section">
+                <h4>Loan Details</h4>
+                <div class="detail-grid">
+                  <div class="detail-row">
+                    <span class="label">Loan Amount</span>
+                    <span class="value">{{ formatCurrency(r.loanAmount) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Monthly Repayment</span>
+                    <span class="value">{{ formatCurrency(r.monthlyRepayment) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Annual Interest (Year 1)</span>
+                    <span class="value">{{ formatCurrency(r.annualInterest) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Loan-to-Value Ratio (LVR)</span>
+                    <span class="value">{{ formatPercent(r.lvr) }}</span>
+                  </div>
+                </div>
+              </div>
 
-        <!-- Tab Content -->
-        <div class="tab-content">
-          <!-- Summary Tab -->
-          @if (activeTab() === 'summary') {
-            <div class="detail-section">
-              <h4>Loan Details</h4>
-              <div class="detail-grid">
-                <div class="detail-row">
-                  <span class="label">Loan Amount</span>
-                  <span class="value">{{ formatCurrency(r.loanAmount) }}</span>
+              <div class="detail-section">
+                <h4>Upfront Costs</h4>
+                <div class="detail-grid">
+                  <div class="detail-row">
+                    <span class="label">Total Upfront Costs</span>
+                    <span class="value">{{ formatCurrency(r.totalUpfrontCosts) }}</span>
+                  </div>
                 </div>
-                <div class="detail-row">
-                  <span class="label">Monthly Repayment</span>
-                  <span class="value">{{ formatCurrency(r.monthlyRepayment) }}</span>
+              </div>
+
+              <div class="detail-section">
+                <h4>Tax Benefits (Year 1)</h4>
+                <div class="detail-grid">
+                  <div class="detail-row">
+                    <span class="label">Total Deductions</span>
+                    <span class="value">{{ formatCurrency(r.totalDeductions) }}</span>
+                  </div>
+                  <div class="detail-row highlight">
+                    <span class="label">Tax Benefit (Refund)</span>
+                    <span class="value positive">{{ formatCurrency(r.taxBenefit) }}</span>
+                  </div>
                 </div>
-                <div class="detail-row">
-                  <span class="label">Annual Interest (Year 1)</span>
-                  <span class="value">{{ formatCurrency(r.annualInterest) }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="label">Loan-to-Value Ratio (LVR)</span>
-                  <span class="value">{{ formatPercent(r.lvr) }}</span>
+              </div>
+
+              <div class="detail-section">
+                <h4>Yields</h4>
+                <div class="detail-grid">
+                  <div class="detail-row">
+                    <span class="label">Gross Yield</span>
+                    <span class="value">{{ formatPercent(r.grossYield) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">Net Yield</span>
+                    <span class="value">{{ formatPercent(r.netYield) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div class="detail-section">
-              <h4>Upfront Costs</h4>
-              <div class="detail-grid">
-                <div class="detail-row">
-                  <span class="label">Total Upfront Costs</span>
-                  <span class="value">{{ formatCurrency(r.totalUpfrontCosts) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-section">
-              <h4>Tax Benefits (Year 1)</h4>
-              <div class="detail-grid">
-                <div class="detail-row">
-                  <span class="label">Total Deductions</span>
-                  <span class="value">{{ formatCurrency(r.totalDeductions) }}</span>
-                </div>
-                <div class="detail-row highlight">
-                  <span class="label">Tax Benefit (Refund)</span>
-                  <span class="value positive">{{ formatCurrency(r.taxBenefit) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="detail-section">
-              <h4>Yields</h4>
-              <div class="detail-grid">
-                <div class="detail-row">
-                  <span class="label">Gross Yield</span>
-                  <span class="value">{{ formatPercent(r.grossYield) }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="label">Net Yield</span>
-                  <span class="value">{{ formatPercent(r.netYield) }}</span>
-                </div>
-              </div>
-            </div>
-          }
+          </mat-tab>
 
           <!-- Cash Flow Tab -->
-          @if (activeTab() === 'cashflow') {
-            <div class="detail-section">
-              <h4>Year 1 Cash Flow Breakdown</h4>
-              <div class="cashflow-table">
-                <div class="cashflow-section income">
-                  <h5>Income</h5>
-                  <div class="cashflow-row">
-                    <span>Gross Rent (52 weeks)</span>
-                    <span class="amount positive">{{ formatCurrency(r.year1CashFlow.grossRent) }}</span>
+          <mat-tab label="Cash Flow">
+            <div class="tab-content">
+              <div class="detail-section">
+                <h4>Year 1 Cash Flow Breakdown</h4>
+                <div class="cashflow-table">
+                  <div class="cashflow-section income">
+                    <h5>Income</h5>
+                    <div class="cashflow-row">
+                      <span>Gross Rent (52 weeks)</span>
+                      <span class="amount positive">{{ formatCurrency(r.year1CashFlow.grossRent) }}</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Less: Vacancy Allowance</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.vacancyAllowance) }})</span>
+                    </div>
+                    <div class="cashflow-row subtotal">
+                      <span>Net Rent</span>
+                      <span class="amount">{{ formatCurrency(r.year1CashFlow.netRent) }}</span>
+                    </div>
                   </div>
-                  <div class="cashflow-row">
-                    <span>Less: Vacancy Allowance</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.vacancyAllowance) }})</span>
-                  </div>
-                  <div class="cashflow-row subtotal">
-                    <span>Net Rent</span>
-                    <span class="amount">{{ formatCurrency(r.year1CashFlow.netRent) }}</span>
-                  </div>
-                </div>
 
-                <div class="cashflow-section expenses">
-                  <h5>Expenses</h5>
-                  <div class="cashflow-row">
-                    <span>Council Rates</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.councilRates) }})</span>
+                  <div class="cashflow-section expenses">
+                    <h5>Expenses</h5>
+                    <div class="cashflow-row">
+                      <span>Council Rates</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.councilRates) }})</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Water Rates</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.waterRates) }})</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Strata Fees</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.strataFees) }})</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Insurance</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.insurance) }})</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Maintenance</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.maintenance) }})</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Management Fees</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.managementFees) }})</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Other Expenses</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.otherExpenses) }})</span>
+                    </div>
+                    <div class="cashflow-row subtotal">
+                      <span>Total Expenses</span>
+                      <span class="amount negative">({{ formatCurrency(r.year1CashFlow.totalExpenses) }})</span>
+                    </div>
                   </div>
-                  <div class="cashflow-row">
-                    <span>Water Rates</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.waterRates) }})</span>
-                  </div>
-                  <div class="cashflow-row">
-                    <span>Strata Fees</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.strataFees) }})</span>
-                  </div>
-                  <div class="cashflow-row">
-                    <span>Insurance</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.insurance) }})</span>
-                  </div>
-                  <div class="cashflow-row">
-                    <span>Maintenance</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.maintenance) }})</span>
-                  </div>
-                  <div class="cashflow-row">
-                    <span>Management Fees</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.managementFees) }})</span>
-                  </div>
-                  <div class="cashflow-row">
-                    <span>Other Expenses</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.otherExpenses) }})</span>
-                  </div>
-                  <div class="cashflow-row subtotal">
-                    <span>Total Expenses</span>
-                    <span class="amount negative">({{ formatCurrency(r.year1CashFlow.totalExpenses) }})</span>
-                  </div>
-                </div>
 
-                <div class="cashflow-section deductions">
-                  <h5>Tax Deductions</h5>
-                  <div class="cashflow-row">
-                    <span>Interest Payments</span>
-                    <span class="amount">{{ formatCurrency(r.year1CashFlow.interestPayments) }}</span>
+                  <div class="cashflow-section deductions">
+                    <h5>Tax Deductions</h5>
+                    <div class="cashflow-row">
+                      <span>Interest Payments</span>
+                      <span class="amount">{{ formatCurrency(r.year1CashFlow.interestPayments) }}</span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Depreciation</span>
+                      <span class="amount">{{ formatCurrency(r.year1CashFlow.depreciation) }}</span>
+                    </div>
+                    <div class="cashflow-row subtotal">
+                      <span>Total Deductions</span>
+                      <span class="amount">{{ formatCurrency(r.year1CashFlow.totalDeductions) }}</span>
+                    </div>
                   </div>
-                  <div class="cashflow-row">
-                    <span>Depreciation</span>
-                    <span class="amount">{{ formatCurrency(r.year1CashFlow.depreciation) }}</span>
-                  </div>
-                  <div class="cashflow-row subtotal">
-                    <span>Total Deductions</span>
-                    <span class="amount">{{ formatCurrency(r.year1CashFlow.totalDeductions) }}</span>
-                  </div>
-                </div>
 
-                <div class="cashflow-section summary">
-                  <div class="cashflow-row total">
-                    <span>Net Cash Flow (before tax)</span>
-                    <span class="amount" [class.negative]="r.year1CashFlow.netCashFlow < 0">
-                      {{ formatCurrency(r.year1CashFlow.netCashFlow) }}
-                    </span>
-                  </div>
-                  <div class="cashflow-row">
-                    <span>Taxable Income (for property)</span>
-                    <span class="amount">{{ formatCurrency(r.year1CashFlow.taxableIncome) }}</span>
+                  <div class="cashflow-section summary">
+                    <div class="cashflow-row total">
+                      <span>Net Cash Flow (before tax)</span>
+                      <span class="amount" [class.negative]="r.year1CashFlow.netCashFlow < 0">
+                        {{ formatCurrency(r.year1CashFlow.netCashFlow) }}
+                      </span>
+                    </div>
+                    <div class="cashflow-row">
+                      <span>Taxable Income (for property)</span>
+                      <span class="amount">{{ formatCurrency(r.year1CashFlow.taxableIncome) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          }
+          </mat-tab>
 
           <!-- Projections Tab -->
-          @if (activeTab() === 'projections') {
-            <div class="detail-section">
-              <h4>{{ projectionYearsValue }}-Year Projection</h4>
-              <div class="projections-table-wrapper">
-                <table class="projections-table">
-                  <thead>
-                    <tr>
-                      <th>Year</th>
-                      <th>Property Value</th>
-                      <th>Loan Balance</th>
-                      <th>Equity</th>
-                      <th>Net Cash Flow</th>
-                      <th>Tax Benefit</th>
-                      <th>Net After Tax</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (proj of r.projections; track proj.year) {
+          <mat-tab label="Projections">
+            <div class="tab-content">
+              <div class="detail-section">
+                <h4>{{ projectionYearsValue }}-Year Projection</h4>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
                       <tr>
-                        <td>{{ proj.year }}</td>
-                        <td>{{ formatCurrency(proj.propertyValue) }}</td>
-                        <td>{{ formatCurrency(proj.loanBalance) }}</td>
-                        <td class="positive">{{ formatCurrency(proj.equity) }}</td>
-                        <td [class.negative]="proj.netCashFlow < 0">{{ formatCurrency(proj.netCashFlow) }}</td>
-                        <td class="positive">{{ formatCurrency(proj.taxBenefit) }}</td>
-                        <td [class.negative]="proj.netPositionAfterTax < 0">{{ formatCurrency(proj.netPositionAfterTax) }}</td>
+                        <th>Year</th>
+                        <th>Property Value</th>
+                        <th>Loan Balance</th>
+                        <th>Equity</th>
+                        <th>Net Cash Flow</th>
+                        <th>Tax Benefit</th>
+                        <th>Net After Tax</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="projection-summary">
-                <div class="summary-item">
-                  <span class="label">Cumulative Equity Growth</span>
-                  <span class="value positive">{{ formatCurrency(r.projections[r.projections.length - 1]?.cumulativeEquityGrowth ?? 0) }}</span>
+                    </thead>
+                    <tbody>
+                      @for (proj of r.projections; track proj.year) {
+                        <tr>
+                          <td>{{ proj.year }}</td>
+                          <td class="mono">{{ formatCurrency(proj.propertyValue) }}</td>
+                          <td class="mono">{{ formatCurrency(proj.loanBalance) }}</td>
+                          <td class="mono positive">{{ formatCurrency(proj.equity) }}</td>
+                          <td class="mono" [class.negative]="proj.netCashFlow < 0">{{ formatCurrency(proj.netCashFlow) }}</td>
+                          <td class="mono positive">{{ formatCurrency(proj.taxBenefit) }}</td>
+                          <td class="mono" [class.negative]="proj.netPositionAfterTax < 0">{{ formatCurrency(proj.netPositionAfterTax) }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
                 </div>
-                <div class="summary-item">
-                  <span class="label">Cumulative Cash Flow</span>
-                  <span class="value" [class.negative]="(r.projections[r.projections.length - 1]?.cumulativeCashFlow ?? 0) < 0">
-                    {{ formatCurrency(r.projections[r.projections.length - 1]?.cumulativeCashFlow ?? 0) }}
-                  </span>
+
+                <div class="projection-summary">
+                  <div class="summary-item">
+                    <span class="label">Cumulative Equity Growth</span>
+                    <span class="value positive">{{ formatCurrency(r.projections[r.projections.length - 1]?.cumulativeEquityGrowth ?? 0) }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Cumulative Cash Flow</span>
+                    <span class="value" [class.negative]="(r.projections[r.projections.length - 1]?.cumulativeCashFlow ?? 0) < 0">
+                      {{ formatCurrency(r.projections[r.projections.length - 1]?.cumulativeCashFlow ?? 0) }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          }
+          </mat-tab>
 
           <!-- ETF Comparison Tab -->
-          @if (activeTab() === 'comparison') {
-            <div class="detail-section">
-              <h4>Property vs ETF Comparison</h4>
-              <p class="comparison-intro">
-                Comparing investing {{ formatCurrency(r.etfComparison.initialInvestment) }} in this property
-                vs investing the same amount in ETFs at {{ formatPercent(r.etfComparison.returnRate) }} p.a.
-              </p>
+          <mat-tab label="vs ETF">
+            <div class="tab-content">
+              <div class="detail-section">
+                <h4>Property vs ETF Comparison</h4>
+                <p class="comparison-intro">
+                  Comparing investing {{ formatCurrency(r.etfComparison.initialInvestment) }} in this property
+                  vs investing the same amount in ETFs at {{ formatPercent(r.etfComparison.returnRate) }} p.a.
+                </p>
 
-              <div class="comparison-result" [class.property-wins]="r.etfComparison.winner === 'PROPERTY'" [class.etf-wins]="r.etfComparison.winner === 'ETF'">
-                <div class="winner-badge">
-                  {{ r.etfComparison.winner === 'PROPERTY' ? 'Property Wins' : r.etfComparison.winner === 'ETF' ? 'ETF Wins' : 'Tie' }}
-                </div>
-                <div class="difference">
-                  by {{ formatCurrency(Math.abs(r.etfComparison.difference)) }}
-                </div>
-              </div>
-
-              <div class="comparison-grid">
-                <div class="comparison-card property">
-                  <h5>Property</h5>
-                  <div class="metric">
-                    <span class="label">Total Return</span>
-                    <span class="value">{{ formatCurrency(r.etfComparison.propertyTotalReturn) }}</span>
-                  </div>
-                  <div class="metric">
-                    <span class="label">Annualised Return</span>
-                    <span class="value">{{ formatPercent(r.etfComparison.propertyAnnualisedReturn) }}</span>
-                  </div>
-                </div>
-
-                <div class="comparison-card etf">
-                  <h5>ETF Portfolio</h5>
-                  <div class="metric">
-                    <span class="label">Total Return</span>
-                    <span class="value">{{ formatCurrency(r.etfComparison.etfTotalReturn) }}</span>
-                  </div>
-                  <div class="metric">
-                    <span class="label">Annual Return (assumed)</span>
-                    <span class="value">{{ formatPercent(r.etfComparison.returnRate) }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="etf-yearly-table">
-                <h5>ETF Growth Over Time</h5>
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Year</th>
-                      <th>ETF Value</th>
-                      <th>Total Growth</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (year of r.etfComparison.yearlyValues; track year.year) {
-                      <tr>
-                        <td>{{ year.year }}</td>
-                        <td>{{ formatCurrency(year.value) }}</td>
-                        <td class="positive">{{ formatCurrency(year.totalGrowth) }}</td>
-                      </tr>
+                <div class="comparison-result" [class.property-wins]="r.etfComparison.difference > 0" [class.etf-wins]="r.etfComparison.difference < 0">
+                  <div class="winner-badge">
+                    @if (r.etfComparison.difference > 0) {
+                      <mat-icon>home</mat-icon>
+                      Property Wins
+                    } @else if (r.etfComparison.difference < 0) {
+                      <mat-icon>show_chart</mat-icon>
+                      ETF Wins
+                    } @else {
+                      <mat-icon>drag_handle</mat-icon>
+                      Tie
                     }
-                  </tbody>
-                </table>
+                  </div>
+                  @if (r.etfComparison.difference !== 0) {
+                    <div class="difference">
+                      by {{ formatCurrency(Math.abs(r.etfComparison.difference)) }}
+                    </div>
+                  }
+                </div>
+
+                <div class="comparison-grid">
+                  <mat-card class="comparison-card property">
+                    <mat-card-content>
+                      <h5>Property</h5>
+                      <div class="metric">
+                        <span class="label">Total Return</span>
+                        <span class="value">{{ formatCurrency(r.etfComparison.propertyTotalReturn) }}</span>
+                      </div>
+                      <div class="metric">
+                        <span class="label">Annualised Return</span>
+                        <span class="value">{{ formatPercent(r.etfComparison.propertyAnnualisedReturn) }}</span>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+
+                  <mat-card class="comparison-card etf">
+                    <mat-card-content>
+                      <h5>ETF Portfolio</h5>
+                      <div class="metric">
+                        <span class="label">Total Return</span>
+                        <span class="value">{{ formatCurrency(r.etfComparison.etfTotalReturn) }}</span>
+                      </div>
+                      <div class="metric">
+                        <span class="label">Annual Return (assumed)</span>
+                        <span class="value">{{ formatPercent(r.etfComparison.returnRate) }}</span>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+
+                <div class="etf-yearly-section">
+                  <h5>ETF Growth Over Time</h5>
+                  <div class="table-container">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Year</th>
+                          <th>ETF Value</th>
+                          <th>Total Growth</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (year of r.etfComparison.yearlyValues; track year.year) {
+                          <tr>
+                            <td>{{ year.year }}</td>
+                            <td class="mono">{{ formatCurrency(year.value) }}</td>
+                            <td class="mono positive">{{ formatCurrency(year.totalGrowth) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
-          }
+          </mat-tab>
 
           <!-- CGT Tab -->
-          @if (activeTab() === 'cgt') {
-            <div class="detail-section">
-              <h4>Capital Gains Tax Scenarios</h4>
-              <p class="cgt-intro">
-                Estimated CGT payable if you sold the property after different holding periods.
-                50% CGT discount applies after 12 months for individuals.
-              </p>
+          <mat-tab label="CGT">
+            <div class="tab-content">
+              <div class="detail-section">
+                <h4>Capital Gains Tax Scenarios</h4>
+                <p class="cgt-intro">
+                  Estimated CGT payable if you sold the property after different holding periods.
+                  50% CGT discount applies after 12 months for individuals.
+                </p>
 
-              <div class="cgt-table-wrapper">
-                <table class="cgt-table">
-                  <thead>
-                    <tr>
-                      <th>Years Held</th>
-                      <th>Sale Price</th>
-                      <th>Capital Gain</th>
-                      <th>Discounted Gain</th>
-                      <th>CGT Payable</th>
-                      <th>Net Proceeds</th>
-                      <th>Total Return</th>
-                      <th>Annualised</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (scenario of r.cgtScenarios; track scenario.yearsHeld) {
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
                       <tr>
-                        <td>{{ scenario.yearsHeld }}</td>
-                        <td>{{ formatCurrency(scenario.salePrice) }}</td>
-                        <td class="positive">{{ formatCurrency(scenario.capitalGain) }}</td>
-                        <td>{{ formatCurrency(scenario.discountedGain) }}</td>
-                        <td class="negative">{{ formatCurrency(scenario.cgtPayable) }}</td>
-                        <td>{{ formatCurrency(scenario.netProceeds) }}</td>
-                        <td class="positive">{{ formatCurrency(scenario.totalReturn) }}</td>
-                        <td>{{ formatPercent(scenario.annualisedReturn) }}</td>
+                        <th>Years Held</th>
+                        <th>Sale Price</th>
+                        <th>Capital Gain</th>
+                        <th>Discounted Gain</th>
+                        <th>CGT Payable</th>
+                        <th>Net Proceeds</th>
+                        <th>Total Return</th>
+                        <th>Annualised</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      @for (scenario of r.cgtScenarios; track scenario.yearsHeld) {
+                        <tr>
+                          <td>{{ scenario.yearsHeld }}</td>
+                          <td class="mono">{{ formatCurrency(scenario.salePrice) }}</td>
+                          <td class="mono positive">{{ formatCurrency(scenario.capitalGain) }}</td>
+                          <td class="mono">{{ formatCurrency(scenario.discountedGain) }}</td>
+                          <td class="mono negative">{{ formatCurrency(scenario.cgtPayable) }}</td>
+                          <td class="mono">{{ formatCurrency(scenario.netProceeds) }}</td>
+                          <td class="mono positive">{{ formatCurrency(scenario.totalReturn) }}</td>
+                          <td class="mono">{{ formatPercent(scenario.annualisedReturn) }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
 
-              <div class="cgt-note">
-                <strong>Note:</strong> These calculations assume you're an individual investor and the property is not your main residence.
-                CGT discount of 50% applies to assets held longer than 12 months.
+                <div class="cgt-note">
+                  <mat-icon>info</mat-icon>
+                  <p><strong>Note:</strong> These calculations assume you're an individual investor and the property is not your main residence. CGT discount of 50% applies to assets held longer than 12 months.</p>
+                </div>
               </div>
             </div>
-          }
-        </div>
-      } @else {
-        <div class="empty-state">
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
+    } @else {
+      <mat-card class="empty-card">
+        <mat-card-content>
+          <mat-icon>home</mat-icon>
           <p>Enter property details to see analysis</p>
-        </div>
-      }
-    </div>
+        </mat-card-content>
+      </mat-card>
+    }
   </div>
 </div>

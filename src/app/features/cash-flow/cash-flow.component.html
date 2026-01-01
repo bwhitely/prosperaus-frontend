@@ -1,6 +1,6 @@
 <div class="page-header">
   <div class="page-header__content">
-    <h1>Cash Flow</h1>
+    <h1>Income/Expenses</h1>
     <p>Track your income, expenses, and savings rate</p>
   </div>
   <button class="btn btn--secondary" (click)="loadSummary()">
@@ -18,15 +18,21 @@
 <!-- Summary Cards -->
 <div class="summary-cards">
   <div class="summary-card">
-    <span class="summary-card__label">Monthly Income</span>
+    <span class="summary-card__label">Annual Income</span>
     <span class="summary-card__value positive">
-      {{ (summary()?.totalMonthlyIncome ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      {{ ((summary()?.totalMonthlyIncome ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+    </span>
+    <span class="summary-card__hint">
+      {{ (summary()?.totalMonthlyIncome ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
     </span>
   </div>
   <div class="summary-card">
-    <span class="summary-card__label">Monthly Expenses</span>
+    <span class="summary-card__label">Annual Expenses</span>
     <span class="summary-card__value negative">
-      {{ (summary()?.totalMonthlyExpenses ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+      {{ ((summary()?.totalMonthlyExpenses ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+    </span>
+    <span class="summary-card__hint">
+      {{ (summary()?.totalMonthlyExpenses ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
     </span>
   </div>
   <div class="summary-card" [class]="'summary-card--' + getSavingsRateClass()">
@@ -35,7 +41,7 @@
       {{ ((summary()?.savingsRate ?? 0) * 100) | number:'1.1-1' }}%
     </span>
     <span class="summary-card__hint">
-      {{ (summary()?.monthlySavings ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
+      {{ ((summary()?.monthlySavings ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}/year
     </span>
   </div>
 </div>
@@ -58,7 +64,7 @@
     class="tabs__tab"
     [class.tabs__tab--active]="activeTab() === 'statements'"
     (click)="setTab('statements')">
-    Bank Statements
+    Bank Statement Analyser
   </button>
 </div>
 

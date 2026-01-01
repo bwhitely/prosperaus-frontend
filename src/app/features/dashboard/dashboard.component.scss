@@ -1,6 +1,46 @@
 @use 'sass:color';
 @use '../../../styles/variables' as *;
 
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-lg;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+
+  &__content {
+    h1 {
+      margin: 0 0 $spacing-xs;
+      font-size: $font-size-2xl;
+      color: $color-text-primary;
+    }
+
+    p {
+      margin: 0;
+      color: $color-text-secondary;
+      font-size: $font-size-sm;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+
+    a {
+      .mat-icon {
+        margin-right: $spacing-xs;
+      }
+    }
+
+    @media (max-width: $breakpoint-md) {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -11,33 +51,133 @@
   color: $color-text-secondary;
 }
 
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid $color-border;
-  border-top-color: $color-primary;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .error-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: $spacing-2xl;
   gap: $spacing-md;
+  text-align: center;
+
+  .error-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $color-negative;
+  }
 }
 
 .error-message {
   color: $color-negative;
 }
 
+// Stat Cards
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  mat-card-content {
+    padding: $spacing-lg !important;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+
+  &--primary {
+    border-left: 4px solid $color-primary !important;
+  }
+}
+
+// Chart Card
+.chart-card {
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+}
+
+.chart-container {
+  height: 300px;
+  position: relative;
+}
+
+.chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: $spacing-sm;
+  color: $color-text-muted;
+}
+
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+  color: $color-text-secondary;
+
+  .mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $color-border-strong;
+    margin-bottom: $spacing-sm;
+  }
+
+  .text-muted {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+.history-summary {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-sm;
+
+  .change {
+    font-family: $font-family-mono;
+    font-weight: 600;
+  }
+
+  .change-percent {
+    color: $color-text-muted;
+  }
+}
+
+// Dashboard Grid
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -48,6 +188,7 @@
   }
 }
 
+// Breakdown Lists
 .breakdown-list {
   display: flex;
   flex-direction: column;
@@ -95,6 +236,108 @@
   }
 }
 
+// Expandable Categories
+.breakdown-category {
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.expanded {
+    .breakdown-item--expandable {
+      background: rgba($color-primary, 0.04);
+    }
+  }
+}
+
+.breakdown-item--expandable {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $spacing-sm $spacing-xs;
+  border-radius: $radius-sm;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba($color-primary, 0.06);
+  }
+
+  .breakdown-label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+}
+
+.expand-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: $color-primary;
+}
+
+.breakdown-subitems {
+  padding: $spacing-xs $spacing-sm $spacing-sm $spacing-xl;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.breakdown-subitem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs 0;
+  font-size: $font-size-sm;
+
+  &:not(:last-child) {
+    border-bottom: 1px dashed rgba($color-border, 0.6);
+  }
+
+  &--loading,
+  &--empty {
+    color: $color-text-muted;
+    font-style: italic;
+    justify-content: center;
+  }
+}
+
+.breakdown-sublabel {
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.breakdown-subvalue {
+  font-family: $font-family-mono;
+  font-weight: 500;
+  color: $color-text-primary;
+}
+
+.ticker-badge {
+  display: inline-block;
+  padding: 2px $spacing-xs;
+  background: $color-primary;
+  color: white;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  font-family: $font-family-mono;
+}
+
+// Allocation Chart
 .allocation-chart {
   display: flex;
   flex-direction: column;
@@ -139,51 +382,24 @@
       background: $color-accent;
     }
     .allocation-bar:nth-child(3) & {
-      background: #805ad5;
+      background: #8b5cf6;
     }
     .allocation-bar:nth-child(4) & {
-      background: #dd6b20;
+      background: #f59e0b;
     }
   }
 }
 
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: $spacing-md;
-}
 
-.quick-action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $spacing-xs;
-  padding: $spacing-md;
-  background: $color-background;
-  border-radius: $radius-md;
-  text-decoration: none;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: color.adjust($color-background, $lightness: -3%);
-    transform: translateY(-2px);
-  }
-
-  &__icon {
-    font-size: 1.5rem;
-  }
-
-  &__label {
-    font-size: $font-size-sm;
-    color: $color-text-primary;
-    text-align: center;
-  }
-}
-
+// Utility classes
 .positive {
   color: $color-accent;
 }
 
 .negative {
   color: $color-negative;
+}
+
+.text-secondary {
+  color: $color-text-secondary;
 }

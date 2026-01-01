@@ -54,3 +54,53 @@
 .neutral {
   color: $color-warning !important;
 }
+
+// Summary cards styling
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  @include card;
+  text-align: center;
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+  }
+
+  &__hint {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+
+  &--positive {
+    border-top: 3px solid $color-accent;
+  }
+
+  &--negative {
+    border-top: 3px solid $color-negative;
+  }
+
+  &--neutral {
+    border-top: 3px solid $color-warning;
+  }
+}

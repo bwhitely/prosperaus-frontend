@@ -1,116 +1,258 @@
 @use 'sass:color';
 @use '../../../styles/variables' as *;
 
+// Page header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+
+  &__content {
+    flex: 1;
+    min-width: 200px;
+
+    h1 {
+      font-size: $font-size-3xl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-xs;
+    }
+
+    .subtitle {
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      margin: 0;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+
+    button {
+      mat-icon {
+        margin-right: $spacing-xs;
+      }
+    }
+  }
+}
+
+// Scenario badge
+.scenario-badge {
+  display: inline-block;
+  margin-top: $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba($color-primary, 0.1);
+  color: $color-primary;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+// Alert
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &--error {
+    background: $color-negative-muted;
+    border: 1px solid rgba($color-negative, 0.3);
+    color: $color-negative;
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+}
+
 // Two-column calculator layout
 .calculator-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: $spacing-lg;
+  gap: $spacing-xl;
 
   @media (min-width: $breakpoint-lg) {
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 450px 1fr;
   }
 }
 
 .calculator-inputs {
-  position: sticky;
-  top: $spacing-lg;
-  height: fit-content;
+  mat-card {
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+  }
+
+  mat-card-header {
+    padding-bottom: $spacing-md;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
+  }
+
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0;
+  }
 }
 
 .calculator-results {
   min-width: 0;
+
+  mat-card {
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    margin-bottom: $spacing-lg;
+  }
+
+  mat-card-header {
+    padding-bottom: $spacing-sm;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
+  }
+
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0;
+  }
 }
 
 // Form sections
 .form-section {
   margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-lg;
+  border-bottom: 1px solid $color-border;
 
-  &__title {
-    font-size: $font-size-sm;
-    font-weight: $font-weight-semibold;
-    color: $color-text-secondary;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  &:last-of-type {
+    border-bottom: none;
     margin-bottom: $spacing-md;
+    padding-bottom: 0;
   }
 
-  &--advanced {
-    background: rgba($color-primary, 0.03);
-    padding: $spacing-md;
-    border-radius: $radius-md;
-    margin-top: $spacing-md;
+  h3 {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-md;
   }
 }
 
-// Input with prefix/suffix
-.input-prefix,
-.input-suffix {
-  display: flex;
-  align-items: center;
-  border: 1px solid $color-border;
-  border-radius: $radius-md;
-  overflow: hidden;
-  transition: border-color $transition-base, box-shadow $transition-base;
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
 
-  &:focus-within {
-    border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
   }
 
-  input {
-    flex: 1;
-    border: none;
-    padding: $spacing-sm $spacing-md;
-    font-size: $font-size-base;
-    min-width: 0;
+  mat-form-field {
+    width: 100%;
 
-    &:focus {
-      outline: none;
+    // Allow hints to wrap and display fully
+    ::ng-deep .mat-mdc-form-field-hint-wrapper {
+      padding: 0;
+    }
+
+    ::ng-deep .mat-mdc-form-field-hint {
+      white-space: normal;
+      line-height: 1.3;
     }
   }
+}
 
-  .prefix,
-  .suffix {
-    padding: $spacing-sm $spacing-md;
-    background: $color-background;
-    color: $color-text-secondary;
+// Equity info box
+.equity-info-box {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  background: rgba($color-primary, 0.05);
+  border: 1px solid rgba($color-primary, 0.2);
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-lg;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: $color-primary;
+  }
+
+  .equity-info-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .equity-label {
     font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    white-space: nowrap;
+    color: $color-text-secondary;
   }
 
-  .prefix {
-    border-right: 1px solid $color-border;
-  }
-
-  .suffix {
-    border-left: 1px solid $color-border;
+  .equity-value {
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $color-primary;
   }
 }
 
-// Info box
-.info-box {
-  padding: $spacing-md;
-  border-radius: $radius-md;
+// Advanced panel
+.advanced-panel {
+  margin-top: $spacing-md;
   margin-bottom: $spacing-lg;
+  border-radius: $radius-md !important;
+  box-shadow: none !important;
+  border: 1px solid $color-border;
 
-  &--highlight {
-    background: linear-gradient(135deg, rgba($color-primary, 0.05), rgba($color-accent, 0.05));
-    border: 1px solid rgba($color-primary, 0.1);
-  }
-
-  &__label {
+  mat-panel-description {
+    color: $color-text-muted;
     font-size: $font-size-sm;
-    color: $color-text-secondary;
-    margin-bottom: $spacing-xs;
+  }
+}
+
+// Calculate button
+.calculate-btn {
+  width: 100%;
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+
+  mat-spinner {
+    display: inline-block;
+    margin-right: $spacing-sm;
   }
 
-  &__value {
-    font-family: $font-family-mono;
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $color-primary;
+  mat-icon {
+    margin-right: $spacing-sm;
+  }
+}
+
+// Loading card
+.loading-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
+
+    p {
+      margin-top: $spacing-md;
+      color: $color-text-secondary;
+    }
   }
 }
 
@@ -119,6 +261,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: $spacing-md;
+  margin-bottom: $spacing-lg;
 
   @media (min-width: $breakpoint-md) {
     grid-template-columns: repeat(3, 1fr);
@@ -126,52 +269,32 @@
 }
 
 .result-card {
-  background: $color-surface;
-  border: 1px solid $color-border;
-  border-radius: $radius-lg;
-  padding: $spacing-lg;
   text-align: center;
+  border-radius: $radius-lg;
 
-  &--primary {
-    background: linear-gradient(135deg, $color-primary, $color-primary-light);
-    border: none;
-    color: white;
-
-    .result-card__label {
-      color: rgba(white, 0.8);
-    }
-
-    .result-card__value {
-      color: white;
-
-      &.positive {
-        color: $color-accent-light;
-      }
-
-      &.negative {
-        color: #feb2b2;
-      }
-    }
-
-    .result-card__change {
-      color: rgba(white, 0.9);
-    }
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-lg;
   }
 
-  &__label {
+  .result-label {
     font-size: $font-size-sm;
     color: $color-text-secondary;
     margin-bottom: $spacing-xs;
   }
 
-  &__value {
+  .result-value {
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
+    font-weight: 700;
     color: $color-text-primary;
+    margin-bottom: $spacing-xs;
 
     &.positive {
-      color: $color-accent;
+      color: $color-positive;
     }
 
     &.negative {
@@ -179,16 +302,30 @@
     }
   }
 
-  &__change {
-    font-size: $font-size-sm;
+  .result-change {
+    font-size: $font-size-xs;
     color: $color-text-muted;
-    margin-top: $spacing-xs;
+
+    &.positive {
+      color: $color-positive;
+    }
+  }
+
+  &--primary {
+    border: 2px solid $color-primary;
+    background: rgba($color-primary, 0.03);
+  }
+
+  &--highlight {
+    background: $color-positive-muted;
+    border: 1px solid rgba($color-positive, 0.3);
   }
 }
 
 // Breakdown grid
 .breakdown-grid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: $spacing-sm;
 }
 
@@ -207,7 +344,8 @@
     border-top: 2px solid $color-border;
     padding-top: $spacing-md;
     margin-top: $spacing-sm;
-    font-weight: $font-weight-semibold;
+    font-weight: 600;
+    border-bottom: none;
   }
 }
 
@@ -218,10 +356,11 @@
 
 .breakdown-value {
   font-family: $font-family-mono;
-  font-weight: $font-weight-semibold;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 
   &.positive {
-    color: $color-accent;
+    color: $color-positive;
   }
 
   &.negative {
@@ -231,38 +370,82 @@
 
 // Risk assessment
 .risk-assessment {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
   padding: $spacing-md;
   border-radius: $radius-md;
-  font-size: $font-size-sm;
-  line-height: $line-height-relaxed;
+  margin-bottom: $spacing-md;
 
-  &.risk-low {
-    background: rgba($color-accent, 0.1);
-    border-left: 4px solid $color-accent;
-    color: $color-accent-dark;
-  }
-
-  &.risk-moderate {
-    background: rgba($color-warning, 0.1);
-    border-left: 4px solid $color-warning;
-    color: color.adjust($color-warning, $lightness: -15%);
-  }
-
-  &.risk-high {
-    background: rgba($color-negative, 0.1);
-    border-left: 4px solid $color-negative;
-    color: color.adjust($color-negative, $lightness: -10%);
-  }
-
-  &.risk-very-high {
-    background: rgba($color-negative, 0.15);
-    border-left: 4px solid color.adjust($color-negative, $lightness: -10%);
-    color: color.adjust($color-negative, $lightness: -15%);
+  mat-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   p {
     margin: 0;
+    font-size: $font-size-sm;
+    line-height: 1.5;
   }
+
+  &.risk-low {
+    background: $color-positive-muted;
+    border-left: 4px solid $color-positive;
+    color: darken($color-positive, 15%);
+
+    mat-icon {
+      color: $color-positive;
+    }
+  }
+
+  &.risk-moderate {
+    background: $color-warning-muted;
+    border-left: 4px solid $color-warning;
+    color: darken($color-warning, 15%);
+
+    mat-icon {
+      color: $color-warning;
+    }
+  }
+
+  &.risk-high,
+  &.risk-very-high {
+    background: $color-negative-muted;
+    border-left: 4px solid $color-negative;
+    color: darken($color-negative, 10%);
+
+    mat-icon {
+      color: $color-negative;
+    }
+  }
+}
+
+.break-even-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm;
+  background: $color-background;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.break-even-label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.break-even-value {
+  font-family: $font-family-mono;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.break-even-note {
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin: 0;
 }
 
 // Projection chart
@@ -287,11 +470,12 @@
 
   &__value {
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
+    font-weight: 500;
 
     &.positive {
-      color: $color-accent;
+      color: $color-positive;
     }
 
     &.negative {
@@ -309,71 +493,102 @@
   &__fill {
     height: 100%;
     border-radius: $radius-full;
-    transition: width $transition-slow;
+    transition: width 0.3s ease;
 
     &--positive {
-      background: linear-gradient(90deg, $color-accent-light, $color-accent);
+      background: linear-gradient(90deg, $color-positive-light, $color-positive);
     }
 
     &--negative {
-      background: linear-gradient(90deg, color.adjust($color-negative, $lightness: 20%), $color-negative);
+      background: linear-gradient(90deg, lighten($color-negative, 20%), $color-negative);
     }
   }
 }
 
 // Disclaimer
 .disclaimer {
-  background: rgba($color-info, 0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: $color-info-muted;
   border: 1px solid rgba($color-info, 0.2);
   border-radius: $radius-md;
-  padding: $spacing-md;
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-  line-height: $line-height-relaxed;
+
+  mat-icon {
+    flex-shrink: 0;
+    color: $color-info;
+  }
 
   p {
     margin: 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.5;
+
+    strong {
+      color: $color-text-primary;
+    }
   }
 }
 
-// Button modifiers
-.btn--link {
-  background: transparent;
-  border: none;
-  color: $color-primary;
-  padding: $spacing-sm 0;
-  cursor: pointer;
-  font-size: $font-size-sm;
-  text-decoration: underline;
+// Modal overlay
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-index-modal;
+  padding: $spacing-lg;
+}
 
-  &:hover {
-    color: $color-primary-dark;
+.modal-card {
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: $radius-lg;
+
+  &--lg {
+    max-width: 600px;
+  }
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  mat-card-title {
+    margin: 0;
+  }
+
+  .modal-close {
+    margin-left: auto;
+  }
+
+  mat-card-actions {
+    padding: $spacing-md;
+    gap: $spacing-sm;
   }
 }
 
-.btn--full-width {
+.full-width {
   width: 100%;
 }
 
-// Error state for cards
-.card--error {
-  border-color: $color-negative;
-  background: rgba($color-negative, 0.05);
+.empty-message {
+  text-align: center;
+  color: $color-text-muted;
+  padding: $spacing-xl;
 }
 
-// Scenario badge
-.scenario-badge {
-  display: inline-block;
-  margin-top: $spacing-sm;
-  padding: $spacing-xs $spacing-sm;
-  background: rgba($color-primary, 0.1);
-  color: $color-primary;
-  border-radius: $radius-full;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-}
-
-// Scenario list in load modal
+// Scenario list
 .scenario-list {
   display: flex;
   flex-direction: column;
@@ -392,7 +607,7 @@
   border: 1px solid $color-border;
   border-radius: $radius-md;
   cursor: pointer;
-  transition: all $transition-base;
+  transition: all 0.15s ease;
 
   &:hover {
     background: rgba($color-primary, 0.03);
@@ -410,7 +625,8 @@
   }
 
   &__name {
-    font-weight: $font-weight-semibold;
+    font-weight: 600;
+    color: $color-text-primary;
     margin-bottom: $spacing-xs;
   }
 
@@ -419,18 +635,3 @@
     color: $color-text-muted;
   }
 }
-
-// Modal size modifier
-.modal--sm {
-  max-width: 400px;
-}
-
-// Page header actions
-.page-header__actions {
-  display: flex;
-  gap: $spacing-sm;
-  flex-wrap: wrap;
-}
-
-// Reuse common modal styles
-@import '../properties/properties.component';

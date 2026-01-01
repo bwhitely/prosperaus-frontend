@@ -23,6 +23,12 @@ export interface InvestmentHoldingResponse {
   unrealisedGainLoss: number;
   createdAt: string;
   updatedAt: string;
+  // ETF metadata fields (nullable for non-ETFs or unknown ETFs)
+  mer?: number;
+  estimatedFrankingPercentage?: number;
+  estimatedDividendYield?: number;
+  category?: string;
+  issuer?: string;
 }
 
 export interface StockQuote {
@@ -52,6 +58,7 @@ export interface EtfMetadata {
   mer: number;
   distributionFrequency: string;
   estimatedFrankingPercentage: number;
+  estimatedDividendYield?: number;
 }
 
 // Portfolio Analysis
@@ -71,9 +78,15 @@ export interface PortfolioAnalysisResponse {
   totalCostBase: number;
   unrealisedGainLoss: number;
   unrealisedGainLossPercent: number;
-  geographyAllocation: Record<string, AllocationBreakdown>;
-  assetClassAllocation: Record<string, AllocationBreakdown>;
+
+  // New weighted allocations
+  countryAllocation: CountryAllocation[];
+  gicsSectorAllocation: GicsSectorAllocation[];
+  assetTypeAllocation: AssetTypeAllocation[];
+
+  // Legacy allocation (for category breakdown)
   categoryAllocation: Record<string, AllocationBreakdown>;
+
   weightedAverageMer: number;
   estimatedAnnualFees: number;
   estimatedAnnualFrankingCredits: number;
@@ -82,6 +95,32 @@ export interface PortfolioAnalysisResponse {
   holdings: HoldingAnalysis[];
 }
 
+// Country allocation with code and display name
+export interface CountryAllocation {
+  code: string;        // ISO 2-letter code: AU, US, GB, JP, etc.
+  name: string;        // Display name: Australia, United States, etc.
+  region: string | null; // Optional region grouping
+  value: number;
+  percentage: number;
+}
+
+// GICS sector allocation (equity sectors only)
+export interface GicsSectorAllocation {
+  code: string;        // GICS code: 10, 15, 20, etc.
+  name: string;        // Sector name: Energy, Materials, etc.
+  value: number;
+  percentage: number;
+}
+
+// Asset type allocation (high-level breakdown)
+export interface AssetTypeAllocation {
+  type: string;        // EQUITIES, BONDS, CASH, GOLD, PROPERTY
+  displayName: string; // Equities, Bonds, Cash, Gold, Property
+  value: number;
+  percentage: number;
+}
+
+// Legacy allocation breakdown (for category)
 export interface AllocationBreakdown {
   value: number;
   percentage: number;
@@ -98,8 +137,8 @@ export interface HoldingAnalysis {
   ticker: string;
   name: string | null;
   category: string | null;
-  geography: string | null;
-  assetClass: string | null;
+  geography: string | null;      // Legacy field - kept for compatibility
+  assetClass: string | null;     // Legacy field - kept for compatibility
   units: number;
   currentPrice: number | null;
   value: number | null;
@@ -109,5 +148,6 @@ export interface HoldingAnalysis {
   unrealisedGainLossPercent: number | null;
   mer: number | null;
   estimatedFrankingPercentage: number | null;
+  estimatedDividendYield: number | null;
   hasMetadata: boolean;
 }

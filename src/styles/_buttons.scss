@@ -3,51 +3,71 @@
 @use 'mixins' as *;
 
 // ===========================================
-// BASE BUTTON
+// BASE BUTTON - Clean Professional Style
 // ===========================================
 .btn {
   @include button-base;
 
-  // Primary button
+  // Primary button - Purple
   &--primary {
     background: $color-primary;
-    color: white;
+    color: $color-text-inverse;
+    border: 1px solid $color-primary;
 
     &:hover:not(:disabled) {
       background: $color-primary-dark;
+      border-color: $color-primary-dark;
     }
 
     &:active:not(:disabled) {
       background: color.adjust($color-primary-dark, $lightness: -5%);
+      border-color: color.adjust($color-primary-dark, $lightness: -5%);
+    }
+
+    &:focus-visible {
+      box-shadow: $shadow-focus;
     }
   }
 
-  // Secondary button
+  // Secondary button - Outlined
   &--secondary {
     background: transparent;
-    color: $color-primary;
-    border: 1px solid $color-primary;
+    color: $color-text-primary;
+    border: 1px solid $color-border-strong;
 
     &:hover:not(:disabled) {
-      background: rgba($color-primary, 0.05);
+      background: $color-surface-hover;
+      border-color: $color-primary;
+      color: $color-primary;
     }
 
     &:active:not(:disabled) {
-      background: rgba($color-primary, 0.1);
+      background: $color-surface;
+    }
+
+    &:focus-visible {
+      box-shadow: $shadow-focus;
     }
   }
 
-  // Accent button (CTA)
+  // Accent button (CTA) - Teal/Blue
   &--accent {
     background: $color-accent;
-    color: white;
+    color: $color-text-inverse;
+    border: 1px solid $color-accent;
 
     &:hover:not(:disabled) {
       background: $color-accent-dark;
+      border-color: $color-accent-dark;
     }
 
     &:active:not(:disabled) {
       background: color.adjust($color-accent-dark, $lightness: -5%);
+      border-color: color.adjust($color-accent-dark, $lightness: -5%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($color-accent, 0.2);
     }
   }
 
@@ -55,10 +75,28 @@
   &--ghost {
     background: transparent;
     color: $color-text-secondary;
+    border: 1px solid transparent;
 
     &:hover:not(:disabled) {
-      background: $color-background;
+      background: $color-surface-hover;
       color: $color-text-primary;
+    }
+
+    &:active:not(:disabled) {
+      background: $color-border;
+    }
+  }
+
+  // Link style button
+  &--link {
+    background: transparent;
+    color: $color-primary;
+    border: none;
+    padding: 0;
+
+    &:hover:not(:disabled) {
+      color: $color-primary-dark;
+      text-decoration: underline;
     }
   }
 
@@ -66,23 +104,58 @@
   &--danger {
     background: $color-negative;
     color: white;
+    border: 1px solid $color-negative;
 
     &:hover:not(:disabled) {
+      background: color.adjust($color-negative, $lightness: -5%);
+      border-color: color.adjust($color-negative, $lightness: -5%);
+    }
+
+    &:active:not(:disabled) {
       background: color.adjust($color-negative, $lightness: -10%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($color-negative, 0.2);
+    }
+  }
+
+  // Outline danger
+  &--danger-outline {
+    background: transparent;
+    color: $color-negative;
+    border: 1px solid $color-negative;
+
+    &:hover:not(:disabled) {
+      background: $color-negative-muted;
     }
   }
 
   // ===========================================
   // SIZE VARIANTS
   // ===========================================
-  &--sm {
+  &--xs {
     padding: $spacing-xs $spacing-sm;
     font-size: $font-size-xs;
+    min-height: 1.75rem;
+  }
+
+  &--sm {
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+    min-height: 2rem;
   }
 
   &--lg {
-    padding: $spacing-md $spacing-lg;
-    font-size: $font-size-base;
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-size-lg;
+    min-height: 3rem;
+  }
+
+  &--xl {
+    padding: $spacing-lg $spacing-2xl;
+    font-size: $font-size-xl;
+    min-height: 3.5rem;
   }
 
   // ===========================================
@@ -99,6 +172,12 @@
     padding: $spacing-sm;
     min-width: 2.5rem;
     min-height: 2.5rem;
+
+    &.btn--sm {
+      min-width: 2rem;
+      min-height: 2rem;
+      padding: $spacing-xs;
+    }
   }
 }
 
@@ -122,5 +201,46 @@
     &:not(:first-child) {
       margin-left: -1px;
     }
+  }
+}
+
+// ===========================================
+// SPECIAL BUTTON STYLES
+// ===========================================
+
+// Premium gradient button
+.btn--premium {
+  background: $gradient-primary;
+  color: $color-text-inverse;
+  border: none;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  &:hover:not(:disabled) {
+    box-shadow: $shadow-lg;
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:focus-visible {
+    box-shadow: $shadow-focus;
   }
 }

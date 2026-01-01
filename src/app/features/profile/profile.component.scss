@@ -1,1 +1,55 @@
-// Profile component styles
+@use '../../../styles/variables' as *;
+
+.page-header {
+  margin-bottom: $spacing-xl;
+
+  &__content {
+    h1 {
+      font-size: $font-size-3xl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-xs;
+    }
+
+    .subtitle {
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      margin: 0;
+    }
+  }
+}
+
+.placeholder-card {
+  max-width: 500px;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: $color-primary;
+      margin-bottom: $spacing-lg;
+    }
+
+    h3 {
+      font-size: $font-size-xl;
+      font-weight: 600;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-sm;
+    }
+
+    p {
+      color: $color-text-secondary;
+      margin: 0;
+    }
+  }
+}

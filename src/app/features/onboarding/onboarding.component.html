@@ -1,11 +1,11 @@
 <div class="onboarding">
-  <div class="onboarding__container">
+  <mat-card class="onboarding__container">
     <div class="onboarding__header">
-      <h1 class="onboarding__title">Welcome to AusFinance</h1>
+      <h1 class="onboarding__title">Welcome to ProsperAus</h1>
       <p class="onboarding__subtitle">Let's set up your profile to personalise your experience</p>
     </div>
 
-    <!-- Progress indicator -->
+    <!-- Progress indicator using Material Stepper styling -->
     <div class="onboarding__progress">
       @for (step of [1, 2, 3]; track step) {
         <div
@@ -15,9 +15,7 @@
         >
           <div class="onboarding__progress-circle">
             @if (currentStep() > step) {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 13l4 4L19 7" />
-              </svg>
+              <mat-icon>check</mat-icon>
             } @else {
               {{ step }}
             }
@@ -41,7 +39,8 @@
 
     @if (error()) {
       <div class="alert alert--error">
-        {{ error() }}
+        <mat-icon>error</mat-icon>
+        <span>{{ error() }}</span>
       </div>
     }
 
@@ -51,38 +50,31 @@
         <div class="onboarding__step">
           <h2 class="onboarding__step-title">Tell us about yourself</h2>
 
-          <div class="form-group">
-            <label for="displayName">What should we call you?</label>
-            <input
-              type="text"
-              id="displayName"
-              formControlName="displayName"
-              placeholder="Enter your name"
-              class="form-control"
-            />
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>What should we call you?</mat-label>
+            <input matInput formControlName="displayName" placeholder="Enter your name">
+            <mat-icon matPrefix>person</mat-icon>
             @if (onboardingForm.get('displayName')?.touched && onboardingForm.get('displayName')?.errors?.['required']) {
-              <span class="form-error">Name is required</span>
+              <mat-error>Name is required</mat-error>
             }
-          </div>
+          </mat-form-field>
 
-          <div class="form-group">
-            <label for="dateOfBirth">Date of Birth</label>
-            <input
-              type="date"
-              id="dateOfBirth"
-              formControlName="dateOfBirth"
-              class="form-control"
-            />
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date of Birth</mat-label>
+            <input matInput type="date" formControlName="dateOfBirth">
+            <mat-icon matPrefix>cake</mat-icon>
             @if (onboardingForm.get('dateOfBirth')?.touched && onboardingForm.get('dateOfBirth')?.errors?.['required']) {
-              <span class="form-error">Date of birth is required</span>
+              <mat-error>Date of birth is required</mat-error>
             }
-            <span class="form-hint">Used for super and retirement calculations</span>
-          </div>
+            <mat-hint>Used for super and retirement calculations</mat-hint>
+          </mat-form-field>
 
           <div class="onboarding__actions">
             <button
+              mat-flat-button
+              color="primary"
               type="button"
-              class="btn btn--primary btn--lg"
+              class="full-width"
               [disabled]="!canProceedFromStep1()"
               (click)="nextStep()"
             >
@@ -97,54 +89,44 @@
         <div class="onboarding__step">
           <h2 class="onboarding__step-title">Your tax situation</h2>
 
-          <div class="form-group">
-            <label>Tax Residency Status</label>
-            <div class="onboarding__options">
+          <div class="form-section">
+            <label class="form-section__label">Tax Residency Status</label>
+            <mat-radio-group formControlName="taxResidency" class="onboarding__radio-group">
               @for (option of taxResidencyOptions; track option.value) {
-                <label
-                  class="onboarding__option"
-                  [class.onboarding__option--selected]="onboardingForm.get('taxResidency')?.value === option.value"
-                >
-                  <input
-                    type="radio"
-                    formControlName="taxResidency"
-                    [value]="option.value"
-                  />
-                  <div class="onboarding__option-content">
-                    <span class="onboarding__option-label">{{ option.label }}</span>
-                    <span class="onboarding__option-desc">{{ option.description }}</span>
+                <mat-radio-button [value]="option.value" class="onboarding__radio-option">
+                  <div class="onboarding__radio-content">
+                    <span class="onboarding__radio-label">{{ option.label }}</span>
+                    <span class="onboarding__radio-desc">{{ option.description }}</span>
                   </div>
-                </label>
+                </mat-radio-button>
               }
-            </div>
+            </mat-radio-group>
           </div>
 
-          <div class="form-group">
-            <label for="marginalTaxRate">Marginal Tax Rate (optional)</label>
-            <select
-              id="marginalTaxRate"
-              formControlName="marginalTaxRate"
-              class="form-control"
-            >
-              <option [ngValue]="null">Select your tax bracket...</option>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Marginal Tax Rate (optional)</mat-label>
+            <mat-select formControlName="marginalTaxRate">
+              <mat-option [value]="null">Select your tax bracket...</mat-option>
               @for (bracket of taxBrackets; track bracket.rate) {
-                <option [ngValue]="bracket.value">{{ bracket.label }}</option>
+                <mat-option [value]="bracket.value">{{ bracket.label }}</mat-option>
               }
-            </select>
-            <span class="form-hint">We'll use this for tax benefit calculations</span>
-          </div>
+            </mat-select>
+            <mat-icon matPrefix>percent</mat-icon>
+            <mat-hint>We'll use this for tax benefit calculations</mat-hint>
+          </mat-form-field>
 
           <div class="onboarding__actions onboarding__actions--split">
             <button
+              mat-stroked-button
               type="button"
-              class="btn btn--secondary btn--lg"
               (click)="previousStep()"
             >
               Back
             </button>
             <button
+              mat-flat-button
+              color="primary"
               type="button"
-              class="btn btn--primary btn--lg"
               [disabled]="!canProceedFromStep2()"
               (click)="nextStep()"
             >
@@ -159,45 +141,37 @@
         <div class="onboarding__step">
           <h2 class="onboarding__step-title">Final details</h2>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                formControlName="hasPrivateHealthInsurance"
-              />
-              <span>I have private health insurance</span>
-            </label>
-            <span class="form-hint">Affects Medicare Levy Surcharge calculations</span>
+          <div class="form-section">
+            <mat-checkbox formControlName="hasPrivateHealthInsurance" color="primary">
+              I have private health insurance
+            </mat-checkbox>
+            <p class="form-hint">Affects Medicare Levy Surcharge calculations</p>
           </div>
 
-          <div class="form-group">
-            <label for="retirementAge">Target Retirement Age</label>
-            <input
-              type="number"
-              id="retirementAge"
-              formControlName="retirementAge"
-              min="55"
-              max="100"
-              class="form-control form-control--narrow"
-            />
-            <span class="form-hint">Used for FIRE and super projections</span>
-          </div>
+          <mat-form-field appearance="outline" class="field-narrow">
+            <mat-label>Target Retirement Age</mat-label>
+            <input matInput type="number" formControlName="retirementAge" min="55" max="100">
+            <mat-icon matPrefix>elderly</mat-icon>
+            <mat-hint>Used for FIRE and super projections</mat-hint>
+          </mat-form-field>
 
           <div class="onboarding__actions onboarding__actions--split">
             <button
+              mat-stroked-button
               type="button"
-              class="btn btn--secondary btn--lg"
               (click)="previousStep()"
             >
               Back
             </button>
             <button
+              mat-flat-button
+              color="primary"
               type="submit"
-              class="btn btn--accent btn--lg"
               [disabled]="isSubmitting()"
             >
               @if (isSubmitting()) {
-                Completing...
+                <mat-spinner diameter="20"></mat-spinner>
+                <span>Completing...</span>
               } @else {
                 Complete Setup
               }
@@ -206,5 +180,5 @@
         </div>
       }
     </form>
-  </div>
+  </mat-card>
 </div>

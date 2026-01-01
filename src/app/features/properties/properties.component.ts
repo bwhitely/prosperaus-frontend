@@ -21,9 +21,9 @@ export class PropertiesComponent implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  // Modal state
-  showPropertyModal = signal(false);
-  showMortgageModal = signal(false);
+  // Form state
+  showPropertyForm = signal(false);
+  showMortgageForm = signal(false);
   editingProperty = signal<PropertyResponse | null>(null);
   editingMortgage = signal<MortgageResponse | null>(null);
   selectedPropertyId = signal<string | null>(null);
@@ -103,17 +103,17 @@ export class PropertiesComponent implements OnInit {
     return mortgages.reduce((sum, m) => sum + (m.effectiveBalance || m.currentBalance), 0);
   }
 
-  // Property Modal
-  openAddPropertyModal(): void {
+  // Property Form
+  openAddPropertyForm(): void {
     this.editingProperty.set(null);
     this.propertyForm.reset({
       propertyType: 'residential',
       isInvestment: false
     });
-    this.showPropertyModal.set(true);
+    this.showPropertyForm.set(true);
   }
 
-  openEditPropertyModal(property: PropertyResponse): void {
+  openEditPropertyForm(property: PropertyResponse): void {
     this.editingProperty.set(property);
     this.propertyForm.patchValue({
       name: property.name,
@@ -126,11 +126,11 @@ export class PropertiesComponent implements OnInit {
       weeklyRent: property.weeklyRent,
       annualExpenses: property.annualExpenses
     });
-    this.showPropertyModal.set(true);
+    this.showPropertyForm.set(true);
   }
 
-  closePropertyModal(): void {
-    this.showPropertyModal.set(false);
+  closePropertyForm(): void {
+    this.showPropertyForm.set(false);
     this.editingProperty.set(null);
   }
 
@@ -160,7 +160,7 @@ export class PropertiesComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadProperties();
-        this.closePropertyModal();
+        this.closePropertyForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {
@@ -181,8 +181,8 @@ export class PropertiesComponent implements OnInit {
     });
   }
 
-  // Mortgage Modal
-  openAddMortgageModal(propertyId: string): void {
+  // Mortgage Form
+  openAddMortgageForm(propertyId: string): void {
     this.selectedPropertyId.set(propertyId);
     this.editingMortgage.set(null);
     this.mortgageForm.reset({
@@ -191,10 +191,10 @@ export class PropertiesComponent implements OnInit {
       repaymentType: 'principal_and_interest',
       isDeductible: false
     });
-    this.showMortgageModal.set(true);
+    this.showMortgageForm.set(true);
   }
 
-  openEditMortgageModal(mortgage: MortgageResponse): void {
+  openEditMortgageForm(mortgage: MortgageResponse): void {
     this.selectedPropertyId.set(mortgage.propertyId);
     this.editingMortgage.set(mortgage);
     this.mortgageForm.patchValue({
@@ -208,11 +208,11 @@ export class PropertiesComponent implements OnInit {
       repaymentType: mortgage.repaymentType,
       isDeductible: mortgage.isDeductible
     });
-    this.showMortgageModal.set(true);
+    this.showMortgageForm.set(true);
   }
 
-  closeMortgageModal(): void {
-    this.showMortgageModal.set(false);
+  closeMortgageForm(): void {
+    this.showMortgageForm.set(false);
     this.editingMortgage.set(null);
     this.selectedPropertyId.set(null);
   }
@@ -248,7 +248,7 @@ export class PropertiesComponent implements OnInit {
       next: () => {
         this.loadMortgagesForProperty(propertyId);
         this.loadProperties(); // Refresh equity calculations
-        this.closeMortgageModal();
+        this.closeMortgageForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {

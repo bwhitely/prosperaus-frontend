@@ -1,48 +1,48 @@
 <div class="page-header">
-  <div class="header-content">
-    <div>
-      <h1>Super Optimiser</h1>
-      <p class="subtitle">Maximise your superannuation contributions and tax savings</p>
-    </div>
-  </div>
+  <h1>Super Optimiser</h1>
+  <p class="subtitle">Maximise your superannuation contributions and tax savings</p>
 </div>
 
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
 <div class="optimiser-layout">
   <!-- Input Section -->
   <div class="input-section">
-    <div class="card">
-      <div class="card__header">
-        <h2>Your Details</h2>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Your Details</mat-card-title>
         @if (isPrefilling()) {
-          <span class="loading-badge">Loading your data...</span>
+          <span class="loading-badge">
+            <mat-spinner diameter="16"></mat-spinner>
+            Loading your data...
+          </span>
         }
-      </div>
-      <div class="card__body">
+      </mat-card-header>
+
+      <mat-card-content>
         <form [formGroup]="form">
           <!-- Income & Super Balance -->
           <div class="form-section">
             <h3>Income & Super</h3>
             <div class="form-row">
-              <div class="form-group">
-                <label for="annualGrossIncome">Annual Gross Income</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="annualGrossIncome" formControlName="annualGrossIncome" min="0">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="currentSuperBalance">Current Super Balance</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="currentSuperBalance" formControlName="currentSuperBalance" min="0">
-                </div>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Annual Gross Income</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="annualGrossIncome" min="0">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Current Super Balance</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="currentSuperBalance" min="0">
+              </mat-form-field>
             </div>
           </div>
 
@@ -50,39 +50,34 @@
           <div class="form-section">
             <h3>Contributions This Financial Year</h3>
             <div class="form-row">
-              <div class="form-group">
-                <label for="employerContributionsYtd">Employer SG (YTD)</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="employerContributionsYtd" formControlName="employerContributionsYtd" min="0">
-                </div>
-                <span class="help-text">Super guarantee from your employer</span>
-              </div>
-              <div class="form-group">
-                <label for="salarySacrificeYtd">Salary Sacrifice (YTD)</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="salarySacrificeYtd" formControlName="salarySacrificeYtd" min="0">
-                </div>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Employer SG (YTD)</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="employerContributionsYtd" min="0">
+                <mat-hint>Super guarantee from your employer</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Salary Sacrifice (YTD)</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="salarySacrificeYtd" min="0">
+              </mat-form-field>
             </div>
+
             <div class="form-row">
-              <div class="form-group">
-                <label for="personalConcessionalYtd">Personal Deductible (YTD)</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="personalConcessionalYtd" formControlName="personalConcessionalYtd" min="0">
-                </div>
-                <span class="help-text">Personal contributions you'll claim as a tax deduction</span>
-              </div>
-              <div class="form-group">
-                <label for="nonConcessionalYtd">Non-Concessional (YTD)</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="nonConcessionalYtd" formControlName="nonConcessionalYtd" min="0">
-                </div>
-                <span class="help-text">After-tax contributions</span>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Personal Deductible (YTD)</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="personalConcessionalYtd" min="0">
+                <mat-hint>Personal contributions you'll claim as a tax deduction</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Non-Concessional (YTD)</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="nonConcessionalYtd" min="0">
+                <mat-hint>After-tax contributions</mat-hint>
+              </mat-form-field>
             </div>
 
             <!-- Cap Progress -->
@@ -91,125 +86,114 @@
                 <span class="label">Concessional Cap Used</span>
                 <span class="value">{{ formatCurrency(totalConcessionalYtd()) }} / $30,000</span>
               </div>
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width.%]="getProgressPercent()"
-                     [class.warning]="getProgressPercent() > 100"
-                     [class.near-limit]="getProgressPercent() >= 80 && getProgressPercent() <= 100"></div>
-              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="getProgressPercent()"
+                [color]="getProgressPercent() > 100 ? 'warn' : 'primary'">
+              </mat-progress-bar>
               <div class="cap-remaining">
                 Remaining: {{ formatCurrency(remainingCap()) }}
               </div>
             </div>
           </div>
 
-          <!-- Spouse Section Toggle -->
-          <button type="button" class="section-toggle" (click)="toggleSpouseSection()">
-            {{ showSpouseSection() ? 'Hide' : 'Show' }} Spouse Details
-            <span class="toggle-icon">{{ showSpouseSection() ? '−' : '+' }}</span>
-          </button>
+          <!-- Spouse Section -->
+          <mat-expansion-panel class="section-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Spouse Details</mat-panel-title>
+              <mat-panel-description>For spouse contribution tax offset calculations</mat-panel-description>
+            </mat-expansion-panel-header>
 
-          @if (showSpouseSection()) {
-            <div class="form-section spouse-section">
-              <h3>Spouse Details</h3>
-              <p class="section-hint">For spouse contribution tax offset calculations</p>
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Spouse Annual Income</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="spouseIncome" min="0" placeholder="Optional">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Spouse Super Balance</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="spouseSuperBalance" min="0" placeholder="Optional">
+              </mat-form-field>
+            </div>
+          </mat-expansion-panel>
+
+          <!-- Advanced Options -->
+          <mat-expansion-panel class="section-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Advanced Options</mat-panel-title>
+              <mat-panel-description>Carry-forward, tax rates & more</mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Carry-forward -->
+            <div class="form-section">
+              <h4>Carry-Forward Unused Cap</h4>
+              <p class="section-hint">Available if your total super was under $500k on 30 June last year</p>
               <div class="form-row">
-                <div class="form-group">
-                  <label for="spouseIncome">Spouse Annual Income</label>
-                  <div class="input-prefix">
-                    <span>$</span>
-                    <input type="number" id="spouseIncome" formControlName="spouseIncome" min="0" placeholder="Optional">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="spouseSuperBalance">Spouse Super Balance</label>
-                  <div class="input-prefix">
-                    <span>$</span>
-                    <input type="number" id="spouseSuperBalance" formControlName="spouseSuperBalance" min="0" placeholder="Optional">
-                  </div>
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Unused Cap (Total)</mat-label>
+                  <span matTextPrefix>$&nbsp;</span>
+                  <input matInput type="number" formControlName="unusedConcessionalCapTotal" min="0">
+                  <mat-hint>Check your ATO online account for exact amounts</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Super Balance (30 June)</mat-label>
+                  <span matTextPrefix>$&nbsp;</span>
+                  <input matInput type="number" formControlName="totalSuperBalancePrevFy" min="0" placeholder="Optional">
+                  <mat-hint>Your total super balance at end of last FY</mat-hint>
+                </mat-form-field>
               </div>
             </div>
-          }
 
-          <!-- Advanced Options Toggle -->
-          <button type="button" class="section-toggle" (click)="toggleAdvanced()">
-            {{ showAdvanced() ? 'Hide' : 'Show' }} Advanced Options
-            <span class="toggle-icon">{{ showAdvanced() ? '−' : '+' }}</span>
-          </button>
+            <!-- Other Settings -->
+            <div class="form-section">
+              <h4>Other Details</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Your Age</mat-label>
+                  <input matInput type="number" formControlName="age" min="18" max="100" placeholder="Optional">
+                </mat-form-field>
 
-          @if (showAdvanced()) {
-            <div class="advanced-section">
-              <!-- Carry-forward -->
-              <div class="form-section">
-                <h3>Carry-Forward Unused Cap</h3>
-                <p class="section-hint">Available if your total super was under $500k on 30 June last year</p>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="unusedConcessionalCapTotal">Unused Cap (Total)</label>
-                    <div class="input-prefix">
-                      <span>$</span>
-                      <input type="number" id="unusedConcessionalCapTotal" formControlName="unusedConcessionalCapTotal" min="0">
-                    </div>
-                    <span class="help-text">Check your ATO online account for exact amounts</span>
-                  </div>
-                  <div class="form-group">
-                    <label for="totalSuperBalancePrevFy">Super Balance (30 June)</label>
-                    <div class="input-prefix">
-                      <span>$</span>
-                      <input type="number" id="totalSuperBalancePrevFy" formControlName="totalSuperBalancePrevFy" min="0" placeholder="Optional">
-                    </div>
-                    <span class="help-text">Your total super balance at end of last FY</span>
-                  </div>
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Marginal Tax Rate</mat-label>
+                  <mat-select formControlName="marginalTaxRate">
+                    <mat-option [value]="null">Auto-calculate</mat-option>
+                    <mat-option [value]="0.16">16%</mat-option>
+                    <mat-option [value]="0.30">30%</mat-option>
+                    <mat-option [value]="0.37">37%</mat-option>
+                    <mat-option [value]="0.45">45%</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
 
-              <!-- Other Settings -->
-              <div class="form-section">
-                <h3>Other Details</h3>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="age">Your Age</label>
-                    <input type="number" id="age" formControlName="age" min="18" max="100" placeholder="Optional">
-                  </div>
-                  <div class="form-group">
-                    <label for="marginalTaxRate">Marginal Tax Rate</label>
-                    <select id="marginalTaxRate" formControlName="marginalTaxRate">
-                      <option [ngValue]="null">Auto-calculate</option>
-                      <option [ngValue]="0.16">16%</option>
-                      <option [ngValue]="0.30">30%</option>
-                      <option [ngValue]="0.37">37%</option>
-                      <option [ngValue]="0.45">45%</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" formControlName="wantsToMaximiseContributions">
-                    I want to maximise contributions (use carry-forward if available)
-                  </label>
-                </div>
-              </div>
+              <mat-checkbox formControlName="wantsToMaximiseContributions" color="primary">
+                I want to maximise contributions (use carry-forward if available)
+              </mat-checkbox>
             </div>
-          }
+          </mat-expansion-panel>
         </form>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <!-- Results Section -->
   <div class="results-section">
     @if (isLoading()) {
-      <div class="card loading-card">
-        <div class="loading-spinner"></div>
-        <p>Analysing your super...</p>
-      </div>
+      <mat-card class="loading-card">
+        <mat-card-content>
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Analysing your super...</p>
+        </mat-card-content>
+      </mat-card>
     } @else if (result()) {
       <!-- Warnings -->
       @if (warnings().length > 0) {
         <div class="warnings-card">
           @for (warning of warnings(); track warning) {
             <div class="warning-item">
-              <span class="warning-icon">!</span>
+              <mat-icon>warning</mat-icon>
               {{ warning }}
             </div>
           }
@@ -218,50 +202,44 @@
 
       <!-- Key Metrics -->
       <div class="summary-cards">
-        <div class="summary-card primary-card">
-          <span class="label">Suggested Contribution</span>
-          <span class="value">{{ formatCurrency(suggestedContribution()) }}</span>
-          <span class="subtext">Additional salary sacrifice this FY</span>
-        </div>
+        <mat-card class="summary-card primary-card">
+          <mat-card-content>
+            <span class="label">Suggested Contribution</span>
+            <span class="value">{{ formatCurrency(suggestedContribution()) }}</span>
+            <span class="subtext">Additional salary sacrifice this FY</span>
+          </mat-card-content>
+        </mat-card>
 
-        <div class="summary-card savings-card">
-          <span class="label">Estimated Tax Saving</span>
-          <span class="value positive">{{ formatCurrency(taxSaving()) }}</span>
-          <span class="subtext">At your marginal rate of {{ marginalRate() | number:'1.0-0' }}%</span>
-        </div>
+        <mat-card class="summary-card savings-card">
+          <mat-card-content>
+            <span class="label">Estimated Tax Saving</span>
+            <span class="value positive">{{ formatCurrency(taxSaving()) }}</span>
+            <span class="subtext">At your marginal rate of {{ marginalRate() | number:'1.0-0' }}%</span>
+          </mat-card-content>
+        </mat-card>
 
-        <div class="summary-card contribution-room-card">
-          <span class="label">Total Contribution Room</span>
-          <span class="value">{{ formatCurrency(result()!.totalContributionRoom) }}</span>
-          <span class="subtext">
-            @if (result()!.eligibleForCarryForward && result()!.carryForwardAvailable > 0) {
-              Includes {{ formatCurrency(result()!.carryForwardAvailable) }} carry-forward
-            } @else {
-              Standard cap: $30,000
-            }
-          </span>
-        </div>
+        <mat-card class="summary-card contribution-room-card">
+          <mat-card-content>
+            <span class="label">Total Contribution Room</span>
+            <span class="value">{{ formatCurrency(result()!.totalContributionRoom) }}</span>
+            <span class="subtext">
+              @if (result()!.eligibleForCarryForward && result()!.carryForwardAvailable > 0) {
+                Includes {{ formatCurrency(result()!.carryForwardAvailable) }} carry-forward
+              } @else {
+                Standard cap: $30,000
+              }
+            </span>
+          </mat-card-content>
+        </mat-card>
       </div>
-
-      <!-- Strategy Summary -->
-      @if (result()!.strategySummary) {
-        <div class="card strategy-card">
-          <div class="card__header">
-            <h3>Your Strategy</h3>
-          </div>
-          <div class="card__body">
-            <p class="strategy-summary">{{ result()!.strategySummary }}</p>
-          </div>
-        </div>
-      }
 
       <!-- Recommendations -->
       @if (recommendations().length > 0) {
-        <div class="card recommendations-card">
-          <div class="card__header">
-            <h3>Recommendations</h3>
-          </div>
-          <div class="card__body">
+        <mat-card class="recommendations-card">
+          <mat-card-header>
+            <mat-card-title>Recommendations</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
             <div class="recommendations-list">
               @for (rec of recommendations(); track rec.title) {
                 <div class="recommendation-item" [class]="getPriorityClass(rec.priority)">
@@ -282,16 +260,16 @@
                 </div>
               }
             </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
       }
 
       <!-- Detailed Breakdown -->
-      <div class="card details-card">
-        <div class="card__header">
-          <h3>Detailed Analysis</h3>
-        </div>
-        <div class="card__body">
+      <mat-card class="details-card">
+        <mat-card-header>
+          <mat-card-title>Detailed Analysis</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div class="details-grid">
             <!-- Concessional -->
             <div class="detail-section">
@@ -400,11 +378,12 @@
               }
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Info Note -->
       <div class="info-note">
+        <mat-icon>info</mat-icon>
         <p>
           <strong>Note:</strong> This analysis is based on FY 2025-26 rules.
           Contribution caps and thresholds may change. Consult a financial adviser for personalised advice.

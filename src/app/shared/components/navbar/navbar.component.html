@@ -1,120 +1,89 @@
-<nav class="navbar">
+<mat-toolbar class="navbar">
   <div class="navbar__container container">
-    <!-- Logo -->
-    <a routerLink="/" class="navbar__logo">
-      <span class="navbar__logo-text">AusFinance</span>
+    <!-- Logo/Wordmark -->
+    <a [routerLink]="isAuthenticated() ? '/dashboard' : '/'" class="navbar__logo">
+      <span class="navbar__logo-prosper">Prosper</span><span class="navbar__logo-aus">Aus</span>
     </a>
 
     @if (isAuthenticated()) {
       <!-- Desktop Navigation (Authenticated) -->
-      <div class="navbar__nav hide-mobile">
-        <a routerLink="/dashboard" routerLinkActive="active" class="navbar__link">
+      <nav class="navbar__nav hide-mobile">
+        <a mat-button routerLink="/dashboard" routerLinkActive="active" class="navbar__link">
           Dashboard
         </a>
 
-        <!-- Tools Dropdown -->
-        <div class="navbar__dropdown" (mouseleave)="closeDropdowns()">
-          <button
-            class="navbar__link navbar__dropdown-trigger"
-            (click)="toggleToolsDropdown()"
-            (mouseenter)="isToolsDropdownOpen.set(true)"
-          >
-            Tools
-            <svg class="navbar__dropdown-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-          @if (isToolsDropdownOpen()) {
-            <div class="navbar__dropdown-menu">
-              <a routerLink="/projections" class="navbar__dropdown-item" (click)="closeDropdowns()">
-                Net Worth Projection
-              </a>
-              <a routerLink="/equity-recycling" class="navbar__dropdown-item" (click)="closeDropdowns()">
-                Equity Recycling Calculator
-              </a>
-              <a routerLink="/fire-calculator" class="navbar__dropdown-item" (click)="closeDropdowns()">
-                FIRE Calculator
-              </a>
-              <a routerLink="/super-optimiser" class="navbar__dropdown-item" (click)="closeDropdowns()">
-                Super Optimiser
-              </a>
-              <a routerLink="/property-analyser" class="navbar__dropdown-item" (click)="closeDropdowns()">
-                Property Analyser
-              </a>
-            </div>
-          }
-        </div>
-
-        <a routerLink="/portfolio" routerLinkActive="active" class="navbar__link">
+        <a mat-button routerLink="/portfolio" routerLinkActive="active" class="navbar__link">
           Portfolio
         </a>
-        <a routerLink="/cash-flow" routerLinkActive="active" class="navbar__link">
-          Cash Flow
+        <a mat-button routerLink="/income-expenses" routerLinkActive="active" class="navbar__link">
+          Income/Expenses
         </a>
-        <a routerLink="/analyse" routerLinkActive="active" class="navbar__link">
-          Analyse
-        </a>
-      </div>
+
+        <!-- Tools Menu -->
+        <button mat-button [matMenuTriggerFor]="toolsMenu" class="navbar__link">
+          Tools
+          <mat-icon iconPositionEnd>expand_more</mat-icon>
+        </button>
+        <mat-menu #toolsMenu="matMenu" class="navbar__menu">
+          <button mat-menu-item (click)="navigateTo('/projections')">
+            <mat-icon>trending_up</mat-icon>
+            <span>Net Worth Projection</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/equity-recycling')">
+            <mat-icon>autorenew</mat-icon>
+            <span>Equity Recycling</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/fire-calculator')">
+            <mat-icon>local_fire_department</mat-icon>
+            <span>FIRE Calculator</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/super-optimiser')">
+            <mat-icon>savings</mat-icon>
+            <span>Super Optimiser</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/property-analyser')">
+            <mat-icon>home</mat-icon>
+            <span>Property Analyser</span>
+          </button>
+        </mat-menu>
+      </nav>
 
       <!-- Desktop User Menu -->
       <div class="navbar__actions hide-mobile">
-        <div class="navbar__dropdown" (mouseleave)="closeDropdowns()">
-          <button
-            class="navbar__avatar"
-            (click)="toggleUserDropdown()"
-            (mouseenter)="isUserDropdownOpen.set(true)"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="navbar__avatar">
+          <mat-icon>person</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="navbar__menu-header">
+            {{ user()?.email }}
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="navigateTo('/profile')">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
           </button>
-          @if (isUserDropdownOpen()) {
-            <div class="navbar__dropdown-menu navbar__dropdown-menu--right">
-              <div class="navbar__dropdown-header">
-                {{ user()?.email }}
-              </div>
-              <a routerLink="/profile" class="navbar__dropdown-item" (click)="closeDropdowns()">
-                Profile Settings
-              </a>
-              <button class="navbar__dropdown-item navbar__dropdown-item--danger" (click)="signOut()">
-                Sign out
-              </button>
-            </div>
-          }
-        </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="signOut()" class="navbar__menu-item--danger">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+          </button>
+        </mat-menu>
       </div>
 
       <!-- Mobile Menu Button -->
-      <button class="navbar__mobile-toggle hide-desktop" (click)="toggleMobileMenu()">
-        @if (isMobileMenuOpen()) {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        } @else {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        }
+      <button mat-icon-button class="hide-desktop" (click)="toggleMobileMenu()">
+        <mat-icon>{{ isMobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
       </button>
     } @else {
       <!-- Desktop Navigation (Not Authenticated) -->
       <div class="navbar__actions hide-mobile">
-        <a routerLink="/auth/login" class="btn btn--secondary">Sign in</a>
-        <a routerLink="/auth/signup" class="btn btn--primary">Get started</a>
+        <a mat-button routerLink="/auth/login">Sign in</a>
+        <a mat-flat-button color="primary" routerLink="/auth/signup">Get Started</a>
       </div>
 
       <!-- Mobile Menu Button -->
-      <button class="navbar__mobile-toggle hide-desktop" (click)="toggleMobileMenu()">
-        @if (isMobileMenuOpen()) {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        } @else {
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        }
+      <button mat-icon-button class="hide-desktop" (click)="toggleMobileMenu()">
+        <mat-icon>{{ isMobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
       </button>
     }
   </div>
@@ -126,47 +95,61 @@
         <div class="navbar__mobile-header">
           {{ user()?.email }}
         </div>
-        <a routerLink="/dashboard" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/dashboard" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>dashboard</mat-icon>
           Dashboard
         </a>
-        <a routerLink="/projections" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <div class="navbar__mobile-section">Tools</div>
+        <a mat-button class="navbar__mobile-link" routerLink="/projections" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>trending_up</mat-icon>
           Net Worth Projection
         </a>
-        <a routerLink="/equity-recycling" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/equity-recycling" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>autorenew</mat-icon>
           Equity Recycling
         </a>
-        <a routerLink="/fire-calculator" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/fire-calculator" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>local_fire_department</mat-icon>
           FIRE Calculator
         </a>
-        <a routerLink="/super-optimiser" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/super-optimiser" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>savings</mat-icon>
           Super Optimiser
         </a>
-        <a routerLink="/property-analyser" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/property-analyser" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>home</mat-icon>
           Property Analyser
         </a>
-        <a routerLink="/portfolio" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/analyse" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>receipt_long</mat-icon>
+          Expenses Analyser
+        </a>
+        <div class="navbar__mobile-section">Portfolio</div>
+        <a mat-button class="navbar__mobile-link" routerLink="/portfolio" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>pie_chart</mat-icon>
           Portfolio
         </a>
-        <a routerLink="/cash-flow" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/cash-flow" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>account_balance_wallet</mat-icon>
           Cash Flow
         </a>
-        <a routerLink="/analyse" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
-          Analyse
+        <div class="navbar__mobile-section">Account</div>
+        <a mat-button class="navbar__mobile-link" routerLink="/profile" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>settings</mat-icon>
+          Settings
         </a>
-        <a routerLink="/profile" routerLinkActive="active" class="navbar__mobile-link" (click)="toggleMobileMenu()">
-          Profile
-        </a>
-        <button class="navbar__mobile-link navbar__mobile-link--danger" (click)="signOut()">
+        <button mat-button class="navbar__mobile-link navbar__mobile-link--danger" (click)="signOut()">
+          <mat-icon>logout</mat-icon>
           Sign out
         </button>
       } @else {
-        <a routerLink="/auth/login" class="navbar__mobile-link" (click)="toggleMobileMenu()">
+        <a mat-button class="navbar__mobile-link" routerLink="/auth/login" (click)="toggleMobileMenu()">
           Sign in
         </a>
-        <a routerLink="/auth/signup" class="navbar__mobile-link navbar__mobile-link--primary" (click)="toggleMobileMenu()">
-          Get started
+        <a mat-flat-button color="primary" class="navbar__mobile-link--primary" routerLink="/auth/signup" (click)="toggleMobileMenu()">
+          Get Started
         </a>
       }
     </div>
   }
-</nav>
+</mat-toolbar>

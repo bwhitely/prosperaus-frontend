@@ -1,31 +1,68 @@
 // ===========================================
-// COLOUR PALETTE - Professional Finance Aesthetic
+// PROSPERAUS - Modern SaaS Design System
+// ===========================================
+// A clean, white-focused theme with vibrant accents
+// Tech startup / SaaS aesthetic
+
+// ===========================================
+// COLOUR PALETTE
 // ===========================================
 
-// Primary - Deep navy: trust, stability
-$color-primary: #1a365d;
-$color-primary-light: #2c5282;
-$color-primary-dark: #0f2442;
+// Primary - Indigo (modern, tech-forward)
+$color-primary: #6366f1;              // Vibrant indigo
+$color-primary-light: #818cf8;        // Light indigo
+$color-primary-dark: #4f46e5;         // Deep indigo
 
-// Accent - Green: growth, money, positive
-$color-accent: #38a169;
-$color-accent-light: #68d391;
-$color-accent-dark: #276749;
+// Secondary - Slate (professional, neutral)
+$color-secondary: #64748b;            // Slate
+$color-secondary-light: #94a3b8;      // Light slate
+$color-secondary-dark: #475569;       // Deep slate
+
+// Legacy aliases for backwards compatibility
+$color-gold: $color-primary;
+$color-gold-light: $color-primary-light;
+$color-gold-dark: $color-primary-dark;
+$color-gold-muted: rgba($color-primary, 0.08);
+
+// Accent - Emerald (growth, success, money)
+$color-accent: #10b981;               // Emerald
+$color-accent-light: #34d399;         // Light emerald
+$color-accent-dark: #059669;          // Deep emerald
+
+// Emerald alias
+$color-emerald: $color-accent;
+$color-emerald-light: $color-accent-light;
+$color-emerald-dark: $color-accent-dark;
 
 // Semantic colours
-$color-negative: #e53e3e;        // Red - losses, warnings
-$color-warning: #dd6b20;         // Orange - caution
-$color-info: #3182ce;            // Blue - information
+$color-positive: #10b981;             // Green for gains
+$color-positive-light: #34d399;       // Light green
+$color-positive-muted: rgba(16, 185, 129, 0.08);
+$color-negative: #ef4444;             // Red for losses
+$color-negative-muted: rgba(239, 68, 68, 0.08);
+$color-warning: #f59e0b;              // Amber for warnings
+$color-warning-muted: rgba(245, 158, 11, 0.08);
+$color-info: #3b82f6;                 // Blue for info
+$color-info-muted: rgba(59, 130, 246, 0.08);
 
-// Neutral palette
-$color-background: #f7fafc;      // Light grey background
-$color-surface: #ffffff;         // Card/panel backgrounds
-$color-border: #e2e8f0;
+// Surface colours (white-focused light theme)
+$color-background: #ffffff;           // Pure white background
+$color-surface: #ffffff;              // White cards/panels
+$color-surface-elevated: #ffffff;     // Elevated elements
+$color-surface-hover: #f8fafc;        // Subtle hover state
+$color-surface-alt: #f8fafc;          // Alternative surface (for sections)
+
+// Border colours
+$color-border: #e2e8f0;               // Light gray borders
+$color-border-strong: #cbd5e1;        // Stronger borders
+$color-border-focus: $color-primary;  // Focus state borders
+$color-border-gold: rgba($color-primary, 0.2);  // Legacy: Primary accent borders
 
 // Text colours
-$color-text-primary: #1a202c;
-$color-text-secondary: #4a5568;
-$color-text-muted: #a0aec0;
+$color-text-primary: #0f172a;         // Near black - primary text
+$color-text-secondary: #475569;       // Medium gray - secondary text
+$color-text-muted: #94a3b8;           // Light gray - muted text
+$color-text-inverse: #ffffff;         // White - text on dark backgrounds
 
 // ===========================================
 // SPACING SCALE
@@ -36,6 +73,8 @@ $spacing-md: 1rem;      // 16px
 $spacing-lg: 1.5rem;    // 24px
 $spacing-xl: 2rem;      // 32px
 $spacing-2xl: 3rem;     // 48px
+$spacing-3xl: 4rem;     // 64px
+$spacing-4xl: 6rem;     // 96px
 
 // ===========================================
 // BORDER RADIUS
@@ -43,20 +82,37 @@ $spacing-2xl: 3rem;     // 48px
 $radius-sm: 4px;
 $radius-md: 8px;
 $radius-lg: 12px;
+$radius-xl: 16px;
+$radius-2xl: 24px;
 $radius-full: 9999px;
 
 // ===========================================
-// SHADOWS
+// SHADOWS - Refined for light theme
 // ===========================================
 $shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+
+// Focus ring
+$shadow-focus: 0 0 0 3px rgba($color-primary, 0.2);
+
+// Glow effects (legacy - adapted for light theme)
+$glow-gold: 0 0 0 3px rgba($color-primary, 0.15);
+$glow-emerald: 0 0 0 3px rgba($color-accent, 0.15);
 
 // ===========================================
 // TYPOGRAPHY
 // ===========================================
-$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$font-family-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+// Display font - Inter for modern SaaS look
+$font-family-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+// Body font - Clean, modern sans-serif
+$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+// Numbers - Tabular figures for clean alignment
+$font-family-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
 // Font sizes
 $font-size-xs: 0.75rem;    // 12px
@@ -67,6 +123,9 @@ $font-size-xl: 1.25rem;    // 20px
 $font-size-2xl: 1.5rem;    // 24px
 $font-size-3xl: 2rem;      // 32px
 $font-size-4xl: 2.5rem;    // 40px
+$font-size-5xl: 3rem;      // 48px
+$font-size-6xl: 3.75rem;   // 60px
+$font-size-7xl: 4.5rem;    // 72px
 
 // Font weights
 $font-weight-normal: 400;
@@ -75,9 +134,16 @@ $font-weight-semibold: 600;
 $font-weight-bold: 700;
 
 // Line heights
-$line-height-tight: 1.25;
+$line-height-tight: 1.2;
+$line-height-snug: 1.35;
 $line-height-normal: 1.5;
 $line-height-relaxed: 1.75;
+
+// Letter spacing
+$letter-spacing-tight: -0.02em;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.05em;
+$letter-spacing-wider: 0.1em;
 
 // ===========================================
 // BREAKPOINTS
@@ -86,6 +152,7 @@ $breakpoint-sm: 640px;
 $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;
 $breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
 
 // ===========================================
 // Z-INDEX SCALE
@@ -102,5 +169,19 @@ $z-index-tooltip: 700;
 // TRANSITIONS
 // ===========================================
 $transition-fast: 0.1s ease;
-$transition-base: 0.15s ease;
+$transition-base: 0.2s ease;
 $transition-slow: 0.3s ease;
+$transition-slower: 0.5s ease;
+
+// Cubic bezier for smooth animations
+$ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+$ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+
+// ===========================================
+// GRADIENTS
+// ===========================================
+$gradient-primary: linear-gradient(135deg, $color-primary, #8b5cf6);
+$gradient-surface: linear-gradient(180deg, $color-surface, $color-surface-alt);
+$gradient-hero: linear-gradient(180deg, $color-surface 0%, $color-surface-alt 100%);
+$gradient-accent: linear-gradient(135deg, $color-accent, #06b6d4);
+$gradient-subtle: linear-gradient(180deg, rgba($color-primary, 0.02) 0%, transparent 100%);

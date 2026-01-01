@@ -1,67 +1,66 @@
 <div class="page-header">
-  <div class="header-content">
-    <div>
-      <h1>FIRE Calculator</h1>
-      <p class="subtitle">Calculate your path to Financial Independence, Retire Early</p>
-    </div>
-    <div class="header-actions">
-      @if (scenarios().length > 0) {
-        <button class="btn btn--secondary" (click)="openLoadModal()">
-          Load Scenario
-        </button>
-      }
-      @if (result()) {
-        <button class="btn btn--secondary" (click)="openSaveModal()">
-          {{ currentScenarioId() ? 'Update' : 'Save' }} Scenario
-        </button>
-      }
-      @if (currentScenarioId()) {
-        <button class="btn btn--ghost" (click)="newScenario()">New</button>
-      }
-    </div>
+  <div class="page-header__content">
+    <h1>FIRE Calculator</h1>
+    <p class="subtitle">Calculate your path to Financial Independence, Retire Early</p>
+    @if (getCurrentScenarioName(); as name) {
+      <span class="scenario-badge">{{ name }}</span>
+    }
   </div>
-  @if (getCurrentScenarioName()) {
-    <div class="current-scenario">
-      <span class="scenario-label">Current:</span>
-      <span class="scenario-name">{{ getCurrentScenarioName() }}</span>
-    </div>
-  }
+  <div class="page-header__actions">
+    <button mat-stroked-button (click)="newScenario()" [disabled]="!currentScenarioId()">
+      <mat-icon>add</mat-icon>
+      New
+    </button>
+    <button mat-stroked-button (click)="openLoadForm()" [disabled]="scenarios().length === 0">
+      <mat-icon>folder_open</mat-icon>
+      Load ({{ scenarios().length }})
+    </button>
+    <button mat-flat-button color="primary" (click)="openSaveForm()" [disabled]="!result()">
+      <mat-icon>save</mat-icon>
+      {{ currentScenarioId() ? 'Update' : 'Save' }}
+    </button>
+  </div>
 </div>
 
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
 <div class="calculator-layout">
   <!-- Input Section -->
   <div class="input-section">
-    <div class="card">
-      <div class="card__header">
-        <h2>Your Details</h2>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Your Details</mat-card-title>
         @if (isPrefilling()) {
-          <span class="loading-badge">Loading your data...</span>
+          <span class="loading-badge">
+            <mat-spinner diameter="16"></mat-spinner>
+            Loading your data...
+          </span>
         }
-      </div>
-      <div class="card__body">
+      </mat-card-header>
+
+      <mat-card-content>
         <form [formGroup]="form">
           <!-- Personal Details -->
           <div class="form-section">
             <h3>Personal</h3>
             <div class="form-row">
-              <div class="form-group">
-                <label for="currentAge">Current Age</label>
-                <input type="number" id="currentAge" formControlName="currentAge" min="18" max="80">
-              </div>
-              <div class="form-group">
-                <label for="targetRetirementAge">
-                  Target FIRE Age
-                  <span class="optional">(optional)</span>
-                </label>
-                <input type="number" id="targetRetirementAge" formControlName="targetRetirementAge" min="30" max="100" placeholder="Auto-calculate">
-                <span class="help-text">Leave blank to auto-calculate</span>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Current Age</mat-label>
+                <input matInput type="number" formControlName="currentAge" min="18" max="80">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Target FIRE Age (optional)</mat-label>
+                <input matInput type="number" formControlName="targetRetirementAge" min="30" max="100" placeholder="Auto-calculate">
+                <mat-hint>Leave blank to auto-calculate</mat-hint>
+              </mat-form-field>
             </div>
           </div>
 
@@ -69,21 +68,18 @@
           <div class="form-section">
             <h3>Current Assets</h3>
             <div class="form-row">
-              <div class="form-group">
-                <label for="currentSuperBalance">Super Balance</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="currentSuperBalance" formControlName="currentSuperBalance" min="0">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="currentNonSuperInvestments">Non-Super Investments</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="currentNonSuperInvestments" formControlName="currentNonSuperInvestments" min="0">
-                </div>
-                <span class="help-text">Shares, ETFs, investment properties</span>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Super Balance</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="currentSuperBalance" min="0">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Non-Super Investments</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="currentNonSuperInvestments" min="0">
+                <mat-hint>Shares, ETFs, investment properties</mat-hint>
+              </mat-form-field>
             </div>
           </div>
 
@@ -91,21 +87,19 @@
           <div class="form-section">
             <h3>Annual Cash Flow</h3>
             <div class="form-row">
-              <div class="form-group">
-                <label for="annualGrossIncome">Gross Income</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="annualGrossIncome" formControlName="annualGrossIncome" min="0">
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="annualExpenses">Annual Expenses</label>
-                <div class="input-prefix">
-                  <span>$</span>
-                  <input type="number" id="annualExpenses" formControlName="annualExpenses" min="0">
-                </div>
-              </div>
+              <mat-form-field appearance="outline">
+                <mat-label>Gross Income</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="annualGrossIncome" min="0">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Annual Expenses</mat-label>
+                <span matTextPrefix>$&nbsp;</span>
+                <input matInput type="number" formControlName="annualExpenses" min="0">
+              </mat-form-field>
             </div>
+
             <div class="savings-rate-display">
               <span class="label">Savings Rate:</span>
               <span class="value" [class.excellent]="savingsRate() >= 50" [class.good]="savingsRate() >= 20 && savingsRate() < 50">
@@ -114,137 +108,140 @@
             </div>
           </div>
 
-          <!-- Advanced Options Toggle -->
-          <button type="button" class="advanced-toggle" (click)="toggleAdvanced()">
-            {{ showAdvanced() ? 'Hide' : 'Show' }} Advanced Options
-            <span class="toggle-icon">{{ showAdvanced() ? '−' : '+' }}</span>
-          </button>
+          <!-- Advanced Options -->
+          <mat-expansion-panel class="advanced-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>Advanced Options</mat-panel-title>
+              <mat-panel-description>Returns, contributions & more</mat-panel-description>
+            </mat-expansion-panel-header>
 
-          @if (showAdvanced()) {
-            <div class="advanced-section">
-              <!-- Super Contributions -->
-              <div class="form-section">
-                <h3>Super Contributions</h3>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="superGuaranteeRate">SG Rate (%)</label>
-                    <div class="input-suffix">
-                      <input type="number" id="superGuaranteeRate" formControlName="superGuaranteeRate" min="0" max="30" step="0.5">
-                      <span>%</span>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="annualSalarySacrifice">Salary Sacrifice p.a.</label>
-                    <div class="input-prefix">
-                      <span>$</span>
-                      <input type="number" id="annualSalarySacrifice" formControlName="annualSalarySacrifice" min="0">
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <!-- Super Contributions -->
+            <div class="form-section">
+              <h4>Super Contributions</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>SG Rate</mat-label>
+                  <input matInput type="number" formControlName="superGuaranteeRate" min="0" max="30" step="0.5">
+                  <span matTextSuffix>%</span>
+                </mat-form-field>
 
-              <!-- Return Assumptions -->
-              <div class="form-section">
-                <h3>Return Assumptions</h3>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="preRetirementReturnRate">Pre-FIRE Return (%)</label>
-                    <div class="input-suffix">
-                      <input type="number" id="preRetirementReturnRate" formControlName="preRetirementReturnRate" min="0" max="20" step="0.5">
-                      <span>%</span>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="postRetirementReturnRate">Post-FIRE Return (%)</label>
-                    <div class="input-suffix">
-                      <input type="number" id="postRetirementReturnRate" formControlName="postRetirementReturnRate" min="0" max="15" step="0.5">
-                      <span>%</span>
-                    </div>
-                    <span class="help-text">More conservative in retirement</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Other Settings -->
-              <div class="form-section">
-                <h3>Other Settings</h3>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="inflationRate">Inflation Rate (%)</label>
-                    <div class="input-suffix">
-                      <input type="number" id="inflationRate" formControlName="inflationRate" min="0" max="10" step="0.1">
-                      <span>%</span>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="safeWithdrawalRate">Safe Withdrawal Rate (%)</label>
-                    <div class="input-suffix">
-                      <input type="number" id="safeWithdrawalRate" formControlName="safeWithdrawalRate" min="2" max="10" step="0.1">
-                      <span>%</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" formControlName="includeAgePension">
-                    Include Age Pension (from age 67)
-                  </label>
-                  <span class="help-text">Based on asset test for homeowner singles</span>
-                </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Salary Sacrifice p.a.</mat-label>
+                  <span matTextPrefix>$&nbsp;</span>
+                  <input matInput type="number" formControlName="annualSalarySacrifice" min="0">
+                </mat-form-field>
               </div>
             </div>
-          }
+
+            <!-- Return Assumptions -->
+            <div class="form-section">
+              <h4>Return Assumptions</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Pre-FIRE Return</mat-label>
+                  <input matInput type="number" formControlName="preRetirementReturnRate" min="0" max="20" step="0.5">
+                  <span matTextSuffix>%</span>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Post-FIRE Return</mat-label>
+                  <input matInput type="number" formControlName="postRetirementReturnRate" min="0" max="15" step="0.5">
+                  <span matTextSuffix>%</span>
+                  <mat-hint>More conservative in retirement</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Other Settings -->
+            <div class="form-section">
+              <h4>Other Settings</h4>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Inflation Rate</mat-label>
+                  <input matInput type="number" formControlName="inflationRate" min="0" max="10" step="0.1">
+                  <span matTextSuffix>%</span>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Safe Withdrawal Rate</mat-label>
+                  <input matInput type="number" formControlName="safeWithdrawalRate" min="2" max="10" step="0.1">
+                  <span matTextSuffix>%</span>
+                </mat-form-field>
+              </div>
+
+              <mat-checkbox formControlName="includeAgePension" color="primary">
+                Include Age Pension (from age 67)
+              </mat-checkbox>
+              <p class="checkbox-hint">Based on asset test for homeowner singles</p>
+            </div>
+          </mat-expansion-panel>
         </form>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <!-- Results Section -->
   <div class="results-section">
     @if (isLoading()) {
-      <div class="card loading-card">
-        <div class="loading-spinner"></div>
-        <p>Calculating your FIRE projection...</p>
-      </div>
+      <mat-card class="loading-card">
+        <mat-card-content>
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Calculating your FIRE projection...</p>
+        </mat-card-content>
+      </mat-card>
     } @else if (result()) {
       <!-- Summary Cards -->
       <div class="summary-cards">
-        <div class="summary-card fire-number-card">
-          <span class="label">FIRE Number</span>
-          <span class="value">{{ formatCurrency(fireNumber()) }}</span>
-          <span class="subtext">{{ form.get('annualExpenses')?.value | currency:'AUD':'symbol':'1.0-0' }} / {{ form.get('safeWithdrawalRate')?.value }}%</span>
-        </div>
+        <mat-card class="summary-card fire-number-card">
+          <mat-card-content>
+            <mat-icon>local_fire_department</mat-icon>
+            <span class="label">FIRE Number</span>
+            <span class="value">{{ formatCurrency(fireNumber()) }}</span>
+            <span class="subtext">{{ form.get('annualExpenses')?.value | currency:'AUD':'symbol':'1.0-0' }} / {{ form.get('safeWithdrawalRate')?.value }}%</span>
+          </mat-card-content>
+        </mat-card>
 
         @if (canAchieveFire()) {
-          <div class="summary-card fire-age-card">
-            <span class="label">FIRE Age</span>
-            <span class="value">{{ fireAge() }}</span>
-            <span class="subtext">{{ yearsToFire() }} years from now</span>
-          </div>
+          <mat-card class="summary-card fire-age-card">
+            <mat-card-content>
+              <mat-icon>celebration</mat-icon>
+              <span class="label">FIRE Age</span>
+              <span class="value">{{ fireAge() }}</span>
+              <span class="subtext">{{ yearsToFire() }} years from now</span>
+            </mat-card-content>
+          </mat-card>
         } @else {
-          <div class="summary-card fire-age-card warning">
-            <span class="label">FIRE Status</span>
-            <span class="value">Not Achievable</span>
-            <span class="subtext">With current inputs</span>
-          </div>
+          <mat-card class="summary-card fire-age-card warning">
+            <mat-card-content>
+              <mat-icon>warning</mat-icon>
+              <span class="label">FIRE Status</span>
+              <span class="value">Not Achievable</span>
+              <span class="subtext">With current inputs</span>
+            </mat-card-content>
+          </mat-card>
         }
 
-        <div class="summary-card assets-card">
-          <span class="label">Assets at FIRE</span>
-          <span class="value">{{ formatCurrency(totalAssetsAtFire()) }}</span>
-          <span class="subtext">Safe withdrawal: {{ formatCurrency(safeWithdrawalAmount()) }}/yr</span>
-        </div>
+        <mat-card class="summary-card assets-card">
+          <mat-card-content>
+            <mat-icon>account_balance</mat-icon>
+            <span class="label">Assets at FIRE</span>
+            <span class="value">{{ formatCurrency(totalAssetsAtFire()) }}</span>
+            <span class="subtext">Safe withdrawal: {{ formatCurrency(safeWithdrawalAmount()) }}/yr</span>
+          </mat-card-content>
+        </mat-card>
       </div>
 
-      <!-- Progress Bar -->
-      <div class="card progress-card">
-        <div class="card__header">
-          <h3>Progress to FIRE</h3>
-        </div>
-        <div class="card__body">
-          <div class="progress-bar-container">
-            <div class="progress-bar" [style.width.%]="getProgressToFire()"></div>
-          </div>
+      <!-- Progress Card -->
+      <mat-card class="progress-card">
+        <mat-card-header>
+          <mat-card-title>Progress to FIRE</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getProgressToFire()"
+            color="primary">
+          </mat-progress-bar>
           <div class="progress-labels">
             <span class="current">
               Current: {{ formatCurrency((form.get('currentSuperBalance')?.value || 0) + (form.get('currentNonSuperInvestments')?.value || 0)) }}
@@ -254,33 +251,34 @@
             </span>
           </div>
           <div class="progress-percent">{{ getProgressToFire() | number:'1.0-0' }}% complete</div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Insights -->
       @if (result()!.insights.length > 0) {
-        <div class="card insights-card">
-          <div class="card__header">
-            <h3>Key Insights</h3>
-          </div>
-          <div class="card__body">
+        <mat-card class="insights-card">
+          <mat-card-header>
+            <mat-card-title>Key Insights</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
             <ul class="insights-list">
               @for (insight of result()!.insights; track insight) {
                 <li [class.warning]="insight.toLowerCase().includes('warning')">
+                  <mat-icon>{{ insight.toLowerCase().includes('warning') ? 'warning' : 'lightbulb' }}</mat-icon>
                   {{ insight }}
                 </li>
               }
             </ul>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
       }
 
       <!-- Milestones -->
-      <div class="card milestones-card">
-        <div class="card__header">
-          <h3>Key Milestones</h3>
-        </div>
-        <div class="card__body">
+      <mat-card class="milestones-card">
+        <mat-card-header>
+          <mat-card-title>Key Milestones</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div class="milestones-grid">
             @if (canAchieveFire()) {
               <div class="milestone fire-milestone">
@@ -308,18 +306,18 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Year-by-Year Projections -->
-      <div class="card projections-card">
-        <div class="card__header">
-          <h3>Year-by-Year Projection</h3>
-          <button class="btn btn--ghost btn--sm" (click)="toggleAllProjections()">
+      <mat-card class="projections-card">
+        <mat-card-header>
+          <mat-card-title>Year-by-Year Projection</mat-card-title>
+          <button mat-stroked-button (click)="toggleAllProjections()">
             {{ showAllProjections() ? 'Show Milestones' : 'Show All Years' }}
           </button>
-        </div>
-        <div class="card__body">
+        </mat-card-header>
+        <mat-card-content>
           <div class="table-container">
             <table class="projections-table">
               <thead>
@@ -350,75 +348,80 @@
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     }
   </div>
 </div>
 
-<!-- Save Scenario Modal -->
-@if (showSaveModal()) {
-  <div class="modal-overlay" (click)="closeSaveModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h3>{{ currentScenarioId() ? 'Update' : 'Save' }} Scenario</h3>
-        <button class="modal__close" (click)="closeSaveModal()">&times;</button>
-      </div>
-      <div class="modal__body">
-        <div class="form-group">
-          <label for="scenarioName">Scenario Name</label>
-          <input
-            type="text"
-            id="scenarioName"
-            [value]="scenarioName()"
-            (input)="scenarioName.set($any($event.target).value)"
-            placeholder="e.g., Conservative FIRE Plan"
-            maxlength="100"
-          >
-        </div>
-      </div>
-      <div class="modal__footer">
-        <button class="btn btn--secondary" (click)="closeSaveModal()">Cancel</button>
-        <button
-          class="btn btn--primary"
-          (click)="saveScenario()"
-          [disabled]="!scenarioName().trim() || isSaving()"
-        >
-          {{ isSaving() ? 'Saving...' : 'Save' }}
-        </button>
-      </div>
-    </div>
-  </div>
+<!-- Save Scenario Inline Form -->
+@if (showSaveForm()) {
+  <mat-card class="inline-form">
+    <mat-card-header class="inline-form__header">
+      <mat-card-title>{{ currentScenarioId() ? 'Update' : 'Save' }} Scenario</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="inline-form__body">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Scenario Name</mat-label>
+        <input
+          matInput
+          type="text"
+          [value]="scenarioName()"
+          (input)="scenarioName.set($any($event.target).value)"
+          placeholder="e.g., Conservative FIRE Plan"
+          maxlength="100">
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions align="end" class="inline-form__footer">
+      <button mat-stroked-button (click)="closeSaveForm()">Cancel</button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="saveScenario()"
+        [disabled]="!scenarioName().trim() || isSaving()">
+        @if (isSaving()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        }
+        {{ isSaving() ? 'Saving...' : 'Save' }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
 }
 
-<!-- Load Scenario Modal -->
-@if (showLoadModal()) {
-  <div class="modal-overlay" (click)="closeLoadModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h3>Load Scenario</h3>
-        <button class="modal__close" (click)="closeLoadModal()">&times;</button>
-      </div>
-      <div class="modal__body">
-        @if (scenarios().length === 0) {
-          <p class="text-muted">No saved scenarios yet.</p>
-        } @else {
-          <ul class="scenario-list">
-            @for (scenario of scenarios(); track scenario.id) {
-              <li class="scenario-item" (click)="loadScenario(scenario)">
-                <div class="scenario-info">
-                  <span class="scenario-name">{{ scenario.name }}</span>
-                  <span class="scenario-date">{{ scenario.updatedAt | date:'short' }}</span>
-                </div>
-                <button class="btn btn--ghost btn--sm" (click)="deleteScenario(scenario, $event)">Delete</button>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-      <div class="modal__footer">
-        <button class="btn btn--secondary" (click)="closeLoadModal()">Close</button>
-      </div>
-    </div>
-  </div>
+<!-- Load Scenario Inline Form -->
+@if (showLoadForm()) {
+  <mat-card class="inline-form">
+    <mat-card-header class="inline-form__header">
+      <mat-card-title>Load Scenario</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="inline-form__body">
+      @if (scenarios().length === 0) {
+        <p class="empty-message">No saved scenarios yet.</p>
+      } @else {
+        <div class="scenario-list">
+          @for (scenario of scenarios(); track scenario.id) {
+            <div
+              class="scenario-item"
+              [class.scenario-item--active]="scenario.id === currentScenarioId()"
+              (click)="loadScenario(scenario)">
+              <div class="scenario-item__info">
+                <div class="scenario-item__name">{{ scenario.name }}</div>
+                <div class="scenario-item__date">Last updated: {{ scenario.updatedAt | date:'medium' }}</div>
+              </div>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="deleteScenario(scenario, $event)"
+                matTooltip="Delete scenario">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+    <mat-card-actions align="end" class="inline-form__footer">
+      <button mat-stroked-button (click)="closeLoadForm()">Close</button>
+    </mat-card-actions>
+  </mat-card>
 }

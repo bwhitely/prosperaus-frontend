@@ -10,7 +10,7 @@ import { PropertyAnalysisRequest, PropertyAnalysisResponse } from '../../shared/
 @Injectable({ providedIn: 'root' })
 export class PropertyAnalyserService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiBaseUrl}/api/v1/property`;
+  private readonly apiUrl = `${environment.apiBaseUrl}/property`;
 
   /**
    * Analyse an investment property.

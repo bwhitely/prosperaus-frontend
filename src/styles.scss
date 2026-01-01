@@ -1,6 +1,9 @@
 // ===========================================
-// AusFinance - Global Styles
+// ProsperAus - Global Styles with Angular Material
 // ===========================================
+
+// Angular Material Theming
+@use '@angular/material' as mat;
 
 // Import SCSS partials
 @use 'styles/variables' as *;
@@ -9,6 +12,98 @@
 @use 'styles/buttons';
 @use 'styles/forms';
 @use 'styles/cards';
+
+// ===========================================
+// ANGULAR MATERIAL CUSTOM THEME
+// ===========================================
+
+// Custom indigo palette for primary (modern SaaS look)
+$prosperaus-indigo: (
+  50: #eef2ff,
+  100: #e0e7ff,
+  200: #c7d2fe,
+  300: #a5b4fc,
+  400: #818cf8,
+  500: #6366f1,
+  600: #4f46e5,
+  700: #4338ca,
+  800: #3730a3,
+  900: #312e81,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  )
+);
+
+// Custom emerald palette for tertiary/accent
+$prosperaus-emerald: (
+  50: #ecfdf5,
+  100: #d1fae5,
+  200: #a7f3d0,
+  300: #6ee7b7,
+  400: #34d399,
+  500: #10b981,
+  600: #059669,
+  700: #047857,
+  800: #065f46,
+  900: #064e3b,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  )
+);
+
+// Apply Material theme with light mode
+html {
+  // Light theme configuration
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: $prosperaus-indigo,
+      tertiary: $prosperaus-emerald,
+    ),
+    typography: (
+      brand-family: 'Inter',
+      plain-family: 'Inter',
+    ),
+    density: 0,
+  ));
+
+  // Override Material surface colors to match our light theme
+  --mat-sys-surface: #{$color-surface};
+  --mat-sys-surface-container: #{$color-surface};
+  --mat-sys-surface-container-low: #{$color-background};
+  --mat-sys-surface-container-high: #{$color-surface};
+  --mat-sys-surface-container-highest: #{$color-surface-hover};
+  --mat-sys-on-surface: #{$color-text-primary};
+  --mat-sys-on-surface-variant: #{$color-text-secondary};
+  --mat-sys-outline: #{$color-border};
+  --mat-sys-outline-variant: #{$color-border-strong};
+  --mat-sys-background: #{$color-background};
+  --mat-sys-on-background: #{$color-text-primary};
+  --mat-sys-primary: #{$color-primary};
+  --mat-sys-on-primary: #{$color-text-inverse};
+  --mat-sys-secondary: #{$color-secondary};
+  --mat-sys-on-secondary: #{$color-text-inverse};
+  --mat-sys-error: #{$color-negative};
+  --mat-sys-on-error: #ffffff;
+}
 
 // ===========================================
 // CSS RESET & BASE STYLES
@@ -31,8 +126,216 @@ html {
 body {
   min-height: 100%;
   background-color: $color-background;
+  color: $color-text-primary;
+  font-family: $font-family-base;
   display: flex;
   flex-direction: column;
+  margin: 0;
+}
+
+// ===========================================
+// ANGULAR MATERIAL COMPONENT OVERRIDES
+// ===========================================
+
+// Form field styling
+.mat-mdc-form-field {
+  width: 100%;
+
+  .mdc-text-field {
+    background-color: $color-surface !important;
+    border-radius: $radius-md !important;
+  }
+
+  .mdc-text-field--outlined .mdc-notched-outline__leading,
+  .mdc-text-field--outlined .mdc-notched-outline__notch,
+  .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    border-color: $color-border !important;
+  }
+
+  .mdc-text-field--outlined:hover .mdc-notched-outline__leading,
+  .mdc-text-field--outlined:hover .mdc-notched-outline__notch,
+  .mdc-text-field--outlined:hover .mdc-notched-outline__trailing {
+    border-color: $color-border-strong !important;
+  }
+
+  .mdc-text-field--focused .mdc-notched-outline__leading,
+  .mdc-text-field--focused .mdc-notched-outline__notch,
+  .mdc-text-field--focused .mdc-notched-outline__trailing {
+    border-color: $color-primary !important;
+  }
+
+  .mat-mdc-floating-label {
+    color: $color-text-secondary !important;
+  }
+
+  .mdc-text-field--focused .mat-mdc-floating-label {
+    color: $color-primary !important;
+  }
+
+  input, textarea {
+    color: $color-text-primary !important;
+    caret-color: $color-primary !important;
+  }
+}
+
+// Button styling
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button {
+  font-family: $font-family-base !important;
+  font-weight: $font-weight-medium !important;
+  letter-spacing: 0.02em !important;
+  border-radius: $radius-md !important;
+}
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-flat-button.mat-primary {
+  background-color: $color-primary !important;
+  color: $color-text-inverse !important;
+
+  &:hover {
+    background-color: $color-primary-dark !important;
+  }
+}
+
+.mat-mdc-raised-button.mat-accent,
+.mat-mdc-flat-button.mat-accent {
+  background-color: $color-secondary !important;
+  color: $color-text-inverse !important;
+
+  &:hover {
+    background-color: $color-secondary-dark !important;
+  }
+}
+
+.mat-mdc-stroked-button {
+  border-color: $color-border !important;
+  color: $color-text-primary !important;
+
+  &:hover {
+    background-color: $color-surface-hover !important;
+  }
+}
+
+// Select dropdown styling
+.mat-mdc-select {
+  font-family: $font-family-base !important;
+}
+
+.mat-mdc-option {
+  font-family: $font-family-base !important;
+  background-color: $color-surface-elevated !important;
+
+  &:hover {
+    background-color: $color-surface-hover !important;
+  }
+
+  &.mat-mdc-option-active {
+    background-color: rgba($color-primary, 0.1) !important;
+  }
+}
+
+.mat-mdc-select-panel {
+  background-color: $color-surface-elevated !important;
+  border: 1px solid $color-border !important;
+  border-radius: $radius-md !important;
+}
+
+// Checkbox styling
+.mat-mdc-checkbox {
+  .mdc-checkbox__background {
+    border-color: $color-border !important;
+  }
+
+  &.mat-mdc-checkbox-checked .mdc-checkbox__background {
+    background-color: $color-primary !important;
+    border-color: $color-primary !important;
+  }
+}
+
+// Slider styling
+.mat-mdc-slider {
+  --mdc-slider-active-track-color: #{$color-primary};
+  --mdc-slider-inactive-track-color: #{$color-border};
+  --mdc-slider-handle-color: #{$color-primary};
+  --mdc-slider-focus-handle-color: #{$color-primary-light};
+  --mdc-slider-hover-handle-color: #{$color-primary-light};
+}
+
+// Card styling
+.mat-mdc-card {
+  background-color: $color-surface !important;
+  border: 1px solid $color-border !important;
+  border-radius: $radius-lg !important;
+  box-shadow: $shadow-md !important;
+}
+
+// Dialog styling
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #{$color-surface-elevated};
+
+  .mat-mdc-dialog-surface {
+    border: 1px solid $color-border !important;
+    border-radius: $radius-lg !important;
+  }
+}
+
+// Snackbar styling
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #{$color-surface-elevated};
+  --mdc-snackbar-supporting-text-color: #{$color-text-primary};
+}
+
+// Tab styling
+.mat-mdc-tab-group {
+  .mat-mdc-tab {
+    color: $color-text-secondary !important;
+
+    &.mdc-tab--active {
+      color: $color-primary !important;
+    }
+  }
+
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid $color-border;
+  }
+
+  .mdc-tab-indicator__content--underline {
+    border-color: $color-primary !important;
+  }
+}
+
+// Progress bar
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: #{$color-primary};
+  --mdc-linear-progress-track-color: #{$color-border};
+}
+
+// Progress spinner
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: #{$color-primary};
+}
+
+// Tooltip
+.mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: #{$color-surface-elevated};
+  --mdc-plain-tooltip-supporting-text-color: #{$color-text-primary};
+}
+
+// Menu
+.mat-mdc-menu-panel {
+  background-color: $color-surface-elevated !important;
+  border: 1px solid $color-border !important;
+  border-radius: $radius-md !important;
+}
+
+.mat-mdc-menu-item {
+  color: $color-text-primary !important;
+
+  &:hover {
+    background-color: $color-surface-hover !important;
+  }
 }
 
 // ===========================================

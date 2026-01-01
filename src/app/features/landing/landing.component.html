@@ -1,0 +1,206 @@
+<div class="landing">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero__content container">
+      <div class="hero__badge">
+        <span class="hero__badge-icon">🇦🇺</span>
+        Built for Australians
+      </div>
+
+      <h1 class="hero__title">
+        <span class="hero__title-line">Build Wealth.</span>
+        <span class="hero__title-line hero__title-line--accent">The Australian Way.</span>
+      </h1>
+
+      <p class="hero__subtitle">
+        The all-in-one platform for tracking your wealth, optimising your tax position,
+        and planning for financial independence — designed specifically for Australian
+        tax rules, superannuation, and investment strategies.
+      </p>
+
+      <div class="hero__actions">
+        <a mat-flat-button color="primary" routerLink="/auth/signup" class="hero__btn-primary">
+          Get Started Free
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </a>
+        <a mat-stroked-button routerLink="/auth/login" class="hero__btn-secondary">
+          Sign In
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <div class="features__header">
+        <h2 class="features__title">Everything You Need in One Place</h2>
+        <p class="features__subtitle">
+          Australian-specific tools for the serious wealth builder. No more spreadsheets,
+          no more guesswork, just clear insights powered by accurate calculators, factoring in Australian tax laws.
+        </p>
+      </div>
+
+      <div class="features__grid">
+        @for (feature of features; track feature.title) {
+          <mat-card class="feature-card">
+            <mat-card-content>
+              <div class="feature-card__icon">
+                @switch (feature.icon) {
+                  @case ('chart-line') {
+                    <mat-icon>trending_up</mat-icon>
+                  }
+                  @case ('recycle') {
+                    <mat-icon>autorenew</mat-icon>
+                  }
+                  @case ('fire') {
+                    <mat-icon>local_fire_department</mat-icon>
+                  }
+                  @case ('building') {
+                    <mat-icon>home</mat-icon>
+                  }
+                  @case ('piggy-bank') {
+                    <mat-icon>savings</mat-icon>
+                  }
+                  @case ('briefcase') {
+                    <mat-icon>pie_chart</mat-icon>
+                  }
+                }
+              </div>
+              <h3 class="feature-card__title">{{ feature.title }}</h3>
+              <p class="feature-card__description">{{ feature.description }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Australian Section -->
+  <section class="why-aus">
+    <div class="container">
+      <div class="why-aus__content">
+        <div class="why-aus__text">
+          <h2 class="why-aus__title">
+            Why <span class="text-primary">Australian-Specific</span> Matters
+          </h2>
+          <p class="why-aus__description">
+            US-centric financial tools don't understand our system. ProsperAus is built
+            from the ground up for Australian investors.
+          </p>
+
+          <ul class="why-aus__list">
+            <li>
+              <mat-icon class="check-icon">check_circle</mat-icon>
+              <span><strong>Tax Deductions</strong> — Factor in tax implications for negative gearing, borrow-to-invest</span>
+            </li>
+            <li>
+              <mat-icon class="check-icon">check_circle</mat-icon>
+              <span><strong>Superannuation</strong> — Contribution caps, carry-forward, Division 293</span>
+            </li>
+            <li>
+              <mat-icon class="check-icon">check_circle</mat-icon>
+              <span><strong>PAYG Tax Brackets</strong> — 2024-25 Stage 3 tax cuts included</span>
+            </li>
+            <li>
+              <mat-icon class="check-icon">check_circle</mat-icon>
+              <span><strong>Franking Credits</strong> — Proper dividend imputation calculations</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="why-aus__visual">
+          <mat-card class="why-aus__card">
+            <mat-card-header>
+              <mat-card-title class="why-aus__card-badge">Tax Optimisation Example</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="why-aus__calculation">
+                <div class="why-aus__calc-row">
+                  <span>Investment Income</span>
+                  <span class="currency">$15,000</span>
+                </div>
+                <div class="why-aus__calc-row">
+                  <span>Franking Credits</span>
+                  <span class="currency currency--positive">+$6,429</span>
+                </div>
+                <div class="why-aus__calc-row">
+                  <span>Deductible Interest</span>
+                  <span class="currency currency--positive">-$8,200</span>
+                </div>
+                <div class="why-aus__calc-divider"></div>
+                <div class="why-aus__calc-row why-aus__calc-row--total">
+                  <span>Tax Benefit</span>
+                  <span class="currency currency--accent">$5,847</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="container">
+      <div class="cta__content">
+        <h2 class="cta__title">Ready to Build Your Wealth?</h2>
+        <p class="cta__description">
+          Start tracking, optimising, and growing your wealth today.
+        </p>
+        <div class="cta__actions">
+          <a mat-flat-button color="primary" routerLink="/auth/signup" class="cta__btn">
+            Create Free Account
+            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </a>
+        </div>
+        <p class="cta__note">No credit card required. Free forever for core features.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__content">
+        <div class="footer__brand">
+          <a routerLink="/" class="footer__logo">
+            <span class="footer__logo-prosper">Prosper</span><span class="footer__logo-aus">Aus</span>
+          </a>
+          <p class="footer__tagline">Build wealth the Australian way.</p>
+        </div>
+
+        <div class="footer__links">
+          <div class="footer__section">
+            <h4>Tools</h4>
+            <a routerLink="/equity-recycling">Equity Recycling</a>
+            <a routerLink="/fire-calculator">FIRE Calculator</a>
+            <a routerLink="/super-optimiser">Super Optimiser</a>
+            <a routerLink="/property-analyser">Property Analyser</a>
+          </div>
+
+          <div class="footer__section">
+            <h4>Account</h4>
+            <a routerLink="/auth/login">Sign In</a>
+            <a routerLink="/auth/signup">Create Account</a>
+          </div>
+
+          <div class="footer__section">
+            <h4>Legal</h4>
+            <a routerLink="/terms">Terms of Service</a>
+            <a routerLink="/privacy">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; {{ currentYear }} ProsperAus. All rights reserved.</p>
+        <p class="footer__disclaimer">
+          This platform provides general information only and does not constitute financial advice.
+          Please consult a licensed financial adviser for personalised guidance.
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>

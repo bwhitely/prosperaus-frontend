@@ -12,7 +12,84 @@
   height: 100%;
 }
 
-// Allocation charts
+// Pie Chart Styles
+.pie-chart-container {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.pie-chart {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+.pie-slice {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform-origin: center;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+.pie-center {
+  fill: $color-surface;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 0;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-xs 0;
+    border-bottom: 1px solid rgba($color-border, 0.5);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+    flex-shrink: 0;
+  }
+}
+
+// Allocation charts (legacy bar style - kept for category breakdown)
 .allocation-chart {
   display: flex;
   flex-direction: column;

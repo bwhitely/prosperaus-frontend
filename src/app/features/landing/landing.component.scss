@@ -1,0 +1,599 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+// ===========================================
+// HERO SECTION
+// ===========================================
+.hero {
+  position: relative;
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  padding: $spacing-3xl 0;
+  background: $gradient-subtle;
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-md;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-full;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-lg;
+    box-shadow: $shadow-sm;
+  }
+
+  &__badge-icon {
+    font-size: $font-size-base;
+  }
+
+  &__title {
+    margin-bottom: $spacing-lg;
+  }
+
+  &__title-line {
+    display: block;
+    font-family: $font-family-display;
+    font-size: clamp($font-size-4xl, 8vw, $font-size-6xl);
+    font-weight: $font-weight-bold;
+    line-height: $line-height-tight;
+    letter-spacing: $letter-spacing-tight;
+    color: $color-text-primary;
+
+    &--accent {
+      background: $gradient-primary;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-xl;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+    max-width: 650px;
+    margin: 0 auto $spacing-xl;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-3xl;
+    flex-wrap: wrap;
+  }
+
+  &__btn-primary {
+    height: 48px !important;
+    padding: 0 $spacing-xl !important;
+    font-size: $font-size-base !important;
+  }
+
+  &__btn-secondary {
+    height: 48px !important;
+    padding: 0 $spacing-xl !important;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xl;
+    flex-wrap: wrap;
+    padding: $spacing-xl;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-md;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__stat {
+    text-align: center;
+  }
+
+  &__stat-value {
+    display: block;
+    font-family: $font-family-mono;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__stat-label {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__stat-divider {
+    width: 1px;
+    height: 40px;
+    background: $color-border;
+
+    @include respond-to-max(md) {
+      display: none;
+    }
+  }
+}
+
+// ===========================================
+// FEATURES SECTION
+// ===========================================
+.features {
+  padding: $spacing-4xl 0;
+  background: $color-surface-alt;
+
+  &__header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto $spacing-3xl;
+  }
+
+  &__title {
+    font-family: $font-family-display;
+    font-size: $font-size-4xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-md;
+    color: $color-text-primary;
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+  }
+
+  &__grid {
+    display: grid;
+    gap: $spacing-lg;
+
+    @include respond-to(md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+.feature-card {
+  text-align: center;
+  transition: all $transition-slow $ease-out-expo;
+  border: none !important;
+  box-shadow: $shadow-sm !important;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg !important;
+  }
+
+  mat-card-content {
+    padding: $spacing-xl;
+  }
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto $spacing-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($color-primary, 0.08);
+    border-radius: $radius-lg;
+
+    .mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: $color-primary;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-sm;
+    color: $color-text-primary;
+  }
+
+  &__description {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+    margin: 0;
+  }
+}
+
+// ===========================================
+// WHY AUSTRALIAN SECTION
+// ===========================================
+.why-aus {
+  padding: $spacing-4xl 0;
+  background: $color-surface;
+
+  &__content {
+    display: grid;
+    gap: $spacing-3xl;
+    align-items: center;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &__title {
+    font-family: $font-family-display;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-md;
+    color: $color-text-primary;
+
+    @include respond-to(lg) {
+      font-size: $font-size-4xl;
+    }
+  }
+
+  &__description {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xl;
+    line-height: $line-height-relaxed;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-md;
+      font-size: $font-size-base;
+      color: $color-text-secondary;
+
+      .check-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: $color-accent;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      strong {
+        color: $color-text-primary;
+      }
+    }
+  }
+
+  &__card {
+    border-color: rgba($color-primary, 0.15) !important;
+    overflow: hidden;
+
+    mat-card-header {
+      padding: $spacing-sm $spacing-md;
+      background: rgba($color-primary, 0.04);
+      margin-bottom: 0 !important;
+    }
+
+    mat-card-content {
+      padding: $spacing-lg;
+    }
+  }
+
+  &__card-badge {
+    font-size: $font-size-xs !important;
+    font-weight: $font-weight-semibold;
+    color: $color-primary !important;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-wider;
+  }
+
+  &__calculation {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+
+    &--total {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+  }
+
+  &__calc-divider {
+    height: 1px;
+    background: $color-border;
+    margin: $spacing-sm 0;
+  }
+}
+
+// ===========================================
+// TESTIMONIALS SECTION
+// ===========================================
+.testimonials {
+  padding: $spacing-4xl 0;
+  background: $color-surface-alt;
+
+  &__title {
+    font-family: $font-family-display;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    text-align: center;
+    margin-bottom: $spacing-3xl;
+    color: $color-text-primary;
+  }
+
+  &__grid {
+    display: grid;
+    gap: $spacing-lg;
+
+    @include respond-to(md) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+.testimonial-card {
+  height: 100%;
+  border: none !important;
+  box-shadow: $shadow-sm !important;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: $spacing-xl;
+  }
+
+  &__quote {
+    flex: 1;
+    margin-bottom: $spacing-lg;
+
+    .quote-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: $color-primary;
+      opacity: 0.3;
+      margin-bottom: $spacing-sm;
+      transform: rotate(180deg);
+    }
+
+    p {
+      font-size: $font-size-base;
+      color: $color-text-secondary;
+      line-height: $line-height-relaxed;
+      font-style: italic;
+      margin: 0;
+    }
+  }
+
+  &__author {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding-top: $spacing-md;
+    border-top: 1px solid $color-border;
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-full;
+    background: rgba($color-primary, 0.08);
+    color: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__name {
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    font-size: $font-size-sm;
+  }
+
+  &__role {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+  }
+}
+
+// ===========================================
+// CTA SECTION
+// ===========================================
+.cta {
+  padding: $spacing-4xl 0;
+  background: $color-surface;
+  text-align: center;
+
+  &__content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__title {
+    font-family: $font-family-display;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-md;
+    color: $color-text-primary;
+
+    @include respond-to(md) {
+      font-size: $font-size-4xl;
+    }
+  }
+
+  &__description {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xl;
+    line-height: $line-height-relaxed;
+  }
+
+  &__actions {
+    margin-bottom: $spacing-md;
+  }
+
+  &__btn {
+    height: 48px !important;
+    padding: 0 $spacing-xl !important;
+    font-size: $font-size-base !important;
+  }
+
+  &__note {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+}
+
+// ===========================================
+// FOOTER
+// ===========================================
+.footer {
+  padding: $spacing-3xl 0 $spacing-xl;
+  background: $color-surface-alt;
+  border-top: 1px solid $color-border;
+
+  &__content {
+    display: grid;
+    gap: $spacing-xl;
+    margin-bottom: $spacing-xl;
+
+    @include respond-to(md) {
+      grid-template-columns: 2fr 3fr;
+    }
+  }
+
+  &__brand {
+    max-width: 300px;
+  }
+
+  &__logo {
+    display: inline-flex;
+    font-family: $font-family-display;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    text-decoration: none;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__logo-prosper {
+    color: $color-text-primary;
+  }
+
+  &__logo-aus {
+    color: $color-primary;
+  }
+
+  &__tagline {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__links {
+    display: grid;
+    gap: $spacing-xl;
+
+    @include respond-to(sm) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &__section {
+    h4 {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin-bottom: $spacing-md;
+    }
+
+    a {
+      display: block;
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      text-decoration: none;
+      margin-bottom: $spacing-sm;
+      transition: color $transition-base;
+
+      &:hover {
+        color: $color-primary;
+      }
+    }
+  }
+
+  &__bottom {
+    padding-top: $spacing-xl;
+    border-top: 1px solid $color-border;
+    text-align: center;
+
+    p {
+      font-size: $font-size-sm;
+      color: $color-text-muted;
+      margin-bottom: $spacing-xs;
+    }
+  }
+
+  &__disclaimer {
+    font-size: $font-size-xs !important;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: $line-height-relaxed;
+  }
+}
+
+// ===========================================
+// UTILITY CLASSES
+// ===========================================
+.text-primary {
+  color: $color-primary;
+}
+
+.currency {
+  font-family: $font-family-mono;
+  font-weight: $font-weight-semibold;
+
+  &--positive {
+    color: $color-accent;
+  }
+
+  &--accent {
+    color: $color-primary;
+    font-size: $font-size-lg;
+  }
+}

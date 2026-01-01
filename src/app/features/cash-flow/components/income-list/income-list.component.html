@@ -7,42 +7,165 @@
 
 <div class="section-header">
   <h2>Income Sources</h2>
-  <button class="btn btn--primary" (click)="openAddModal()">
-    + Add Income
-  </button>
+  @if (!showForm()) {
+    <button class="btn btn--primary" (click)="openAddForm()">
+      + Add Income
+    </button>
+  }
 </div>
+
+<!-- Inline Form -->
+@if (showForm()) {
+  <div class="card inline-form">
+    <div class="inline-form__header">
+      <h3>{{ editingSource() ? 'Edit Income Source' : 'Add Income Source' }}</h3>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="inline-form__body">
+        <div class="form-group">
+          <label for="name">Name *</label>
+          <input type="text" id="name" formControlName="name"
+                 placeholder="e.g., Main Salary, Rental Income">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sourceType">Type *</label>
+            <select id="sourceType" formControlName="sourceType">
+              @for (type of commonSourceTypes; track type) {
+                <option [value]="type">{{ formatSourceType(type) }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="frequency">Frequency *</label>
+            <select id="frequency" formControlName="frequency">
+              @for (freq of frequencies; track freq.value) {
+                <option [value]="freq.value">{{ freq.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="grossAmount">Gross Amount *</label>
+          <div class="input-prefix">
+            <span class="prefix">$</span>
+            <input type="number" id="grossAmount" formControlName="grossAmount" step="0.01">
+          </div>
+          <span class="form-hint">Before tax - we'll calculate the tax automatically</span>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <textarea id="notes" formControlName="notes" rows="2"
+                    placeholder="Optional notes..."></textarea>
+        </div>
+      </div>
+
+      <div class="inline-form__footer">
+        <button type="button" class="btn btn--secondary" (click)="closeForm()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : (editingSource() ? 'Update' : 'Add') }} Income Source
+        </button>
+      </div>
+    </form>
+  </div>
+}
 
 @if (isLoading()) {
   <div class="loading-container">
     <div class="loading-spinner"></div>
     <p>Loading income sources...</p>
   </div>
-} @else if (incomeSources().length === 0) {
+} @else if (incomeSources().length === 0 && !showForm()) {
   <div class="empty-state">
     <div class="empty-state__icon">💰</div>
     <h3>No income sources yet</h3>
     <p>Add your salary, rental income, dividends, and other income sources.</p>
-    <button class="btn btn--primary" (click)="openAddModal()">
+    <button class="btn btn--primary" (click)="openAddForm()">
       Add Your First Income Source
     </button>
   </div>
-} @else {
+} @else if (incomeSources().length > 0) {
+  <!-- Income Summary Cards -->
+  <div class="income-summary">
+    <div class="income-summary__card">
+      <span class="income-summary__label">Gross Annual Income</span>
+      <span class="income-summary__value">{{ totalAnnualGross() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="income-summary__card income-summary__card--tax">
+      <span class="income-summary__label">Estimated Tax</span>
+      <span class="income-summary__value negative">-{{ totalAnnualTax() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="income-summary__card income-summary__card--net">
+      <span class="income-summary__label">Net Annual Income</span>
+      <span class="income-summary__value positive">{{ totalAnnualNet() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+  </div>
+
+  <!-- Income Breakdown Table -->
+  <div class="income-breakdown">
+    <div class="income-breakdown__header">
+      <span class="income-breakdown__title">Income Breakdown</span>
+      <div class="income-breakdown__periods">
+        <span>Fortnightly</span>
+        <span>Monthly</span>
+        <span>Annually</span>
+      </div>
+    </div>
+
+    <!-- Pre-tax row -->
+    <div class="income-breakdown__row">
+      <span class="income-breakdown__label">Pre-tax (Gross)</span>
+      <div class="income-breakdown__values">
+        <span class="mono">{{ totalAnnualGross() / 26 | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        <span class="mono">{{ totalAnnualGross() / 12 | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        <span class="mono">{{ totalAnnualGross() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Tax row -->
+    <div class="income-breakdown__row income-breakdown__row--tax">
+      <span class="income-breakdown__label">Tax (incl. Medicare)</span>
+      <div class="income-breakdown__values">
+        <span class="mono negative">-{{ totalAnnualTax() / 26 | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        <span class="mono negative">-{{ totalAnnualTax() / 12 | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        <span class="mono negative">-{{ totalAnnualTax() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Post-tax row -->
+    <div class="income-breakdown__row income-breakdown__row--net">
+      <span class="income-breakdown__label"><strong>Post-tax (Net)</strong></span>
+      <div class="income-breakdown__values">
+        <span class="mono positive"><strong>{{ totalAnnualNet() / 26 | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></span>
+        <span class="mono positive"><strong>{{ totalAnnualNet() / 12 | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></span>
+        <span class="mono positive"><strong>{{ totalAnnualNet() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Individual Sources -->
   <div class="card">
     <div class="income-table-wrapper">
       <table class="income-table">
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Source</th>
             <th>Type</th>
             <th class="text-right">Amount</th>
-            <th class="text-right">Monthly</th>
-            <th>Status</th>
+            <th class="text-right">Annual</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
           @for (source of incomeSources(); track source.id) {
-            <tr [class.inactive]="!source.isActive">
+            <tr>
               <td>
                 <span class="income-name">{{ source.name }}</span>
               </td>
@@ -53,129 +176,20 @@
                 {{ source.grossAmount | currency:'AUD':'symbol-narrow':'1.0-0' }}{{ formatFrequency(source.frequency) }}
               </td>
               <td class="text-right mono">
-                {{ source.monthlyAmount | currency:'AUD':'symbol-narrow':'1.0-0' }}
-              </td>
-              <td>
-                @if (source.isActive) {
-                  <span class="status-badge status-badge--active">Active</span>
-                } @else {
-                  <span class="status-badge status-badge--inactive">Inactive</span>
-                }
+                {{ getAnnualAmount(source) | currency:'AUD':'symbol-narrow':'1.0-0' }}
               </td>
               <td class="actions-cell">
-                <button class="btn btn--icon btn--sm" (click)="openEditModal(source)" title="Edit">
-                  ✏️
+                <button mat-icon-button (click)="openEditForm(source)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
                 </button>
-                <button class="btn btn--icon btn--sm btn--danger" (click)="delete(source)" title="Delete">
-                  🗑️
+                <button mat-icon-button color="warn" (click)="delete(source)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
                 </button>
               </td>
             </tr>
           }
         </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3"><strong>Total Monthly Income</strong></td>
-            <td class="text-right mono positive"><strong>{{ getTotalMonthly() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></td>
-            <td colspan="2"></td>
-          </tr>
-        </tfoot>
       </table>
-    </div>
-  </div>
-}
-
-<!-- Modal -->
-@if (showModal()) {
-  <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h2>{{ editingSource() ? 'Edit Income Source' : 'Add Income Source' }}</h2>
-        <button class="modal__close" (click)="closeModal()">&times;</button>
-      </div>
-
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div class="modal__body">
-          <div class="form-group">
-            <label for="name">Name *</label>
-            <input type="text" id="name" formControlName="name"
-                   placeholder="e.g., Main Salary, Rental Income">
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="sourceType">Type *</label>
-              <select id="sourceType" formControlName="sourceType">
-                @for (type of commonSourceTypes; track type) {
-                  <option [value]="type">{{ formatSourceType(type) }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="frequency">Frequency *</label>
-              <select id="frequency" formControlName="frequency">
-                @for (freq of frequencies; track freq.value) {
-                  <option [value]="freq.value">{{ freq.label }}</option>
-                }
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="grossAmount">Gross Amount *</label>
-              <div class="input-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="grossAmount" formControlName="grossAmount" step="0.01">
-              </div>
-              <span class="form-hint">Before tax</span>
-            </div>
-
-            <div class="form-group">
-              <label for="taxWithheld">Tax Withheld (PAYG)</label>
-              <div class="input-prefix">
-                <span class="prefix">$</span>
-                <input type="number" id="taxWithheld" formControlName="taxWithheld" step="0.01">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="startDate">Start Date</label>
-              <input type="date" id="startDate" formControlName="startDate">
-            </div>
-
-            <div class="form-group">
-              <label for="endDate">End Date</label>
-              <input type="date" id="endDate" formControlName="endDate">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="isActive">
-              <span>Active income source</span>
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label for="notes">Notes</label>
-            <textarea id="notes" formControlName="notes" rows="2"
-                      placeholder="Optional notes..."></textarea>
-          </div>
-        </div>
-
-        <div class="modal__footer">
-          <button type="button" class="btn btn--secondary" (click)="closeModal()">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
-            {{ isSubmitting() ? 'Saving...' : (editingSource() ? 'Update' : 'Add') }} Income Source
-          </button>
-        </div>
-      </form>
     </div>
   </div>
 }

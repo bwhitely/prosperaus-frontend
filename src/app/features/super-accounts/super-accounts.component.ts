@@ -3,11 +3,13 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SuperAccountService } from '../../core/services/super-account.service';
 import { SuperAccountRequest, SuperAccountResponse } from '../../shared/models/super-account.model';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-super-accounts',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatIconModule, MatButtonModule],
   templateUrl: './super-accounts.component.html',
   styleUrl: './super-accounts.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,7 +22,7 @@ export class SuperAccountsComponent implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  showModal = signal(false);
+  showForm = signal(false);
   editingAccount = signal<SuperAccountResponse | null>(null);
   isSubmitting = signal(false);
   showAdvanced = signal(false);
@@ -85,7 +87,7 @@ export class SuperAccountsComponent implements OnInit {
     return Math.max(0, cap - this.getTotalConcessionalYtd());
   }
 
-  openAddModal(): void {
+  openAddForm(): void {
     this.editingAccount.set(null);
     this.form.reset({
       employerContributionsYtd: 0,
@@ -95,10 +97,10 @@ export class SuperAccountsComponent implements OnInit {
       hasInsurance: false
     });
     this.showAdvanced.set(false);
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  openEditModal(account: SuperAccountResponse): void {
+  openEditForm(account: SuperAccountResponse): void {
     this.editingAccount.set(account);
     this.form.patchValue({
       fundName: account.fundName,
@@ -113,11 +115,11 @@ export class SuperAccountsComponent implements OnInit {
       insurancePremiumPa: account.insurancePremiumPa
     });
     this.showAdvanced.set(true);
-    this.showModal.set(true);
+    this.showForm.set(true);
   }
 
-  closeModal(): void {
-    this.showModal.set(false);
+  closeForm(): void {
+    this.showForm.set(false);
     this.editingAccount.set(null);
   }
 
@@ -148,7 +150,7 @@ export class SuperAccountsComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadAccounts();
-        this.closeModal();
+        this.closeForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {

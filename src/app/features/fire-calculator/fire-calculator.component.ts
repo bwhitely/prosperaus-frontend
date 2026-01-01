@@ -1,6 +1,19 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FireService } from '../../core/services/fire.service';
 import { ScenarioService } from '../../core/services/scenario.service';
 import { FireProjectionRequest, FireProjectionResponse, YearProjection } from '../../shared/models/fire.model';
@@ -10,7 +23,26 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-fire-calculator',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CurrencyPipe,
+    DecimalPipe,
+    DatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule,
+    MatCheckboxModule,
+    MatTableModule,
+    MatChipsModule,
+    MatTooltipModule
+  ],
   templateUrl: './fire-calculator.component.html',
   styleUrl: './fire-calculator.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,8 +60,8 @@ export class FireCalculatorComponent implements OnInit {
 
   // Scenario management
   scenarios = signal<ScenarioResponse[]>([]);
-  showSaveModal = signal(false);
-  showLoadModal = signal(false);
+  showSaveForm = signal(false);
+  showLoadForm = signal(false);
   isSaving = signal(false);
   currentScenarioId = signal<string | null>(null);
   scenarioName = signal('');
@@ -135,25 +167,25 @@ export class FireCalculatorComponent implements OnInit {
     });
   }
 
-  openSaveModal(): void {
+  openSaveForm(): void {
     const currentId = this.currentScenarioId();
     const existing = currentId ? this.scenarios().find(s => s.id === currentId) : null;
     this.scenarioName.set(existing?.name || '');
-    this.showSaveModal.set(true);
+    this.showSaveForm.set(true);
   }
 
-  closeSaveModal(): void {
-    this.showSaveModal.set(false);
+  closeSaveForm(): void {
+    this.showSaveForm.set(false);
     this.scenarioName.set('');
   }
 
-  openLoadModal(): void {
+  openLoadForm(): void {
     this.loadScenarios();
-    this.showLoadModal.set(true);
+    this.showLoadForm.set(true);
   }
 
-  closeLoadModal(): void {
-    this.showLoadModal.set(false);
+  closeLoadForm(): void {
+    this.showLoadForm.set(false);
   }
 
   saveScenario(): void {
@@ -178,7 +210,7 @@ export class FireCalculatorComponent implements OnInit {
       next: (saved) => {
         this.currentScenarioId.set(saved.id);
         this.loadScenarios();
-        this.closeSaveModal();
+        this.closeSaveForm();
         this.isSaving.set(false);
       },
       error: () => {
@@ -192,7 +224,7 @@ export class FireCalculatorComponent implements OnInit {
     const inputData = scenario.inputData as Record<string, unknown>;
     this.form.patchValue(inputData);
     this.currentScenarioId.set(scenario.id);
-    this.closeLoadModal();
+    this.closeLoadForm();
   }
 
   deleteScenario(scenario: ScenarioResponse, event: Event): void {

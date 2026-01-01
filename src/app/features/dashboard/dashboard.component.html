@@ -1,87 +1,247 @@
 <div class="page-header">
-  <h1>Dashboard</h1>
-  <p>Your financial snapshot at a glance</p>
+  <div class="page-header__content">
+    <h1>Dashboard</h1>
+    <p>Your financial snapshot at a glance</p>
+  </div>
+  <div class="page-header__actions">
+    <a mat-stroked-button routerLink="/properties">
+      <mat-icon>home</mat-icon>
+      Add Property
+    </a>
+    <a mat-stroked-button routerLink="/investments">
+      <mat-icon>trending_up</mat-icon>
+      Add Investment
+    </a>
+    <a mat-stroked-button routerLink="/super">
+      <mat-icon>savings</mat-icon>
+      Add Super
+    </a>
+    <a mat-stroked-button routerLink="/cash">
+      <mat-icon>account_balance</mat-icon>
+      Cash
+    </a>
+    <a mat-stroked-button routerLink="/fire-calculator">
+      <mat-icon>local_fire_department</mat-icon>
+      FIRE
+    </a>
+  </div>
 </div>
 
 @if (isLoading()) {
   <div class="loading-container">
-    <div class="loading-spinner"></div>
+    <mat-spinner diameter="40"></mat-spinner>
     <p>Loading your financial data...</p>
   </div>
 } @else if (error()) {
   <div class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
     <p class="error-message">{{ error() }}</p>
-    <button class="btn btn--primary" (click)="loadNetWorth()">Try Again</button>
+    <button mat-flat-button color="primary" (click)="loadNetWorth()">Try Again</button>
   </div>
 } @else {
-  <div class="card-grid">
-    <div class="stat-card stat-card--primary">
-      <div class="stat-card__label">Net Worth</div>
-      <div class="stat-card__value currency" [class.positive]="netWorth()!.netWorth >= 0" [class.negative]="netWorth()!.netWorth < 0">
-        {{ netWorth()!.netWorth | currency:'AUD':'symbol-narrow':'1.0-0' }}
-      </div>
-      @if (!hasAssets()) {
-        <div class="stat-card__change">Add assets to get started</div>
-      }
-    </div>
+  <div class="stat-cards">
+    <mat-card class="stat-card stat-card--primary">
+      <mat-card-content>
+        <div class="stat-card__label">Net Worth</div>
+        <div class="stat-card__value" [class.positive]="netWorth()!.netWorth >= 0" [class.negative]="netWorth()!.netWorth < 0">
+          {{ netWorth()!.netWorth | currency:'AUD':'symbol-narrow':'1.0-0' }}
+        </div>
+        @if (!hasAssets()) {
+          <div class="stat-card__hint">Add assets to get started</div>
+        }
+      </mat-card-content>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="stat-card__label">Total Assets</div>
-      <div class="stat-card__value currency">
-        {{ netWorth()!.totalAssets | currency:'AUD':'symbol-narrow':'1.0-0' }}
-      </div>
-    </div>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-card__label">Total Assets</div>
+        <div class="stat-card__value">
+          {{ netWorth()!.totalAssets | currency:'AUD':'symbol-narrow':'1.0-0' }}
+        </div>
+      </mat-card-content>
+    </mat-card>
 
-    <div class="stat-card">
-      <div class="stat-card__label">Total Liabilities</div>
-      <div class="stat-card__value currency">
-        {{ netWorth()!.totalLiabilities | currency:'AUD':'symbol-narrow':'1.0-0' }}
-      </div>
-    </div>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-card__label">Total Liabilities</div>
+        <div class="stat-card__value">
+          {{ netWorth()!.totalLiabilities | currency:'AUD':'symbol-narrow':'1.0-0' }}
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
+
+  <!-- Net Worth History Chart -->
+  <mat-card class="chart-card mt-lg">
+    <mat-card-header>
+      <mat-card-title>Net Worth Over Time</mat-card-title>
+      @if (hasHistoryData()) {
+        <div class="history-summary">
+          @if (historyData()!.summary.change >= 0) {
+            <span class="change positive">+{{ historyData()!.summary.change | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          } @else {
+            <span class="change negative">{{ historyData()!.summary.change | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          }
+          <span class="change-percent">({{ historyData()!.summary.changePercent | number:'1.1-1' }}%)</span>
+        </div>
+      }
+    </mat-card-header>
+    <mat-card-content>
+      @if (isHistoryLoading()) {
+        <div class="chart-loading">
+          <mat-spinner diameter="32"></mat-spinner>
+          <p>Loading history...</p>
+        </div>
+      } @else if (hasHistoryData()) {
+        <div class="chart-container">
+          <canvas #netWorthChart></canvas>
+        </div>
+      } @else {
+        <div class="chart-empty">
+          <mat-icon>timeline</mat-icon>
+          <p>No history data available yet.</p>
+          <p class="text-muted">Net worth snapshots will be recorded over time to show your progress.</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
 
   @if (hasAssets()) {
     <!-- Asset Breakdown -->
     <div class="dashboard-grid mt-lg">
-      <div class="card">
-        <div class="card__header">
-          <h3>Asset Breakdown</h3>
-        </div>
-        <div class="card__body">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Asset Breakdown</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div class="breakdown-list">
+            <!-- Property -->
             @if (netWorth()!.assetBreakdown.propertyValue > 0) {
-              <div class="breakdown-item">
-                <span class="breakdown-label">Property</span>
-                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.propertyValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              <div class="breakdown-category" [class.expanded]="isExpanded('property')">
+                <button class="breakdown-item breakdown-item--expandable" (click)="toggleCategory('property')">
+                  <span class="breakdown-label">
+                    <mat-icon class="expand-icon">{{ isExpanded('property') ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    Property
+                  </span>
+                  <span class="breakdown-value">{{ netWorth()!.assetBreakdown.propertyValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                </button>
+                @if (isExpanded('property')) {
+                  <div class="breakdown-subitems">
+                    @if (isCategoryLoading('property')) {
+                      <div class="breakdown-subitem breakdown-subitem--loading">Loading...</div>
+                    } @else if (properties().length === 0) {
+                      <div class="breakdown-subitem breakdown-subitem--empty">No properties found</div>
+                    } @else {
+                      @for (prop of properties(); track prop.id) {
+                        <div class="breakdown-subitem">
+                          <span class="breakdown-sublabel">{{ prop.name }}</span>
+                          <span class="breakdown-subvalue">{{ prop.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
               </div>
             }
+
+            <!-- Superannuation -->
             @if (netWorth()!.assetBreakdown.superBalance > 0) {
-              <div class="breakdown-item">
-                <span class="breakdown-label">Superannuation</span>
-                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.superBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              <div class="breakdown-category" [class.expanded]="isExpanded('super')">
+                <button class="breakdown-item breakdown-item--expandable" (click)="toggleCategory('super')">
+                  <span class="breakdown-label">
+                    <mat-icon class="expand-icon">{{ isExpanded('super') ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    Superannuation
+                  </span>
+                  <span class="breakdown-value">{{ netWorth()!.assetBreakdown.superBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                </button>
+                @if (isExpanded('super')) {
+                  <div class="breakdown-subitems">
+                    @if (isCategoryLoading('super')) {
+                      <div class="breakdown-subitem breakdown-subitem--loading">Loading...</div>
+                    } @else if (superAccounts().length === 0) {
+                      <div class="breakdown-subitem breakdown-subitem--empty">No super accounts found</div>
+                    } @else {
+                      @for (account of superAccounts(); track account.id) {
+                        <div class="breakdown-subitem">
+                          <span class="breakdown-sublabel">{{ account.fundName }}</span>
+                          <span class="breakdown-subvalue">{{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
               </div>
             }
+
+            <!-- Investments -->
             @if (netWorth()!.assetBreakdown.investmentValue > 0) {
-              <div class="breakdown-item">
-                <span class="breakdown-label">Investments</span>
-                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.investmentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              <div class="breakdown-category" [class.expanded]="isExpanded('investments')">
+                <button class="breakdown-item breakdown-item--expandable" (click)="toggleCategory('investments')">
+                  <span class="breakdown-label">
+                    <mat-icon class="expand-icon">{{ isExpanded('investments') ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    Investments
+                  </span>
+                  <span class="breakdown-value">{{ netWorth()!.assetBreakdown.investmentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                </button>
+                @if (isExpanded('investments')) {
+                  <div class="breakdown-subitems">
+                    @if (isCategoryLoading('investments')) {
+                      <div class="breakdown-subitem breakdown-subitem--loading">Loading...</div>
+                    } @else if (investments().length === 0) {
+                      <div class="breakdown-subitem breakdown-subitem--empty">No investments found</div>
+                    } @else {
+                      @for (inv of investments(); track inv.id) {
+                        <div class="breakdown-subitem">
+                          <span class="breakdown-sublabel">
+                            <span class="ticker-badge">{{ inv.ticker }}</span>
+                            {{ inv.securityName || inv.ticker }}
+                          </span>
+                          <span class="breakdown-subvalue">{{ inv.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
               </div>
             }
+
+            <!-- Cash -->
             @if (netWorth()!.assetBreakdown.cashBalance > 0) {
-              <div class="breakdown-item">
-                <span class="breakdown-label">Cash</span>
-                <span class="breakdown-value">{{ netWorth()!.assetBreakdown.cashBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              <div class="breakdown-category" [class.expanded]="isExpanded('cash')">
+                <button class="breakdown-item breakdown-item--expandable" (click)="toggleCategory('cash')">
+                  <span class="breakdown-label">
+                    <mat-icon class="expand-icon">{{ isExpanded('cash') ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    Cash
+                  </span>
+                  <span class="breakdown-value">{{ netWorth()!.assetBreakdown.cashBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                </button>
+                @if (isExpanded('cash')) {
+                  <div class="breakdown-subitems">
+                    @if (isCategoryLoading('cash')) {
+                      <div class="breakdown-subitem breakdown-subitem--loading">Loading...</div>
+                    } @else if (cashAccounts().length === 0) {
+                      <div class="breakdown-subitem breakdown-subitem--empty">No cash accounts found</div>
+                    } @else {
+                      @for (account of cashAccounts(); track account.id) {
+                        <div class="breakdown-subitem">
+                          <span class="breakdown-sublabel">{{ account.accountName }}</span>
+                          <span class="breakdown-subvalue">{{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
               </div>
             }
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
-      <div class="card">
-        <div class="card__header">
-          <h3>Asset Allocation</h3>
-        </div>
-        <div class="card__body">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Asset Allocation</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div class="allocation-chart">
             @for (allocation of netWorth()!.assetAllocation; track allocation.category) {
               <div class="allocation-bar">
@@ -95,17 +255,17 @@
               </div>
             }
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <!-- Liability Breakdown -->
     @if (netWorth()!.totalLiabilities > 0) {
-      <div class="card mt-lg">
-        <div class="card__header">
-          <h3>Liability Breakdown</h3>
-        </div>
-        <div class="card__body">
+      <mat-card class="mt-lg">
+        <mat-card-header>
+          <mat-card-title>Liability Breakdown</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div class="breakdown-list breakdown-list--horizontal">
             @if (netWorth()!.liabilityBreakdown.mortgageBalance > 0) {
               <div class="breakdown-item">
@@ -144,57 +304,26 @@
               </div>
             }
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     }
   } @else {
     <!-- Getting Started Card -->
-    <div class="card mt-lg">
-      <div class="card__header">
-        <h3>Get Started</h3>
-      </div>
-      <div class="card__body">
+    <mat-card class="mt-lg">
+      <mat-card-header>
+        <mat-card-title>Get Started</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
         <p class="text-secondary mb-md">
-          Welcome to AusFinance! This platform helps you track your wealth, optimise your tax position,
-          and plan for financial independence using Australian tax rules.
+          Welcome to ProsperAus! Your platform for tracking wealth, optimising your tax position,
+          and planning for financial independence using Australian tax rules.
         </p>
 
         <div class="d-flex flex-wrap gap-sm">
-          <a routerLink="/profile" class="btn btn--primary">Complete Your Profile</a>
-          <a routerLink="/equity-recycling" class="btn btn--secondary">Try Equity Recycling Calculator</a>
+          <a mat-flat-button color="primary" routerLink="/profile">Complete Your Profile</a>
+          <a mat-stroked-button routerLink="/equity-recycling">Try Equity Recycling Calculator</a>
         </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
   }
-
-  <!-- Quick Actions -->
-  <div class="card mt-lg">
-    <div class="card__header">
-      <h3>Quick Actions</h3>
-    </div>
-    <div class="card__body">
-      <div class="quick-actions">
-        <a routerLink="/properties" class="quick-action">
-          <span class="quick-action__icon">🏠</span>
-          <span class="quick-action__label">Add Property</span>
-        </a>
-        <a routerLink="/investments" class="quick-action">
-          <span class="quick-action__icon">📈</span>
-          <span class="quick-action__label">Add Investment</span>
-        </a>
-        <a routerLink="/super" class="quick-action">
-          <span class="quick-action__icon">💰</span>
-          <span class="quick-action__label">Add Super Account</span>
-        </a>
-        <a routerLink="/cash-liabilities" class="quick-action">
-          <span class="quick-action__icon">🏦</span>
-          <span class="quick-action__label">Cash & Liabilities</span>
-        </a>
-        <a routerLink="/fire-calculator" class="quick-action">
-          <span class="quick-action__icon">🔥</span>
-          <span class="quick-action__label">FIRE Calculator</span>
-        </a>
-      </div>
-    </div>
-  </div>
 }

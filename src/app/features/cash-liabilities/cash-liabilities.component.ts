@@ -26,8 +26,8 @@ export class CashLiabilitiesComponent implements OnInit {
   isLoading = signal(true);
   error = signal<string | null>(null);
 
-  showCashModal = signal(false);
-  showLiabilityModal = signal(false);
+  showCashForm = signal(false);
+  showLiabilityForm = signal(false);
   editingCash = signal<CashAccountResponse | null>(null);
   editingLiability = signal<LiabilityResponse | null>(null);
   isSubmitting = signal(false);
@@ -118,14 +118,14 @@ export class CashLiabilitiesComponent implements OnInit {
     return this.liabilities().reduce((sum, l) => sum + l.balance, 0);
   }
 
-  // Cash Account Modal
-  openAddCashModal(): void {
+  // Cash Account Form
+  openAddCashForm(): void {
     this.editingCash.set(null);
     this.cashForm.reset({ accountType: 'savings' });
-    this.showCashModal.set(true);
+    this.showCashForm.set(true);
   }
 
-  openEditCashModal(account: CashAccountResponse): void {
+  openEditCashForm(account: CashAccountResponse): void {
     this.editingCash.set(account);
     this.cashForm.patchValue({
       accountName: account.accountName,
@@ -139,11 +139,11 @@ export class CashLiabilitiesComponent implements OnInit {
       principal: account.principal,
       linkedMortgageId: account.linkedMortgageId || ''
     });
-    this.showCashModal.set(true);
+    this.showCashForm.set(true);
   }
 
-  closeCashModal(): void {
-    this.showCashModal.set(false);
+  closeCashForm(): void {
+    this.showCashForm.set(false);
     this.editingCash.set(null);
   }
 
@@ -174,7 +174,7 @@ export class CashLiabilitiesComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadData();
-        this.closeCashModal();
+        this.closeCashForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {
@@ -193,14 +193,14 @@ export class CashLiabilitiesComponent implements OnInit {
     });
   }
 
-  // Liability Modal
-  openAddLiabilityModal(): void {
+  // Liability Form
+  openAddLiabilityForm(): void {
     this.editingLiability.set(null);
     this.liabilityForm.reset({ liabilityType: 'personal_loan' });
-    this.showLiabilityModal.set(true);
+    this.showLiabilityForm.set(true);
   }
 
-  openEditLiabilityModal(liability: LiabilityResponse): void {
+  openEditLiabilityForm(liability: LiabilityResponse): void {
     this.editingLiability.set(liability);
     this.liabilityForm.patchValue({
       name: liability.name,
@@ -217,11 +217,11 @@ export class CashLiabilitiesComponent implements OnInit {
       termMonths: liability.termMonths,
       startDate: liability.startDate || ''
     });
-    this.showLiabilityModal.set(true);
+    this.showLiabilityForm.set(true);
   }
 
-  closeLiabilityModal(): void {
-    this.showLiabilityModal.set(false);
+  closeLiabilityForm(): void {
+    this.showLiabilityForm.set(false);
     this.editingLiability.set(null);
   }
 
@@ -255,7 +255,7 @@ export class CashLiabilitiesComponent implements OnInit {
     operation.subscribe({
       next: () => {
         this.loadData();
-        this.closeLiabilityModal();
+        this.closeLiabilityForm();
         this.isSubmitting.set(false);
       },
       error: (err) => {

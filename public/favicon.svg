@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  width="512"
+  height="512"
+  viewBox="0 0 512 512"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Background -->
+  <rect
+    x="0"
+    y="0"
+    width="512"
+    height="512"
+    rx="96"
+    fill="#0A2540"
+  />
+
+  <!-- Bar 1 -->
+  <rect
+    x="120"
+    y="280"
+    width="72"
+    height="140"
+    rx="16"
+    fill="#4FD1C5"
+  />
+
+  <!-- Bar 2 -->
+  <rect
+    x="220"
+    y="220"
+    width="72"
+    height="200"
+    rx="16"
+    fill="#4FD1C5"
+  />
+
+  <!-- Bar 3 -->
+  <rect
+    x="320"
+    y="160"
+    width="72"
+    height="260"
+    rx="16"
+    fill="#4FD1C5"
+  />
+</svg>

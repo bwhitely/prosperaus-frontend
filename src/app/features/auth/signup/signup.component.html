@@ -1,107 +1,115 @@
 <div class="auth-page">
-  <div class="auth-card card">
-    <div class="auth-header">
-      <h1>Create your account</h1>
-      <p class="text-secondary">Start tracking your wealth with AusFinance</p>
-    </div>
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>Create your account</mat-card-title>
+      <mat-card-subtitle>Start building wealth the Australian way</mat-card-subtitle>
+    </mat-card-header>
 
-    @if (errorMessage()) {
-      <div class="alert alert--error mb-md">
-        {{ errorMessage() }}
-      </div>
-    }
-
-    @if (successMessage()) {
-      <div class="alert alert--success mb-md">
-        {{ successMessage() }}
-        <div class="mt-sm">
-          <a routerLink="/auth/login" class="btn btn--primary btn--sm">Go to login</a>
+    <mat-card-content>
+      @if (errorMessage()) {
+        <div class="alert alert--error">
+          <mat-icon>error</mat-icon>
+          <span>{{ errorMessage() }}</span>
         </div>
-      </div>
-    } @else {
-      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input
-            type="email"
-            id="email"
-            formControlName="email"
-            placeholder="you@example.com"
-            autocomplete="email"
-          >
-          @if (email?.invalid && email?.touched) {
-            <div class="form-error">
-              @if (email?.errors?.['required']) {
-                Email is required
-              } @else if (email?.errors?.['email']) {
-                Please enter a valid email address
-              }
-            </div>
-          }
-        </div>
+      }
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            formControlName="password"
-            placeholder="Create a strong password"
-            autocomplete="new-password"
-          >
-          @if (password?.invalid && password?.touched) {
-            <div class="form-error">
-              @if (password?.errors?.['required']) {
-                Password is required
-              } @else if (password?.errors?.['minlength']) {
-                Password must be at least 8 characters
-              } @else if (password?.errors?.['passwordStrength']) {
-                Password must contain uppercase, lowercase, and a number
-              }
-            </div>
-          }
-          <div class="form-helper">
-            Use at least 8 characters with uppercase, lowercase, and numbers
+      @if (successMessage()) {
+        <div class="alert alert--success">
+          <mat-icon>check_circle</mat-icon>
+          <div class="alert__content">
+            <span>{{ successMessage() }}</span>
+            <a mat-flat-button color="primary" routerLink="/auth/login" class="mt-sm">
+              Go to login
+            </a>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="confirmPassword">Confirm password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            formControlName="confirmPassword"
-            placeholder="Confirm your password"
-            autocomplete="new-password"
-          >
-          @if (confirmPassword?.touched && signupForm.errors?.['passwordMismatch']) {
-            <div class="form-error">
-              Passwords do not match
-            </div>
-          }
-        </div>
-
-        <div class="form-actions">
-          <button
-            type="submit"
-            class="btn btn--primary btn--full"
-            [disabled]="isSubmitting()"
-          >
-            @if (isSubmitting()) {
-              Creating account...
-            } @else {
-              Create account
+      } @else {
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email address</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+            >
+            <mat-icon matPrefix>email</mat-icon>
+            @if (email?.invalid && email?.touched) {
+              <mat-error>
+                @if (email?.errors?.['required']) {
+                  Email is required
+                } @else if (email?.errors?.['email']) {
+                  Please enter a valid email address
+                }
+              </mat-error>
             }
-          </button>
-        </div>
-      </form>
+          </mat-form-field>
 
-      <div class="auth-footer">
-        <p>
-          Already have an account?
-          <a routerLink="/auth/login">Sign in</a>
-        </p>
-      </div>
-    }
-  </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              type="password"
+              formControlName="password"
+              placeholder="Create a strong password"
+              autocomplete="new-password"
+            >
+            <mat-icon matPrefix>lock</mat-icon>
+            @if (password?.invalid && password?.touched) {
+              <mat-error>
+                @if (password?.errors?.['required']) {
+                  Password is required
+                } @else if (password?.errors?.['minlength']) {
+                  Password must be at least 8 characters
+                } @else if (password?.errors?.['passwordStrength']) {
+                  Must contain uppercase, lowercase, and a number
+                }
+              </mat-error>
+            }
+            <mat-hint>At least 8 characters with uppercase, lowercase, and numbers</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirm password</mat-label>
+            <input
+              matInput
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+            >
+            <mat-icon matPrefix>lock_outline</mat-icon>
+            @if (confirmPassword?.touched && signupForm.errors?.['passwordMismatch']) {
+              <mat-error>Passwords do not match</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              class="full-width"
+              [disabled]="isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <mat-spinner diameter="20"></mat-spinner>
+                <span>Creating account...</span>
+              } @else {
+                Create account
+              }
+            </button>
+          </div>
+        </form>
+
+        <mat-card-actions class="auth-footer">
+          <p>
+            Already have an account?
+            <a routerLink="/auth/login">Sign in</a>
+          </p>
+        </mat-card-actions>
+      }
+    </mat-card-content>
+  </mat-card>
 </div>

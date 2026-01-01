@@ -156,7 +156,8 @@
         <div class="upload-zone__content">
           <span class="upload-zone__icon">📂</span>
           <p class="upload-zone__text">Drop CSV files here or click to upload</p>
-          <p class="upload-zone__hint">Supports: CBA, Westpac, ANZ, NAB CSV formats</p>
+          <p class="upload-zone__hint">Supports .csv format</p>
+          <p class="upload-zone__hint">Required columns: processed_date,description,amount,type</p>
         </div>
       }
     </div>
@@ -186,10 +187,12 @@
           <span class="loading-spinner loading-spinner--sm"></span>
           Analysing...
         } @else {
-          🤖 Analyse All Statements with AI
+          Analyse All Statements with AI
         }
       </button>
-      <p class="analyse-hint">Get AI-powered insights across all your uploaded statements</p>
+      <p class="analyse-hint">Uses Claude Sonnet 4.5 to go over your expenses and income and automatically categorize them.</p>
+      <p class="analyse-hint">Be mindful of personal information included in the file.</p>
+      <p class="analyse-hint">.csv format is preferred.</p>
     </div>
   }
 
@@ -227,20 +230,20 @@
               @if (isAnalysing()) {
                 ...
               } @else {
-                🤖 Analyse
+                Analyse
               }
             </button>
             <button
-              class="btn btn--sm btn--secondary"
+              matButton
               (click)="viewTransactions(upload); $event.stopPropagation()"
-              title="View transactions">
-              View
+              matTooltip="View transactions">
+              <mat-icon>search</mat-icon>
             </button>
             <button
-              class="btn btn--icon btn--sm btn--danger"
+            matButton
               (click)="deleteUpload(upload); $event.stopPropagation()"
-              title="Delete">
-              🗑️
+              matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>

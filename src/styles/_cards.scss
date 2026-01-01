@@ -2,7 +2,7 @@
 @use 'mixins' as *;
 
 // ===========================================
-// BASE CARD
+// BASE CARD - Refined Luxury
 // ===========================================
 .card {
   @include card;
@@ -30,6 +30,16 @@
     padding-top: $spacing-md;
     border-top: 1px solid $color-border;
   }
+
+  // Elevated variant
+  &--elevated {
+    @include card-elevated;
+  }
+
+  // Gold accent variant
+  &--gold {
+    @include card-gold;
+  }
 }
 
 // ===========================================
@@ -38,14 +48,20 @@
 .stat-card {
   @include card;
   text-align: center;
+  transition: all $transition-slow $ease-out-expo;
+
+  &:hover {
+    border-color: $color-border-strong;
+    transform: translateY(-2px);
+  }
 
   &__label {
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
     color: $color-text-muted;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: $spacing-xs;
+    letter-spacing: $letter-spacing-wider;
+    margin-bottom: $spacing-sm;
   }
 
   &__value {
@@ -54,14 +70,16 @@
     font-weight: $font-weight-bold;
     color: $color-text-primary;
     margin-bottom: $spacing-xs;
+    line-height: $line-height-tight;
   }
 
   &__change {
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
+    font-family: $font-family-mono;
 
     &--positive {
-      color: $color-accent;
+      color: $color-emerald;
     }
 
     &--negative {
@@ -69,17 +87,26 @@
     }
   }
 
-  // Variants
+  // Variants with gold accent
   &--primary {
-    border-left: 4px solid $color-primary;
+    border-left: 3px solid $color-gold;
   }
 
   &--accent {
-    border-left: 4px solid $color-accent;
+    border-left: 3px solid $color-emerald;
   }
 
   &--warning {
-    border-left: 4px solid $color-warning;
+    border-left: 3px solid $color-warning;
+  }
+
+  // Large variant for hero stats
+  &--large {
+    padding: $spacing-xl;
+
+    .stat-card__value {
+      font-size: $font-size-5xl;
+    }
   }
 }
 
@@ -91,11 +118,15 @@
   font-weight: $font-weight-semibold;
 
   &--positive {
-    color: $color-accent;
+    color: $color-emerald;
   }
 
   &--negative {
     color: $color-negative;
+  }
+
+  &--gold {
+    color: $color-gold;
   }
 
   &--large {
@@ -105,6 +136,11 @@
   &--xlarge {
     font-size: $font-size-4xl;
   }
+
+  &--hero {
+    font-size: $font-size-5xl;
+    font-weight: $font-weight-bold;
+  }
 }
 
 // ===========================================
@@ -112,8 +148,8 @@
 // ===========================================
 .info-card {
   @include card;
-  background: rgba($color-info, 0.05);
-  border-color: rgba($color-info, 0.2);
+  background: $color-info-muted;
+  border-color: rgba($color-info, 0.3);
 
   &__icon {
     color: $color-info;
@@ -131,8 +167,8 @@
 // ===========================================
 .warning-card {
   @include card;
-  background: rgba($color-warning, 0.05);
-  border-color: rgba($color-warning, 0.2);
+  background: $color-warning-muted;
+  border-color: rgba($color-warning, 0.3);
 
   &__icon {
     color: $color-warning;
@@ -142,6 +178,60 @@
   &__content {
     color: $color-text-secondary;
     font-size: $font-size-sm;
+  }
+}
+
+// ===========================================
+// SUCCESS CARD
+// ===========================================
+.success-card {
+  @include card;
+  background: $color-positive-muted;
+  border-color: rgba($color-emerald, 0.3);
+
+  &__icon {
+    color: $color-emerald;
+    margin-right: $spacing-sm;
+  }
+
+  &__content {
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+// ===========================================
+// FEATURE CARD (for landing page)
+// ===========================================
+.feature-card {
+  @include card-hover;
+  text-align: center;
+  padding: $spacing-xl;
+
+  &__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto $spacing-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $color-gold-muted;
+    border-radius: $radius-lg;
+    font-size: $font-size-2xl;
+    color: $color-gold;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-sm;
+    color: $color-text-primary;
+  }
+
+  &__description {
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
   }
 }
 
@@ -169,6 +259,60 @@
   &--4 {
     @include respond-to(lg) {
       grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+// ===========================================
+// SUMMARY CARDS (dashboard-style row)
+// ===========================================
+.summary-cards {
+  display: grid;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+
+  @include respond-to(md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.summary-card {
+  @include card;
+  text-align: center;
+
+  &__label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-wider;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+  }
+
+  &__hint {
+    font-size: $font-size-sm;
+    font-family: $font-family-mono;
+    margin-top: $spacing-xs;
+  }
+
+  &--positive {
+    .summary-card__value,
+    .summary-card__hint {
+      color: $color-emerald;
+    }
+  }
+
+  &--negative {
+    .summary-card__value,
+    .summary-card__hint {
+      color: $color-negative;
     }
   }
 }

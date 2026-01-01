@@ -2,14 +2,35 @@ import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProfileService, TaxResidency, OnboardingRequest } from '../../core/services/profile.service';
 
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatRadioModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './onboarding.component.html',
-  styleUrl: './onboarding.component.scss',
+  styleUrls: ['./onboarding.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OnboardingComponent {

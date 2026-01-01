@@ -1,7 +1,7 @@
 @use 'variables' as *;
 
 // ===========================================
-// CARD MIXIN
+// CARD MIXINS - Refined Luxury
 // ===========================================
 @mixin card {
   background: $color-surface;
@@ -11,14 +11,29 @@
   padding: $spacing-lg;
 }
 
+@mixin card-elevated {
+  background: $color-surface-elevated;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  padding: $spacing-lg;
+}
+
 @mixin card-hover {
   @include card;
-  transition: box-shadow $transition-base, transform $transition-base;
+  transition: all $transition-slow $ease-out-expo;
 
   &:hover {
-    box-shadow: $shadow-md;
+    border-color: $color-border-strong;
+    box-shadow: $shadow-lg;
     transform: translateY(-2px);
   }
+}
+
+@mixin card-gold {
+  @include card;
+  border-color: $color-border-gold;
+  background: linear-gradient(180deg, rgba(201, 162, 39, 0.05), transparent);
 }
 
 // ===========================================
@@ -29,7 +44,7 @@
   align-items: center;
   justify-content: center;
   gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
+  padding: $spacing-sm $spacing-lg;
   border-radius: $radius-md;
   font-family: $font-family-base;
   font-weight: $font-weight-medium;
@@ -39,6 +54,7 @@
   transition: all $transition-base;
   text-decoration: none;
   border: none;
+  min-height: 2.5rem;
 
   &:disabled {
     opacity: 0.5;
@@ -46,7 +62,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid $color-primary;
+    outline: 2px solid $color-gold;
     outline-offset: 2px;
   }
 }
@@ -63,6 +79,8 @@
     @media (min-width: $breakpoint-lg) { @content; }
   } @else if $breakpoint == xl {
     @media (min-width: $breakpoint-xl) { @content; }
+  } @else if $breakpoint == 2xl {
+    @media (min-width: $breakpoint-2xl) { @content; }
   }
 }
 
@@ -107,7 +125,7 @@
 }
 
 // ===========================================
-// FORM MIXINS
+// FORM MIXINS - Dark Theme
 // ===========================================
 @mixin form-input {
   width: 100%;
@@ -119,28 +137,33 @@
   line-height: $line-height-normal;
   color: $color-text-primary;
   background: $color-surface;
-  transition: border-color $transition-base, box-shadow $transition-base;
+  transition: all $transition-base;
 
   &::placeholder {
     color: $color-text-muted;
   }
 
+  &:hover:not(:focus):not(:disabled) {
+    border-color: $color-border-strong;
+  }
+
   &:focus {
     outline: none;
-    border-color: $color-primary;
-    box-shadow: 0 0 0 3px rgba($color-primary, 0.1);
+    border-color: $color-gold;
+    box-shadow: 0 0 0 3px rgba($color-gold, 0.15);
   }
 
   &:disabled {
-    background: $color-background;
+    background: $color-primary-light;
     cursor: not-allowed;
+    opacity: 0.6;
   }
 
   &.ng-invalid.ng-touched {
     border-color: $color-negative;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba($color-negative, 0.1);
+      box-shadow: 0 0 0 3px rgba($color-negative, 0.15);
     }
   }
 }
@@ -151,6 +174,7 @@
   font-weight: $font-weight-medium;
   color: $color-text-secondary;
   margin-bottom: $spacing-xs;
+  letter-spacing: $letter-spacing-wide;
 }
 
 // ===========================================
@@ -159,6 +183,25 @@
 @mixin container {
   width: 100%;
   max-width: $breakpoint-xl;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $spacing-md;
+  padding-right: $spacing-md;
+
+  @include respond-to(md) {
+    padding-left: $spacing-lg;
+    padding-right: $spacing-lg;
+  }
+
+  @include respond-to(xl) {
+    padding-left: $spacing-xl;
+    padding-right: $spacing-xl;
+  }
+}
+
+@mixin container-wide {
+  width: 100%;
+  max-width: $breakpoint-2xl;
   margin-left: auto;
   margin-right: auto;
   padding-left: $spacing-md;
@@ -180,4 +223,58 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+// ===========================================
+// DECORATIVE MIXINS
+// ===========================================
+@mixin gold-gradient-border {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: $gradient-gold;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
+
+@mixin glass-effect {
+  background: rgba($color-surface, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@mixin shimmer {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    left: 100%;
+  }
 }

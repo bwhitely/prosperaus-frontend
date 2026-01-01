@@ -1,6 +1,16 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EquityRecyclingService } from '../../core/services/equity-recycling.service';
 import { ScenarioService } from '../../core/services/scenario.service';
 import { EquityRecyclingRequest, EquityRecyclingResponse } from '../../shared/models/equity-recycling.model';
@@ -10,7 +20,23 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-equity-recycling',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe, DatePipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CurrencyPipe,
+    DecimalPipe,
+    DatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule,
+    MatDialogModule,
+    MatTooltipModule
+  ],
   templateUrl: './equity-recycling.component.html',
   styleUrl: './equity-recycling.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,8 +53,8 @@ export class EquityRecyclingComponent implements OnInit {
 
   // Scenario management
   scenarios = signal<ScenarioResponse[]>([]);
-  showSaveModal = signal(false);
-  showLoadModal = signal(false);
+  showSaveForm = signal(false);
+  showLoadForm = signal(false);
   isSaving = signal(false);
   currentScenarioId = signal<string | null>(null);
   scenarioName = signal('');
@@ -91,25 +117,25 @@ export class EquityRecyclingComponent implements OnInit {
     });
   }
 
-  openSaveModal(): void {
+  openSaveForm(): void {
     const currentId = this.currentScenarioId();
     const existing = currentId ? this.scenarios().find(s => s.id === currentId) : null;
     this.scenarioName.set(existing?.name || '');
-    this.showSaveModal.set(true);
+    this.showSaveForm.set(true);
   }
 
-  closeSaveModal(): void {
-    this.showSaveModal.set(false);
+  closeSaveForm(): void {
+    this.showSaveForm.set(false);
     this.scenarioName.set('');
   }
 
-  openLoadModal(): void {
+  openLoadForm(): void {
     this.loadScenarios();
-    this.showLoadModal.set(true);
+    this.showLoadForm.set(true);
   }
 
-  closeLoadModal(): void {
-    this.showLoadModal.set(false);
+  closeLoadForm(): void {
+    this.showLoadForm.set(false);
   }
 
   saveScenario(): void {
@@ -134,7 +160,7 @@ export class EquityRecyclingComponent implements OnInit {
       next: (saved) => {
         this.currentScenarioId.set(saved.id);
         this.loadScenarios();
-        this.closeSaveModal();
+        this.closeSaveForm();
         this.isSaving.set(false);
       },
       error: () => {
@@ -159,7 +185,7 @@ export class EquityRecyclingComponent implements OnInit {
       frankingRate: inputData['frankingRate']
     });
     this.currentScenarioId.set(scenario.id);
-    this.closeLoadModal();
+    this.closeLoadForm();
   }
 
   deleteScenario(scenario: ScenarioResponse, event: Event): void {

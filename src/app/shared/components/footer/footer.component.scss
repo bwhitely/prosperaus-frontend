@@ -1,0 +1,49 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.app-footer {
+  background: $color-surface;
+  border-top: 1px solid $color-border;
+  padding: $spacing-md 0;
+  margin-top: auto;
+
+  &__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+  }
+
+  &__copyright {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__link {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    text-decoration: none;
+    transition: color $transition-base;
+
+    &:hover {
+      color: $color-gold;
+    }
+  }
+
+  &__divider {
+    color: $color-border;
+    font-size: $font-size-sm;
+  }
+}

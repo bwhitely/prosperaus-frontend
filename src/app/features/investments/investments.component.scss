@@ -1,38 +1,236 @@
 @use '../../../styles/variables' as *;
 
-// Holdings table
-.holdings-table-wrapper {
+// Page header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+
+  &__content {
+    flex: 1;
+    min-width: 200px;
+
+    h1 {
+      font-size: $font-size-3xl;
+      font-weight: 700;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-xs;
+    }
+
+    .subtitle {
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      margin: 0;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    align-items: center;
+
+    button mat-icon {
+      margin-right: $spacing-xs;
+    }
+
+    mat-spinner {
+      display: inline-block;
+      margin-right: $spacing-sm;
+    }
+  }
+}
+
+// Alert
+.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &--error {
+    background: $color-negative-muted;
+    border: 1px solid rgba($color-negative, 0.3);
+    color: $color-negative;
+  }
+}
+
+// Summary cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  text-align: center;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-lg;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      margin-bottom: $spacing-sm;
+      color: $color-primary;
+    }
+  }
+
+  .label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  .value {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-primary;
+  }
+
+  .hint {
+    font-size: $font-size-sm;
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+
+  &.positive {
+    border-top: 3px solid $color-positive;
+
+    mat-card-content mat-icon {
+      color: $color-positive;
+    }
+  }
+
+  &.negative {
+    border-top: 3px solid $color-negative;
+
+    mat-card-content mat-icon {
+      color: $color-negative;
+    }
+  }
+}
+
+// Loading card
+.loading-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
+
+    p {
+      margin-top: $spacing-md;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+// Empty state
+.empty-state-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: $color-primary;
+      margin-bottom: $spacing-lg;
+    }
+
+    h3 {
+      font-size: $font-size-xl;
+      font-weight: 600;
+      color: $color-text-primary;
+      margin: 0 0 $spacing-sm;
+    }
+
+    p {
+      color: $color-text-secondary;
+      margin: 0 0 $spacing-lg;
+      max-width: 400px;
+    }
+
+    button mat-icon {
+      margin-right: $spacing-xs;
+    }
+  }
+}
+
+// Holdings card
+.holdings-card {
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: 0;
+  overflow: hidden;
+}
+
+// Table container
+.table-container {
   overflow-x: auto;
 }
 
+// Holdings table
 .holdings-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: $font-size-sm;
 
   th, td {
     padding: $spacing-sm $spacing-md;
     text-align: left;
     border-bottom: 1px solid $color-border;
+    white-space: nowrap;
   }
 
   th {
     font-size: $font-size-xs;
-    font-weight: $font-weight-semibold;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: $color-text-muted;
     background: $color-background;
   }
 
-  tbody tr:hover {
-    background: rgba($color-primary, 0.02);
+  tbody tr {
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba($color-primary, 0.02);
+    }
   }
 
-  tfoot {
-    td {
-      background: $color-background;
-      border-top: 2px solid $color-border;
-    }
+  tfoot td {
+    background: $color-background;
+    border-top: 2px solid $color-border;
   }
 }
 
@@ -42,21 +240,29 @@
 
 .mono {
   font-family: $font-family-mono;
+  font-variant-numeric: tabular-nums;
 }
 
+.text-muted {
+  color: $color-text-muted;
+}
+
+// Ticker badge
 .ticker-badge {
   display: inline-block;
   padding: $spacing-xs $spacing-sm;
   background: $color-primary;
   color: white;
   border-radius: $radius-md;
-  font-weight: $font-weight-semibold;
+  font-weight: 600;
   font-size: $font-size-sm;
 }
 
+// Security info
 .security-name {
   display: block;
   font-size: $font-size-sm;
+  color: $color-text-primary;
 }
 
 .security-type {
@@ -65,27 +271,135 @@
   color: $color-text-muted;
 }
 
+// Price cell
+.price-cell {
+  .price-value {
+    display: block;
+  }
+
+  .price-date {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    font-family: $font-family-base;
+    margin-top: 2px;
+  }
+}
+
+// Actions cell
 .actions-cell {
   white-space: nowrap;
+
+  .delete-btn {
+    color: $color-negative;
+  }
 }
 
-// Summary card modifiers
-.summary-card--positive {
-  background: linear-gradient(135deg, rgba($color-accent, 0.05), rgba($color-accent, 0.02));
-  border-color: rgba($color-accent, 0.2);
-}
-
-.summary-card--negative {
-  background: linear-gradient(135deg, rgba($color-negative, 0.05), rgba($color-negative, 0.02));
-  border-color: rgba($color-negative, 0.2);
-}
-
+// Gain/loss colors
 .positive {
-  color: $color-accent;
+  color: $color-positive;
 }
 
 .negative {
   color: $color-negative;
+}
+
+// Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-index-modal;
+  padding: $spacing-lg;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: $radius-lg;
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $color-border;
+  }
+
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .modal-close {
+    margin-left: auto;
+  }
+
+  mat-card-content {
+    padding: $spacing-lg;
+  }
+
+  mat-card-actions {
+    padding: $spacing-md $spacing-lg;
+    gap: $spacing-sm;
+  }
+}
+
+// Form layout
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-group--ticker {
+  flex: 2;
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Ticker autocomplete wrapper
+.ticker-autocomplete-wrapper {
+  margin-bottom: $spacing-md;
+
+  .ticker-label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+}
+
+.form-hint {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $spacing-xs;
+
+  &--warning {
+    color: $color-warning;
+  }
 }
 
 // Quote preview
@@ -99,21 +413,23 @@
   margin-bottom: $spacing-md;
 
   &__symbol {
-    font-weight: $font-weight-semibold;
+    font-weight: 600;
     color: $color-primary;
   }
 
   &__price {
     font-family: $font-family-mono;
-    font-weight: $font-weight-semibold;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
   }
 
   &__change {
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     font-size: $font-size-sm;
 
     &.positive {
-      color: $color-accent;
+      color: $color-positive;
     }
 
     &.negative {
@@ -122,49 +438,16 @@
   }
 }
 
-.form-hint--warning {
-  color: $color-warning;
-}
+// Advanced panel
+.advanced-panel {
+  margin-top: $spacing-md;
+  margin-bottom: $spacing-lg;
+  border-radius: $radius-md !important;
+  box-shadow: none !important;
+  border: 1px solid $color-border;
 
-// Form group for ticker autocomplete
-.form-group--ticker {
-  flex: 2;
-}
-
-// Advanced options toggle
-.advanced-toggle {
-  margin: $spacing-md 0;
-  padding-top: $spacing-md;
-  border-top: 1px solid $color-border;
-
-  .btn--link {
-    background: none;
-    border: none;
-    color: $color-primary;
+  mat-panel-description {
+    color: $color-text-muted;
     font-size: $font-size-sm;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-
-    &:hover {
-      text-decoration: underline;
-    }
-
-    .toggle-icon {
-      font-weight: bold;
-    }
   }
 }
-
-.advanced-options {
-  padding: $spacing-md;
-  background: $color-background;
-  border-radius: $radius-md;
-  margin-bottom: $spacing-md;
-}
-
-// Reuse common styles
-@import '../properties/properties.component';
-@import '../super-accounts/super-accounts.component';

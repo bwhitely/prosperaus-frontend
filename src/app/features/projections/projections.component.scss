@@ -1,12 +1,6 @@
 @use '../../../styles/variables' as *;
-@use '../../../styles/mixins' as *;
 
-.projections {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: $spacing-lg;
-}
-
+// Page header
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -16,259 +10,205 @@
   gap: $spacing-md;
 
   &__content {
+    flex: 1;
+    min-width: 200px;
+
     h1 {
       font-size: $font-size-3xl;
       font-weight: 700;
       color: $color-text-primary;
       margin: 0 0 $spacing-xs;
     }
+
+    .subtitle {
+      color: $color-text-secondary;
+      font-size: $font-size-base;
+      margin: 0;
+    }
   }
 
-  &__subtitle {
-    color: $color-text-secondary;
-    margin: 0;
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+
+    button mat-icon {
+      margin-right: $spacing-xs;
+    }
   }
 }
 
-.error-banner {
+// Alert
+.alert {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: $spacing-md;
-  background: rgba($color-negative, 0.1);
-  border: 1px solid $color-negative;
   border-radius: $radius-md;
-  color: $color-negative;
   margin-bottom: $spacing-lg;
 
-  &__close {
-    background: none;
-    border: none;
+  &--error {
+    background: $color-negative-muted;
+    border: 1px solid rgba($color-negative, 0.3);
     color: $color-negative;
-    cursor: pointer;
-    font-size: $font-size-lg;
-    padding: $spacing-xs;
   }
 }
 
-.projections__layout {
+// Two-column layout
+.projections-layout {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 420px 1fr;
   gap: $spacing-xl;
   align-items: start;
 
-  @include respond-to(md) {
+  @media (max-width: $breakpoint-lg) {
     grid-template-columns: 1fr;
   }
 }
 
-.projections__inputs {
-  position: sticky;
-  top: $spacing-lg;
-}
-
-.input-section {
-  @include card;
-  margin-bottom: $spacing-md;
-  padding: 0;
-  overflow: hidden;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: $spacing-md;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-
-    &:hover {
-      background: rgba($color-primary, 0.02);
-    }
-  }
-
-  &__title {
-    font-weight: 600;
-    color: $color-text-primary;
-  }
-
-  &__toggle {
-    font-size: $font-size-lg;
-    color: $color-text-muted;
-  }
-
-  &__content {
-    padding: 0 $spacing-md $spacing-md;
-    border-top: 1px solid $color-border;
-    padding-top: $spacing-md;
-  }
-}
-
-.form-row {
-  display: flex;
-  gap: $spacing-md;
-  margin-bottom: $spacing-md;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.form-group {
-  flex: 1;
-
-  &--small {
-    flex: 0 0 80px;
-  }
-
-  label {
+// Inputs section
+.inputs-section {
+  mat-accordion {
     display: block;
-    font-size: $font-size-sm;
-    font-weight: 500;
-    color: $color-text-secondary;
-    margin-bottom: $spacing-xs;
   }
 
-  input, select {
-    width: 100%;
-    padding: $spacing-sm;
-    border: 1px solid $color-border;
-    border-radius: $radius-md;
-    font-size: $font-size-base;
+  mat-expansion-panel {
+    margin-bottom: $spacing-sm !important;
+    border-radius: $radius-md !important;
+    box-shadow: $shadow-sm !important;
 
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
+    &:last-of-type {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  mat-expansion-panel-header {
+    font-weight: 600;
+  }
+}
+
+// Form layout
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  &--with-action {
+    grid-template-columns: 1fr 1fr auto auto;
+    align-items: center;
+
+    @media (max-width: $breakpoint-sm) {
+      grid-template-columns: 1fr 1fr;
     }
   }
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  cursor: pointer;
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-
-  input[type="checkbox"] {
-    width: auto;
-  }
+.form-field--small {
+  max-width: 100px;
 }
 
+.full-width {
+  width: 100%;
+}
+
+// Income source styling
 .income-source {
   padding: $spacing-md;
   background: rgba($color-primary, 0.02);
   border-radius: $radius-md;
   margin-bottom: $spacing-md;
+  border: 1px solid $color-border;
 
   &:last-of-type {
     margin-bottom: $spacing-md;
   }
 }
 
-.btn--icon {
-  padding: $spacing-sm;
-  min-width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-end;
-}
-
-.btn--danger {
-  background: rgba($color-negative, 0.1);
-  color: $color-negative;
-  border: 1px solid transparent;
-
-  &:hover:not(:disabled) {
-    background: rgba($color-negative, 0.2);
-  }
-}
-
-.btn--small {
-  padding: $spacing-xs $spacing-sm;
-  font-size: $font-size-sm;
-}
-
 // Results section
-.projections__results {
+.results-section {
   min-height: 600px;
   position: relative;
 }
 
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(white, 0.8);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+// Loading card
+.loading-card {
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+    text-align: center;
 
-  p {
-    margin-top: $spacing-md;
-    color: $color-text-secondary;
+    p {
+      margin-top: $spacing-md;
+      color: $color-text-secondary;
+    }
   }
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid $color-border;
-  border-top-color: $color-primary;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
+// Summary cards
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: $spacing-md;
-  margin-bottom: $spacing-xl;
+  margin-bottom: $spacing-lg;
 
-  @include respond-to(md) {
+  @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
   }
 }
 
 .summary-card {
-  @include card;
   text-align: center;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
 
-  &__label {
-    display: block;
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-lg;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      margin-bottom: $spacing-sm;
+      color: $color-primary;
+    }
+  }
+
+  .label {
     font-size: $font-size-sm;
     color: $color-text-secondary;
     margin-bottom: $spacing-xs;
   }
 
-  &__value {
-    display: block;
+  .value {
     font-size: $font-size-2xl;
     font-weight: 700;
-    color: $color-text-primary;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-primary;
   }
 
-  &__change {
-    display: block;
+  .change {
     font-size: $font-size-sm;
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     margin-top: $spacing-xs;
 
     &.positive {
-      color: $color-accent;
+      color: $color-positive;
     }
 
     &.negative {
@@ -277,29 +217,48 @@
   }
 
   &--highlight {
-    background: linear-gradient(135deg, rgba($color-primary, 0.05), rgba($color-accent, 0.05));
-    border-color: rgba($color-primary, 0.2);
+    border-top: 3px solid $color-primary;
+    background: linear-gradient(135deg, rgba($color-primary, 0.03), rgba($color-secondary, 0.03));
 
-    .summary-card__value {
+    mat-card-content mat-icon {
+      color: $color-primary;
+    }
+
+    .value {
       color: $color-primary;
     }
   }
 }
 
-.milestones-section {
-  @include card;
+// Cards common styling
+.milestones-card,
+.fire-status-card,
+.insights-card,
+.graph-card,
+.allocation-card,
+.table-card {
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
   margin-bottom: $spacing-lg;
 
-  h3 {
-    font-size: $font-size-lg;
-    margin: 0 0 $spacing-md;
-    color: $color-text-primary;
+  mat-card-header {
+    padding-bottom: $spacing-sm;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $color-border;
+
+    mat-card-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $color-text-primary;
+      margin: 0;
+    }
   }
 }
 
-.milestones {
+// Milestones
+.milestones-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: $spacing-md;
 }
 
@@ -311,34 +270,37 @@
   border-radius: $radius-md;
   text-align: center;
 
-  &__label {
+  .milestone-label {
     font-size: $font-size-sm;
     color: $color-text-secondary;
     margin-bottom: $spacing-xs;
   }
 
-  &__value {
+  .milestone-age {
     font-size: $font-size-lg;
     font-weight: 600;
     color: $color-primary;
   }
 
-  &__years {
+  .milestone-years {
     font-size: $font-size-xs;
     color: $color-text-muted;
     margin-top: 2px;
   }
 }
 
-.fire-status {
-  @include card;
-  margin-bottom: $spacing-lg;
+// FIRE status card
+.fire-status-card {
   border-left: 4px solid $color-warning;
 
-  h4 {
-    margin: 0 0 $spacing-sm;
-    font-size: $font-size-lg;
-    color: $color-text-primary;
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    mat-icon {
+      color: $color-warning;
+    }
   }
 
   p {
@@ -346,109 +308,162 @@
     color: $color-text-secondary;
   }
 
-  &.achievable {
-    border-left-color: $color-accent;
-
-    h4 {
-      color: $color-accent;
-    }
-  }
-
-  &__details {
-    margin-top: $spacing-sm !important;
+  .fire-details {
+    margin-top: $spacing-sm;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     font-weight: 600;
   }
-}
 
-.insights-section {
-  @include card;
-  margin-bottom: $spacing-lg;
+  &.achievable {
+    border-left-color: $color-positive;
 
-  h3 {
-    font-size: $font-size-lg;
-    margin: 0 0 $spacing-md;
-    color: $color-text-primary;
+    mat-card-header mat-icon {
+      color: $color-positive;
+    }
+
+    mat-card-header mat-card-title {
+      color: $color-positive;
+    }
   }
 }
 
-.insights {
+// Insights
+.insights-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
-  padding-left: $spacing-lg;
 
   li {
-    margin-bottom: $spacing-sm;
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0;
     color: $color-text-secondary;
-    line-height: 1.5;
+    border-bottom: 1px solid $color-border;
 
     &:last-child {
-      margin-bottom: 0;
+      border-bottom: none;
+    }
+
+    mat-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $color-primary;
     }
   }
 }
 
-.key-points {
-  @include card;
-  margin-bottom: $spacing-lg;
+// Graph
+.graph-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
 
-  h3 {
-    font-size: $font-size-lg;
-    margin: 0 0 $spacing-md;
-    color: $color-text-primary;
+.graph-svg {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+}
+
+.graph-grid-line {
+  stroke: $color-border;
+  stroke-width: 1;
+  stroke-dasharray: 4, 4;
+}
+
+.graph-axis-label {
+  font-family: $font-family-mono;
+  font-size: 11px;
+  fill: $color-text-muted;
+
+  &--y {
+    text-anchor: end;
   }
 
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: $spacing-md;
-
-    @include respond-to(md) {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  &--x {
+    text-anchor: middle;
   }
 }
 
-.key-point {
+.graph-area {
+  fill: url(#areaGradient);
+}
+
+.graph-line {
+  fill: none;
+  stroke: $color-primary;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.graph-point {
+  fill: $color-surface;
+  stroke: $color-primary;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    r: 7;
+    fill: $color-primary;
+  }
+}
+
+.graph-point-group:hover .graph-point {
+  r: 7;
+  fill: $color-primary;
+}
+
+.graph-legend {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1px solid $color-border;
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.graph-legend-item {
   text-align: center;
-  padding: $spacing-md;
-  background: rgba($color-primary, 0.03);
+  padding: $spacing-sm;
+  background: rgba($color-primary, 0.05);
   border-radius: $radius-md;
-
-  &__label {
-    display: block;
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__value {
-    font-size: $font-size-lg;
-    font-weight: 600;
-    font-family: $font-family-mono;
-    color: $color-text-primary;
-  }
+  border: 1px solid rgba($color-primary, 0.15);
 }
 
-.allocation-section {
-  @include card;
-  margin-bottom: $spacing-lg;
-
-  h3 {
-    font-size: $font-size-lg;
-    margin: 0 0 $spacing-md;
-    color: $color-text-primary;
-  }
+.graph-legend-label {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-bottom: 2px;
 }
 
+.graph-legend-value {
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: $font-family-mono;
+  font-variant-numeric: tabular-nums;
+  color: $color-primary;
+}
+
+// Allocation bars
 .allocation-bars {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
+  gap: $spacing-md;
 }
 
 .allocation-bar {
   display: grid;
-  grid-template-columns: 80px 1fr 60px;
+  grid-template-columns: 80px 1fr 50px;
   align-items: center;
   gap: $spacing-md;
 
@@ -457,8 +472,15 @@
     color: $color-text-secondary;
   }
 
-  &__fill {
+  &__track {
     height: 24px;
+    background: $color-background;
+    border-radius: $radius-sm;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
     border-radius: $radius-sm;
     transition: width 0.3s ease;
 
@@ -467,11 +489,11 @@
     }
 
     &--property {
-      background: $color-accent;
+      background: $color-positive;
     }
 
     &--shares {
-      background: #9B59B6;
+      background: $color-secondary;
     }
 
     &--cash {
@@ -482,47 +504,44 @@
   &__value {
     font-size: $font-size-sm;
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
     color: $color-text-secondary;
     text-align: right;
   }
 }
 
-.table-section {
-  @include card;
-
-  &__header {
+// Table card
+.table-card {
+  mat-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: $spacing-md;
-
-    h3 {
-      font-size: $font-size-lg;
-      margin: 0;
-      color: $color-text-primary;
-    }
   }
 }
 
-.table-wrapper {
+.table-container {
   overflow-x: auto;
 }
 
 .projection-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: $font-size-sm;
 
   th, td {
     padding: $spacing-sm $spacing-md;
     text-align: left;
     border-bottom: 1px solid $color-border;
+    white-space: nowrap;
   }
 
   th {
-    font-size: $font-size-sm;
+    font-size: $font-size-xs;
     font-weight: 600;
-    color: $color-text-secondary;
-    background: rgba($color-primary, 0.02);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $color-text-muted;
+    background: $color-background;
   }
 
   .text-right {
@@ -531,10 +550,19 @@
 
   .mono {
     font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
   }
 
   .milestone-row {
-    background: rgba($color-accent, 0.05);
+    background: rgba($color-positive, 0.05);
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba($color-primary, 0.02);
+    }
   }
 }
 
@@ -549,25 +577,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: $z-index-modal;
+  padding: $spacing-lg;
 }
 
-.modal {
-  @include card;
+.modal-card {
   width: 100%;
   max-width: 400px;
-  margin: $spacing-md;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: $radius-lg;
 
-  h3 {
-    margin: 0 0 $spacing-lg;
-    font-size: $font-size-xl;
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $color-border;
   }
 
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: $spacing-md;
-    margin-top: $spacing-lg;
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .modal-close {
+    margin-left: auto;
+  }
+
+  mat-card-content {
+    padding: $spacing-lg;
+  }
+
+  mat-card-actions {
+    padding: $spacing-md $spacing-lg;
+    gap: $spacing-sm;
   }
 }
 
@@ -577,32 +622,38 @@
   right: $spacing-lg;
   top: 100px;
   width: 250px;
-  @include card;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-md;
   max-height: calc(100vh - 150px);
   overflow-y: auto;
+  z-index: 10;
 
   h4 {
     margin: 0 0 $spacing-md;
     font-size: $font-size-base;
+    font-weight: 600;
     color: $color-text-secondary;
   }
 
-  @include respond-to(lg) {
+  @media (max-width: $breakpoint-xl) {
     display: none;
   }
 }
 
-.scenarios-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.scenario-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
 }
 
 .scenario-item {
-  padding: $spacing-sm;
-  border-radius: $radius-sm;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
   cursor: pointer;
-  margin-bottom: $spacing-xs;
+  transition: background 0.15s;
 
   &:hover {
     background: rgba($color-primary, 0.05);
@@ -623,7 +674,7 @@
 
 // Positive/negative helpers
 .positive {
-  color: $color-accent;
+  color: $color-positive;
 }
 
 .negative {
