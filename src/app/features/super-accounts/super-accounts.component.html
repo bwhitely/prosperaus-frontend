@@ -4,7 +4,7 @@
     <p>Track your superannuation balances and contributions</p>
   </div>
   @if (!showForm()) {
-    <button class="btn btn--primary" (click)="openAddForm()">
+    <button mat-flat-button color="primary" (click)="openAddForm()">
       + Add Superannuation
     </button>
   }
@@ -13,7 +13,9 @@
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
@@ -46,7 +48,7 @@
     <div class="empty-state__icon">💰</div>
     <h3>No super accounts yet</h3>
     <p>Add your superannuation accounts to track your retirement savings.</p>
-    <button class="btn btn--primary" (click)="openAddForm()">
+    <button mat-flat-button color="primary" (click)="openAddForm()">
       Add Your First Account
     </button>
   </div>
@@ -142,7 +144,7 @@
           </div>
         </div>
 
-        <button type="button" class="btn btn--link" (click)="toggleAdvanced()">
+        <button mat-button type="button" (click)="toggleAdvanced()">
           {{ showAdvanced() ? 'Hide' : 'Show' }} Contribution Details
         </button>
 
@@ -157,6 +159,9 @@
                   <span class="prefix">$</span>
                   <input type="number" id="employerContributionsYtd" formControlName="employerContributionsYtd">
                 </div>
+                @if (calculatedSgYtd() !== null && !editingAccount()) {
+                  <span class="form-hint">Estimated from your salary income (12% SG, {{ getMonthsElapsedInFy() }} months YTD)</span>
+                }
               </div>
 
               <div class="form-group">
@@ -218,10 +223,10 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closeForm()">
+        <button mat-stroked-button type="button" (click)="closeForm()">
           Cancel
         </button>
-        <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editingAccount() ? 'Update' : 'Add') }} Account
         </button>
       </div>

@@ -1,6 +1,9 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe, PercentPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DistributionService } from '../../core/services/distribution.service';
 import { InvestmentService } from '../../core/services/investment.service';
 import {
@@ -13,7 +16,7 @@ import { InvestmentHoldingResponse } from '../../shared/models/investment.model'
 @Component({
   selector: 'app-dividends',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe, PercentPipe, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DecimalPipe, PercentPipe, DatePipe, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './dividends.component.html',
   styleUrl: './dividends.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

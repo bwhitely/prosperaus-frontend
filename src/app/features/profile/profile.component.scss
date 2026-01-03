@@ -1,5 +1,7 @@
 @use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
 
+// Page Header
 .page-header {
   margin-bottom: $spacing-xl;
 
@@ -19,37 +21,590 @@
   }
 }
 
-.placeholder-card {
-  max-width: 500px;
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-3xl;
+  text-align: center;
+
+  p {
+    margin-top: $spacing-lg;
+    color: $color-text-secondary;
+  }
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-lg;
+  border-bottom: 1px solid $color-border;
+  padding-bottom: $spacing-xs;
+  overflow-x: auto;
+
+  &__tab {
+    @include button-base;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    background: transparent;
+    color: $color-text-secondary;
+    border: none;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-md $radius-md 0 0;
+    position: relative;
+    white-space: nowrap;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover:not(:disabled) {
+      color: $color-text-primary;
+      background: rgba($color-primary, 0.05);
+    }
+
+    &--active {
+      color: $color-primary;
+      font-weight: 600;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: calc(-#{$spacing-xs} - 1px);
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: $color-primary;
+      }
+    }
+  }
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+// Profile Card (Personal Tab)
+.profile-card,
+.subscription-card {
+  max-width: 600px;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
 
-  mat-card-content {
+  mat-card-header {
+    margin-bottom: $spacing-lg;
+  }
+
+  mat-card-title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+  }
+
+  mat-card-subtitle {
+    color: $color-text-secondary;
+  }
+}
+
+// Subscription Card
+.subscription-card {
+  margin-top: $spacing-xl;
+}
+
+.subscription-status {
+  display: flex;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__value {
+    font-size: $font-size-xl;
+    font-weight: 700;
+
+    &--pro {
+      color: $color-accent;
+    }
+
+    &--free {
+      color: $color-text-secondary;
+    }
+
+    &--warning {
+      color: $color-warning;
+    }
+
+    &--canceled {
+      color: $color-text-muted;
+    }
+  }
+
+  &__date {
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $color-text-primary;
+  }
+}
+
+.subscription-actions {
+  margin-bottom: $spacing-lg;
+
+  button, a {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+}
+
+.subscription-benefits {
+  background: rgba($color-primary, 0.05);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+
+  p {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-sm;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      padding: $spacing-xs 0;
+      padding-left: $spacing-lg;
+      position: relative;
+
+      &::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: $color-accent;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.personal-form {
+  .form-row {
+    margin-bottom: $spacing-md;
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    &--double {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: $spacing-md;
+      align-items: center;
+
+      @media (max-width: $breakpoint-sm) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .form-section-title {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin: $spacing-xl 0 $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+  }
+
+  .age-display {
+    @include card;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: $spacing-2xl;
     text-align: center;
+    padding: $spacing-md;
+
+    .age-label {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .age-value {
+      font-size: $font-size-xl;
+      font-weight: 700;
+      color: $color-primary;
+    }
+  }
+
+  .checkbox-hint {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+    margin-left: $spacing-xl + $spacing-sm;
+  }
+
+  .form-actions {
+    margin-top: $spacing-xl;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      mat-spinner {
+        margin-right: $spacing-sm;
+      }
+    }
+  }
+}
+
+// Summary Cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  &--four {
+    grid-template-columns: repeat(4, 1fr);
+
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &--three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  @include card;
+  text-align: center;
+
+  &__icon {
+    display: block;
+    margin: 0 auto $spacing-sm;
+    color: $color-primary;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__value {
+    display: block;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+  }
+
+  &__hint {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+
+  &--positive {
+    border-top: 3px solid $color-accent;
+  }
+
+  &--negative {
+    border-top: 3px solid $color-negative;
+  }
+
+  &--neutral {
+    border-top: 3px solid $color-warning;
+  }
+}
+
+// Color utilities
+.positive {
+  color: $color-accent !important;
+}
+
+.negative {
+  color: $color-negative !important;
+}
+
+.neutral {
+  color: $color-warning !important;
+}
+
+// Total Card
+.total-card {
+  @include card;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+  background: rgba($color-accent, 0.05);
+  border: 1px solid rgba($color-accent, 0.2);
+
+  &--negative {
+    background: rgba($color-negative, 0.05);
+    border: 1px solid rgba($color-negative, 0.2);
+  }
+
+  .total-label {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  .total-value {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+  }
+}
+
+// Asset/Liability Sections
+.asset-sections,
+.liability-sections {
+  mat-expansion-panel {
+    margin-bottom: $spacing-md;
+    border-radius: $radius-lg !important;
+    box-shadow: $shadow-sm;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  mat-expansion-panel-header {
+    padding: $spacing-md $spacing-lg;
+  }
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-weight: 600;
+    color: $color-text-primary;
 
     mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
       color: $color-primary;
-      margin-bottom: $spacing-lg;
+    }
+  }
+
+  mat-panel-description {
+    color: $color-text-secondary;
+    margin-left: auto;
+  }
+}
+
+// Section Loading
+.section-loading {
+  display: flex;
+  justify-content: center;
+  padding: $spacing-lg;
+}
+
+// Empty Section
+.empty-section {
+  text-align: center;
+  padding: $spacing-lg;
+
+  p {
+    color: $color-text-secondary;
+    margin-bottom: $spacing-md;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+}
+
+// Section Actions
+.section-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: $spacing-md;
+  margin-top: $spacing-md;
+  border-top: 1px solid $color-border;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+}
+
+// Asset/Liability Lists
+.asset-list,
+.liability-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.asset-item,
+.liability-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-surface-alt;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+
+  &__name {
+    font-weight: 600;
+    color: $color-text-primary;
+  }
+
+  &__ticker {
+    font-family: $font-family-mono;
+    font-weight: 700;
+    color: $color-primary;
+    font-size: $font-size-lg;
+  }
+
+  &__type,
+  &__units,
+  &__institution {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__values {
+    display: flex;
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-md) {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  &__value {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: $spacing-xs;
+
+    @media (max-width: $breakpoint-md) {
+      align-items: flex-start;
     }
 
-    h3 {
-      font-size: $font-size-xl;
+    .label {
+      font-size: $font-size-xs;
+      color: $color-text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .amount {
+      font-family: $font-family-mono;
       font-weight: 600;
-      color: $color-text-primary;
-      margin: 0 0 $spacing-sm;
+      font-size: $font-size-base;
     }
+  }
+}
 
-    p {
-      color: $color-text-secondary;
-      margin: 0;
+// Liability Hint
+.liability-hint {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba($color-primary, 0.05);
+  border-radius: $radius-md;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+
+  mat-icon {
+    color: $color-primary;
+    flex-shrink: 0;
+  }
+
+  a {
+    color: $color-primary;
+    font-weight: 500;
+  }
+}
+
+// Sub-tabs styling for income/expense
+.sub-tabs {
+  margin-bottom: $spacing-lg;
+}
+
+// Responsive adjustments
+@media (max-width: $breakpoint-sm) {
+  .tabs {
+    &__tab {
+      padding: $spacing-sm;
+      font-size: $font-size-sm;
+
+      mat-icon {
+        display: none;
+      }
     }
+  }
+
+  .summary-card {
+    &__value {
+      font-size: $font-size-lg;
+    }
+  }
+
+  .total-card {
+    flex-direction: column;
+    text-align: center;
+    gap: $spacing-sm;
   }
 }

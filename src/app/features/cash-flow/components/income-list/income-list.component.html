@@ -1,14 +1,16 @@
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
 <div class="section-header">
   <h2>Income Sources</h2>
   @if (!showForm()) {
-    <button class="btn btn--primary" (click)="openAddForm()">
+    <button mat-flat-button color="primary" (click)="openAddForm()">
       + Add Income
     </button>
   }
@@ -66,10 +68,10 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closeForm()">
+        <button mat-stroked-button type="button" (click)="closeForm()">
           Cancel
         </button>
-        <button type="submit" class="btn btn--primary" [disabled]="form.invalid || isSubmitting()">
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editingSource() ? 'Update' : 'Add') }} Income Source
         </button>
       </div>
@@ -87,7 +89,7 @@
     <div class="empty-state__icon">💰</div>
     <h3>No income sources yet</h3>
     <p>Add your salary, rental income, dividends, and other income sources.</p>
-    <button class="btn btn--primary" (click)="openAddForm()">
+    <button mat-flat-button color="primary" (click)="openAddForm()">
       Add Your First Income Source
     </button>
   </div>

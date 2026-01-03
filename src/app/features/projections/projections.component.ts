@@ -62,7 +62,7 @@ export class ProjectionsComponent implements OnInit {
 
   // Scenario management
   scenarios = signal<ScenarioResponse[]>([]);
-  showSaveModal = signal(false);
+  showSaveForm = signal(false);
   isSaving = signal(false);
   scenarioName = signal('');
 
@@ -312,9 +312,102 @@ export class ProjectionsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadPrefillData();
     this.loadScenarios();
     // Initial calculation after a short delay
     setTimeout(() => this.calculate(), 200);
+  }
+
+  loadPrefillData(): void {
+    this.projectionService.getPrefillData().subscribe({
+      next: (data) => {
+        if (data && Object.keys(data).length > 0) {
+          const patchData: Record<string, unknown> = {};
+
+          // Personal details
+          if (data.personal) {
+            if (data.personal.currentAge) {
+              patchData['currentAge'] = data.personal.currentAge;
+            }
+            if (data.personal.targetRetirementAge) {
+              patchData['targetRetirementAge'] = data.personal.targetRetirementAge;
+            }
+          }
+
+          // Superannuation
+          if (data.superannuation) {
+            if (data.superannuation.currentBalance !== undefined) {
+              patchData['superBalance'] = data.superannuation.currentBalance;
+            }
+            if (data.superannuation.salarySacrifice !== undefined) {
+              patchData['salarySacrifice'] = data.superannuation.salarySacrifice;
+            }
+          }
+
+          // PPOR
+          if (data.ppor) {
+            if (data.ppor.currentValue !== undefined) {
+              patchData['pporValue'] = data.ppor.currentValue;
+            }
+            if (data.ppor.mortgageBalance !== undefined) {
+              patchData['pporMortgage'] = data.ppor.mortgageBalance;
+            }
+            if (data.ppor.interestRate !== undefined) {
+              // Backend returns decimal, form expects percentage
+              patchData['pporInterestRate'] = data.ppor.interestRate * 100;
+            }
+            if (data.ppor.offsetBalance !== undefined) {
+              patchData['pporOffsetBalance'] = data.ppor.offsetBalance;
+            }
+            if (data.ppor.remainingTermYears !== undefined) {
+              patchData['pporRemainingTerm'] = data.ppor.remainingTermYears;
+            }
+          }
+
+          // Shares
+          if (data.shares && data.shares.currentValue !== undefined) {
+            patchData['sharesValue'] = data.shares.currentValue;
+          }
+
+          // Cash
+          if (data.cash && data.cash.currentBalance !== undefined) {
+            patchData['cashBalance'] = data.cash.currentBalance;
+          }
+
+          // Expenses
+          if (data.expenses && data.expenses.annualAmount !== undefined) {
+            patchData['annualExpenses'] = data.expenses.annualAmount;
+          }
+
+          // Tax
+          if (data.tax && data.tax.marginalTaxRate !== undefined) {
+            patchData['marginalTaxRate'] = data.tax.marginalTaxRate;
+          }
+
+          if (Object.keys(patchData).length > 0) {
+            this.form.patchValue(patchData);
+          }
+
+          // Handle income sources (dynamic array)
+          if (data.incomeSources && data.incomeSources.length > 0) {
+            // Clear existing and add from prefill
+            this.incomeSources.clear();
+            data.incomeSources.forEach(source => {
+              this.incomeSources.push(this.fb.group({
+                name: [source.name || ''],
+                sourceType: [source.sourceType || 'SALARY'],
+                amount: [source.amount || 0],
+                frequency: [source.frequency?.toLowerCase() || 'annually'],
+                annualGrowthRate: [3]
+              }));
+            });
+          }
+        }
+      },
+      error: () => {
+        // Silently fail - form stays with defaults
+      }
+    });
   }
 
   setSectionExpanded(section: string, expanded: boolean): void {
@@ -431,12 +524,12 @@ export class ProjectionsComponent implements OnInit {
     });
   }
 
-  openSaveModal(): void {
-    this.showSaveModal.set(true);
+  openSaveForm(): void {
+    this.showSaveForm.set(true);
   }
 
-  closeSaveModal(): void {
-    this.showSaveModal.set(false);
+  closeSaveForm(): void {
+    this.showSaveForm.set(false);
     this.scenarioName.set('');
   }
 
@@ -452,7 +545,7 @@ export class ProjectionsComponent implements OnInit {
     this.projectionService.calculateAndSave(request, name).subscribe({
       next: () => {
         this.loadScenarios();
-        this.closeSaveModal();
+        this.closeSaveForm();
         this.isSaving.set(false);
       },
       error: () => {

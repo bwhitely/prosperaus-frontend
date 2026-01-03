@@ -132,22 +132,78 @@
 // INPUT WITH PREFIX (currency, percentage)
 // ===========================================
 .input-prefix {
-  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &:focus-within {
+    border-color: $color-gold;
+    box-shadow: 0 0 0 3px rgba($color-gold, 0.1);
+  }
 
   .prefix {
-    position: absolute;
-    left: $spacing-md;
-    top: 50%;
-    transform: translateY(-50%);
+    flex-shrink: 0;
+    padding: $spacing-sm $spacing-md;
+    background: $color-surface-elevated;
+    border-right: 1px solid $color-border;
     color: $color-text-muted;
     font-family: $font-family-mono;
     font-weight: $font-weight-medium;
-    pointer-events: none;
   }
 
   input {
-    padding-left: $spacing-xl;
+    flex: 1;
+    min-width: 0;
+    border: none;
+    padding: $spacing-sm $spacing-md;
     font-family: $font-family-mono;
+    background: $color-surface;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+// Input suffix variant
+.input-suffix {
+  display: flex;
+  align-items: center;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &:focus-within {
+    border-color: $color-gold;
+    box-shadow: 0 0 0 3px rgba($color-gold, 0.1);
+  }
+
+  .suffix {
+    flex-shrink: 0;
+    padding: $spacing-sm $spacing-md;
+    background: $color-surface-elevated;
+    border-left: 1px solid $color-border;
+    color: $color-text-muted;
+    font-family: $font-family-mono;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    padding: $spacing-sm $spacing-md;
+    font-family: $font-family-mono;
+    background: $color-surface;
+
+    &:focus {
+      outline: none;
+    }
   }
 }
 

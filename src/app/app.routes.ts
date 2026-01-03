@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, publicGuard } from './core/auth/auth.guard';
 import { onboardingGuard, incompleteOnboardingGuard } from './core/auth/onboarding.guard';
+import { paidFeatureGuard } from './core/auth/subscription.guard';
 
 export const routes: Routes = [
   // Landing page (accessible to everyone)
@@ -23,6 +24,23 @@ export const routes: Routes = [
     loadComponent: () => import('./features/legal/privacy/privacy.component')
       .then(m => m.PrivacyComponent),
     title: 'Privacy Policy - ProsperAus'
+  },
+
+  // Pricing (public)
+  {
+    path: 'pricing',
+    loadComponent: () => import('./features/pricing/pricing.component')
+      .then(m => m.PricingComponent),
+    title: 'Pricing - ProsperAus'
+  },
+
+  // Subscription management (requires auth)
+  {
+    path: 'subscription/success',
+    loadComponent: () => import('./features/subscription/success/success.component')
+      .then(m => m.SubscriptionSuccessComponent),
+    canActivate: [authGuard],
+    title: 'Subscription Confirmed - ProsperAus'
   },
 
   // Auth routes (public only)
@@ -50,14 +68,7 @@ export const routes: Routes = [
     title: 'Get Started - ProsperAus'
   },
 
-  // Protected routes (require auth + completed onboarding)
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./features/dashboard/dashboard.component')
-      .then(m => m.DashboardComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Dashboard - ProsperAus'
-  },
+  // Free calculators (require auth + onboarding, but no Pro subscription)
   {
     path: 'equity-recycling',
     loadComponent: () => import('./features/equity-recycling/equity-recycling.component')
@@ -87,19 +98,14 @@ export const routes: Routes = [
     title: 'Property Analyser - ProsperAus'
   },
   {
-    path: 'portfolio',
-    loadComponent: () => import('./features/portfolio-analyser/portfolio-analyser.component')
-      .then(m => m.PortfolioAnalyserComponent),
+    path: 'mortgage-calculator',
+    loadComponent: () => import('./features/mortgage-calculator/mortgage-calculator.component')
+      .then(m => m.MortgageCalculatorComponent),
     canActivate: [authGuard, onboardingGuard],
-    title: 'Portfolio Analyser - ProsperAus'
+    title: 'Mortgage Calculator - ProsperAus'
   },
-  {
-    path: 'analyse',
-    loadComponent: () => import('./features/statement-analyser/statement-analyser.component')
-      .then(m => m.StatementAnalyserComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Expenses Analyser - ProsperAus'
-  },
+
+  // Profile (auth only, not Pro - so users can manage subscription)
   {
     path: 'profile',
     loadComponent: () => import('./features/profile/profile.component')
@@ -108,55 +114,78 @@ export const routes: Routes = [
     title: 'Profile - ProsperAus'
   },
 
-  // Asset Management Routes
+  // Pro features (require auth + onboarding + Pro subscription)
   {
-    path: 'properties',
-    loadComponent: () => import('./features/properties/properties.component')
-      .then(m => m.PropertiesComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Properties - ProsperAus'
+    path: 'dashboard',
+    loadComponent: () => import('./features/dashboard/dashboard.component')
+      .then(m => m.DashboardComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Dashboard - ProsperAus'
   },
   {
-    path: 'super',
-    loadComponent: () => import('./features/super-accounts/super-accounts.component')
-      .then(m => m.SuperAccountsComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Superannuation - ProsperAus'
+    path: 'portfolio',
+    loadComponent: () => import('./features/portfolio-analyser/portfolio-analyser.component')
+      .then(m => m.PortfolioAnalyserComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Portfolio Analyser - ProsperAus'
   },
   {
-    path: 'investments',
-    loadComponent: () => import('./features/investments/investments.component')
-      .then(m => m.InvestmentsComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Investments - ProsperAus'
-  },
-  {
-    path: 'cash',
-    loadComponent: () => import('./features/cash-liabilities/cash-liabilities.component')
-      .then(m => m.CashLiabilitiesComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Cash & Liabilities - ProsperAus'
-  },
-  {
-    path: 'income-expenses',
-    loadComponent: () => import('./features/cash-flow/cash-flow.component')
-      .then(m => m.CashFlowComponent),
-    canActivate: [authGuard, onboardingGuard],
-    title: 'Income & Expenses - ProsperAus'
+    path: 'analyse',
+    loadComponent: () => import('./features/statement-analyser/statement-analyser.component')
+      .then(m => m.StatementAnalyserComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Expenses Analyser - ProsperAus'
   },
   {
     path: 'projections',
     loadComponent: () => import('./features/projections/projections.component')
       .then(m => m.ProjectionsComponent),
-    canActivate: [authGuard, onboardingGuard],
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
     title: 'Net Worth Projection - ProsperAus'
   },
   {
     path: 'dividends',
     loadComponent: () => import('./features/dividends/dividends.component')
       .then(m => m.DividendsComponent),
-    canActivate: [authGuard, onboardingGuard],
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
     title: 'Dividends & Distributions - ProsperAus'
+  },
+
+  // Asset Management Routes (Pro features)
+  {
+    path: 'properties',
+    loadComponent: () => import('./features/properties/properties.component')
+      .then(m => m.PropertiesComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Properties - ProsperAus'
+  },
+  {
+    path: 'super',
+    loadComponent: () => import('./features/super-accounts/super-accounts.component')
+      .then(m => m.SuperAccountsComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Superannuation - ProsperAus'
+  },
+  {
+    path: 'investments',
+    loadComponent: () => import('./features/investments/investments.component')
+      .then(m => m.InvestmentsComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Investments - ProsperAus'
+  },
+  {
+    path: 'cash',
+    loadComponent: () => import('./features/cash-liabilities/cash-liabilities.component')
+      .then(m => m.CashLiabilitiesComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Cash & Liabilities - ProsperAus'
+  },
+  {
+    path: 'income-expenses',
+    loadComponent: () => import('./features/cash-flow/cash-flow.component')
+      .then(m => m.CashFlowComponent),
+    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    title: 'Income & Expenses - ProsperAus'
   },
 
   // Fallback

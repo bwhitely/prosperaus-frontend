@@ -4,7 +4,7 @@
     <p class="subtitle">Project your wealth growth over time with Australian tax and super rules</p>
   </div>
   <div class="page-header__actions">
-    <button mat-stroked-button (click)="openSaveModal()">
+    <button mat-stroked-button (click)="openSaveForm()">
       <mat-icon>save</mat-icon>
       Save Scenario
     </button>
@@ -88,14 +88,6 @@
                     <span matTextPrefix>$&nbsp;</span>
                     <input matInput type="number" formControlName="amount" min="0">
                   </mat-form-field>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Frequency</mat-label>
-                    <mat-select formControlName="frequency">
-                      @for (freq of frequencyOptions; track freq.value) {
-                        <mat-option [value]="freq.value">{{ freq.label }}</mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
                   <mat-form-field appearance="outline" class="form-field--small">
                     <mat-label>Growth %</mat-label>
                     <input matInput type="number" formControlName="annualGrowthRate" min="-10" max="20">
@@ -107,6 +99,14 @@
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
+                <mat-form-field appearance="outline">
+                  <mat-label>Frequency</mat-label>
+                  <mat-select formControlName="frequency">
+                    @for (freq of frequencyOptions; track freq.value) {
+                      <mat-option [value]="freq.value">{{ freq.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
               </div>
             }
           </div>
@@ -608,38 +608,33 @@
   </div>
 </div>
 
-<!-- Save Scenario Modal -->
-@if (showSaveModal()) {
-  <div class="modal-overlay" (click)="closeSaveModal()">
-    <mat-card class="modal-card" (click)="$event.stopPropagation()">
-      <mat-card-header>
-        <mat-card-title>Save Projection Scenario</mat-card-title>
-        <button mat-icon-button class="modal-close" (click)="closeSaveModal()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Scenario Name</mat-label>
-          <input matInput
-                 [value]="scenarioName()"
-                 (input)="scenarioName.set($any($event.target).value)"
-                 placeholder="e.g., Base Case, Aggressive Savings">
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions align="end">
-        <button mat-button (click)="closeSaveModal()">Cancel</button>
-        <button mat-flat-button color="primary"
-                (click)="saveScenario()"
-                [disabled]="isSaving() || !scenarioName()">
-          @if (isSaving()) {
-            <mat-spinner diameter="18"></mat-spinner>
-          }
-          {{ isSaving() ? 'Saving...' : 'Save' }}
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+<!-- Save Scenario Inline Form -->
+@if (showSaveForm()) {
+  <mat-card class="inline-form">
+    <mat-card-header class="inline-form__header">
+      <mat-card-title>Save Projection Scenario</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="inline-form__body">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Scenario Name</mat-label>
+        <input matInput
+               [value]="scenarioName()"
+               (input)="scenarioName.set($any($event.target).value)"
+               placeholder="e.g., Base Case, Aggressive Savings">
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions align="end" class="inline-form__footer">
+      <button mat-stroked-button (click)="closeSaveForm()">Cancel</button>
+      <button mat-flat-button color="primary"
+              (click)="saveScenario()"
+              [disabled]="isSaving() || !scenarioName()">
+        @if (isSaving()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        }
+        {{ isSaving() ? 'Saving...' : 'Save' }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
 }
 
 <!-- Saved Scenarios Sidebar (if any exist) -->

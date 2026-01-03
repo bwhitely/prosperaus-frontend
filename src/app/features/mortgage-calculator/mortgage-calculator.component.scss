@@ -1,0 +1,474 @@
+@use 'sass:color';
+@use '../../../styles/variables' as *;
+
+// Page header
+.page-header {
+  margin-bottom: $spacing-xl;
+
+  h1 {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin: 0 0 $spacing-sm 0;
+  }
+
+  .subtitle {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+    margin: 0;
+  }
+}
+
+// Alert
+.alert {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  &--error {
+    background: $color-negative-muted;
+    border: 1px solid rgba($color-negative, 0.2);
+    color: $color-negative;
+  }
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+
+  span {
+    flex: 1;
+  }
+}
+
+// Two-column layout
+.calculator-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-xl;
+
+  @media (min-width: $breakpoint-lg) {
+    grid-template-columns: 450px 1fr;
+  }
+}
+
+// Inputs column
+.calculator-inputs {
+  mat-card {
+    position: sticky;
+    top: $spacing-lg;
+    overflow: visible;
+  }
+
+  mat-card-content {
+    overflow: visible;
+  }
+
+  mat-card-title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+// Form sections
+.form-section {
+  margin-bottom: $spacing-lg;
+
+  .section-info {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-md;
+    line-height: 1.5;
+  }
+}
+
+.form-row {
+  margin-bottom: $spacing-md;
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  &--double {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
+
+    @media (max-width: $breakpoint-sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Options panels
+.options-panel {
+  margin-bottom: $spacing-md;
+  margin-left: 0;
+  margin-right: 0;
+
+  // Ensure the expansion indicator and icons aren't clipped
+  ::ng-deep .mat-expansion-panel-header {
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+  }
+
+  mat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    overflow: visible;
+
+    mat-icon {
+      color: $color-primary;
+      flex-shrink: 0;
+    }
+  }
+
+  mat-panel-description {
+    color: $color-text-muted;
+  }
+
+  .form-section {
+    margin-top: $spacing-md;
+    margin-bottom: 0;
+  }
+}
+
+// Calculate button
+.calculate-btn {
+  width: 100%;
+  padding: $spacing-md $spacing-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  margin-top: $spacing-md;
+
+  mat-icon {
+    margin-right: $spacing-sm;
+  }
+
+  mat-spinner {
+    margin-right: $spacing-sm;
+  }
+}
+
+// Results column
+.calculator-results {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+// Loading card
+.loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-3xl;
+  text-align: center;
+
+  p {
+    margin-top: $spacing-lg;
+    color: $color-text-secondary;
+  }
+}
+
+// Result cards grid
+.result-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $spacing-md;
+}
+
+.result-card {
+  text-align: center;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    padding: 0 !important;
+  }
+
+  .result-label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .result-value {
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+
+    &.positive {
+      color: $color-positive;
+    }
+
+    &.negative {
+      color: $color-text-primary;
+    }
+  }
+
+  &--primary {
+    border: 2px solid $color-primary;
+    background: rgba($color-primary, 0.03);
+  }
+
+  &--highlight {
+    background: $color-positive-muted;
+    border: 1px solid rgba($color-positive, 0.2);
+
+    .result-label {
+      color: $color-accent-dark;
+    }
+  }
+}
+
+// Savings banner
+.savings-banner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: $color-positive-muted;
+  border-radius: $radius-md;
+  border-left: 4px solid $color-positive;
+  color: $color-accent-dark;
+  font-size: $font-size-base;
+
+  mat-icon {
+    color: $color-positive;
+    flex-shrink: 0;
+  }
+
+  strong {
+    color: $color-positive;
+  }
+}
+
+// Chart card
+.chart-card {
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+
+  .chart-container {
+    height: 350px;
+    position: relative;
+  }
+}
+
+// Comparison card
+.comparison-card {
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.comparison-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: $spacing-md;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $color-border;
+
+  &--header {
+    font-weight: $font-weight-semibold;
+    color: $color-text-secondary;
+    font-size: $font-size-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid $color-border;
+    padding-bottom: $spacing-md;
+  }
+
+  &--highlight {
+    background: $color-positive-muted;
+    margin: 0 (-$spacing-lg);
+    padding: $spacing-md $spacing-lg;
+    border-bottom: none;
+    border-radius: $radius-md;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.comparison-label {
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.comparison-value {
+  font-family: $font-family-mono;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+
+  &.positive {
+    color: $color-positive;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+// Breakdown card
+.breakdown-card {
+  mat-card-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.breakdown-table-wrapper {
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: right;
+    border-bottom: 1px solid $color-border;
+  }
+
+  th {
+    font-weight: $font-weight-semibold;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: sticky;
+    top: 0;
+    background: $color-surface;
+    z-index: 1;
+
+    &:first-child {
+      text-align: left;
+    }
+  }
+
+  td {
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+
+    &:first-child {
+      text-align: left;
+      font-family: $font-family-base;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  tbody tr:hover {
+    background: $color-surface-hover;
+  }
+}
+
+// Insights card
+.insights-card {
+  mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+
+    mat-icon {
+      color: $color-primary;
+    }
+  }
+}
+
+.insights-list {
+  margin: 0;
+  padding-left: $spacing-lg;
+
+  li {
+    padding: $spacing-sm 0;
+    color: $color-text-secondary;
+    line-height: 1.6;
+
+    &::marker {
+      color: $color-primary;
+    }
+  }
+}
+
+// Disclaimer
+.disclaimer {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: $color-surface-alt;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+
+  mat-icon {
+    color: $color-text-muted;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.6;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $breakpoint-lg) {
+  .calculator-inputs mat-card {
+    position: static;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .page-header h1 {
+    font-size: $font-size-2xl;
+  }
+
+  .result-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .result-card .result-value {
+    font-size: $font-size-xl;
+  }
+
+  .comparison-row {
+    grid-template-columns: 1fr;
+    gap: $spacing-xs;
+    padding: $spacing-md 0;
+
+    &--header {
+      display: none;
+    }
+  }
+
+  .comparison-label {
+    font-size: $font-size-xs;
+  }
+
+  .comparison-value {
+    text-align: left;
+  }
+}

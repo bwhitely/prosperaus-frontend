@@ -8,7 +8,9 @@
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
@@ -32,10 +34,10 @@
 
 <!-- Tabs -->
 <div class="tabs">
-  <button class="tab" [class.tab--active]="activeTab() === 'cash'" (click)="setTab('cash')">
+  <button mat-button class="tab" [class.tab--active]="activeTab() === 'cash'" (click)="setTab('cash')">
     Cash Accounts ({{ cashAccounts().length }})
   </button>
-  <button class="tab" [class.tab--active]="activeTab() === 'liabilities'" (click)="setTab('liabilities')">
+  <button mat-button class="tab" [class.tab--active]="activeTab() === 'liabilities'" (click)="setTab('liabilities')">
     Liabilities ({{ liabilities().length }})
   </button>
 </div>
@@ -52,14 +54,14 @@
       <div class="tab-header">
         <h3>Cash Accounts</h3>
         @if (!showCashForm()) {
-          <button class="btn btn--primary" (click)="openAddCashForm()">+ Add Account</button>
+          <button mat-flat-button color="primary" (click)="openAddCashForm()">+ Add Account</button>
         }
       </div>
 
       @if (cashAccounts().length === 0 && !showCashForm()) {
         <div class="empty-state empty-state--small">
           <p>No cash accounts yet. Add your savings and everyday accounts.</p>
-          <button class="btn btn--primary" (click)="openAddCashForm()">Add First Account</button>
+          <button mat-flat-button color="primary" (click)="openAddCashForm()">Add First Account</button>
         </div>
       } @else {
         <div class="items-list">
@@ -89,8 +91,12 @@
                 {{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}
               </div>
               <div class="item-card__actions">
-                <button class="btn btn--icon btn--sm" (click)="openEditCashForm(account)">Edit</button>
-                <button class="btn btn--icon btn--sm btn--danger" (click)="deleteCashAccount(account)">Delete</button>
+                <button mat-icon-button (click)="openEditCashForm(account)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteCashAccount(account)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
             </div>
           }
@@ -105,14 +111,14 @@
       <div class="tab-header">
         <h3>Liabilities</h3>
         @if (!showLiabilityForm()) {
-          <button class="btn btn--primary" (click)="openAddLiabilityForm()">+ Add Liability</button>
+          <button mat-flat-button color="primary" (click)="openAddLiabilityForm()">+ Add Liability</button>
         }
       </div>
 
       @if (liabilities().length === 0 && !showLiabilityForm()) {
         <div class="empty-state empty-state--small">
           <p>No liabilities tracked. Add any debts like personal loans, car loans, or credit cards.</p>
-          <button class="btn btn--primary" (click)="openAddLiabilityForm()">Add First Liability</button>
+          <button mat-flat-button color="primary" (click)="openAddLiabilityForm()">Add First Liability</button>
         </div>
       } @else {
         <div class="items-list">
@@ -140,8 +146,12 @@
                 {{ liability.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}
               </div>
               <div class="item-card__actions">
-                <button class="btn btn--icon btn--sm" (click)="openEditLiabilityForm(liability)">Edit</button>
-                <button class="btn btn--icon btn--sm btn--danger" (click)="deleteLiability(liability)">Delete</button>
+                <button mat-icon-button (click)="openEditLiabilityForm(liability)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteLiability(liability)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
             </div>
           }
@@ -235,8 +245,8 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closeCashForm()">Cancel</button>
-        <button type="submit" class="btn btn--primary" [disabled]="cashForm.invalid || isSubmitting()">
+        <button mat-stroked-button type="button" (click)="closeCashForm()">Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="cashForm.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editingCash() ? 'Update' : 'Add') }}
         </button>
       </div>
@@ -359,8 +369,8 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closeLiabilityForm()">Cancel</button>
-        <button type="submit" class="btn btn--primary" [disabled]="liabilityForm.invalid || isSubmitting()">
+        <button mat-stroked-button type="button" (click)="closeLiabilityForm()">Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="liabilityForm.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editingLiability() ? 'Update' : 'Add') }}
         </button>
       </div>

@@ -1,6 +1,81 @@
 @use '../../../styles/variables' as *;
 
-// Analysis grid
+// 3-column allocation charts row
+.allocation-charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.allocation-chart-card {
+  .card__header h2 {
+    font-size: $font-size-base;
+    margin: 0;
+  }
+
+  .card__body {
+    padding-top: $spacing-sm;
+  }
+}
+
+// Centered pie chart with legend below
+.pie-chart-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+// Compact legend for 3-column layout
+.pie-legend-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs $spacing-md;
+  justify-content: center;
+  width: 100%;
+
+  &--scrollable {
+    max-height: 140px;
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-xs;
+  }
+
+  &__color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    color: $color-text-secondary;
+    white-space: nowrap;
+  }
+
+  &__value {
+    font-weight: $font-weight-semibold;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+  }
+}
+
+// Analysis grid (for Fee/Franking cards)
 .analysis-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -25,8 +100,8 @@
 }
 
 .pie-chart {
-  width: 180px;
-  height: 180px;
+  width: 160px;
+  height: 160px;
   flex-shrink: 0;
 }
 

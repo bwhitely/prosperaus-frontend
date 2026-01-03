@@ -4,14 +4,16 @@
     <p>Track your dividend income and franking credits for tax time</p>
   </div>
   @if (!showForm()) {
-    <button class="btn btn--primary" (click)="openAddForm()">+ Log Distribution</button>
+    <button mat-flat-button color="primary" (click)="openAddForm()">+ Log Distribution</button>
   }
 </div>
 
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
@@ -46,6 +48,7 @@
     <div class="year-selector">
       @for (year of summary()!.historicalYears; track year.financialYear) {
         <button
+          mat-button
           class="year-btn"
           [class.year-btn--active]="selectedYear() === year.financialYear"
           (click)="selectYear(year.financialYear)"
@@ -58,10 +61,10 @@
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab" [class.tab--active]="activeTab() === 'summary'" (click)="setTab('summary')">
+    <button mat-button class="tab" [class.tab--active]="activeTab() === 'summary'" (click)="setTab('summary')">
       Summary
     </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'list'" (click)="setTab('list')">
+    <button mat-button class="tab" [class.tab--active]="activeTab() === 'list'" (click)="setTab('list')">
       All Distributions ({{ getFilteredDistributions().length }})
     </button>
   </div>
@@ -98,7 +101,7 @@
           <div class="card__body">
             <div class="empty-state">
               <p>No dividend distributions recorded yet.</p>
-              <button class="btn btn--primary" (click)="openAddForm()">Log First Distribution</button>
+              <button mat-flat-button color="primary" (click)="openAddForm()">Log First Distribution</button>
             </div>
           </div>
         </div>
@@ -142,7 +145,7 @@
           <div class="card__body">
             <div class="empty-state">
               <p>No distributions for {{ summary()!.financialYearDisplay }}.</p>
-              <button class="btn btn--primary" (click)="openAddForm()">Log Distribution</button>
+              <button mat-flat-button color="primary" (click)="openAddForm()">Log Distribution</button>
             </div>
           </div>
         </div>
@@ -180,8 +183,12 @@
                 </div>
               </div>
               <div class="distribution-actions">
-                <button class="btn btn--icon btn--sm" (click)="openEditForm(dist)">Edit</button>
-                <button class="btn btn--icon btn--sm btn--danger" (click)="deleteDistribution(dist)">Delete</button>
+                <button mat-icon-button (click)="openEditForm(dist)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteDistribution(dist)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
             </div>
           }
@@ -286,8 +293,8 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closeForm()">Cancel</button>
-        <button type="submit" class="btn btn--primary" [disabled]="distributionForm.invalid || isSubmitting()">
+        <button mat-stroked-button type="button" (click)="closeForm()">Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="distributionForm.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editing() ? 'Update' : 'Log') }}
         </button>
       </div>

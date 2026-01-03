@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { PortfolioService } from '../../core/services/portfolio.service';
 import { PortfolioAnalysisResponse, CountryAllocation, GicsSectorAllocation, AssetTypeAllocation, AllocationBreakdown } from '../../shared/models/investment.model';
 
@@ -18,7 +20,7 @@ interface PieSlice {
 @Component({
   selector: 'app-portfolio-analyser',
   standalone: true,
-  imports: [CommonModule, RouterLink, CurrencyPipe, DecimalPipe, PercentPipe],
+  imports: [CommonModule, RouterLink, CurrencyPipe, DecimalPipe, PercentPipe, MatButtonModule, MatIconModule],
   templateUrl: './portfolio-analyser.component.html',
   styleUrl: './portfolio-analyser.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -100,7 +102,8 @@ export class PortfolioAnalyserComponent implements OnInit {
 
   gicsSectorPieSlices = computed(() => {
     const entries = this.gicsSectorEntries();
-    return this.createPieSlicesFromGics(entries);
+    // Normalize percentages to 100% (they're based on total portfolio, not just equity)
+    return this.createPieSlicesFromGicsNormalized(entries);
   });
 
   assetTypePieSlices = computed(() => {
@@ -161,8 +164,12 @@ export class PortfolioAnalyserComponent implements OnInit {
     return slices;
   }
 
-  private createPieSlicesFromGics(entries: GicsSectorAllocation[]): PieSlice[] {
+  private createPieSlicesFromGicsNormalized(entries: GicsSectorAllocation[]): PieSlice[] {
     if (entries.length === 0) return [];
+
+    // Calculate total of all GICS percentages to normalize to 100%
+    const totalPercentage = entries.reduce((sum, e) => sum + e.percentage, 0);
+    if (totalPercentage === 0) return [];
 
     const slices: PieSlice[] = [];
     const centerX = 100;
@@ -171,8 +178,9 @@ export class PortfolioAnalyserComponent implements OnInit {
     let currentAngle = -90;
 
     entries.forEach((entry, index) => {
-      const percentage = entry.percentage;
-      const sliceAngle = (percentage / 100) * 360;
+      // Normalize percentage so all GICS sectors add up to 100%
+      const normalizedPercentage = (entry.percentage / totalPercentage) * 100;
+      const sliceAngle = (normalizedPercentage / 100) * 360;
       const startAngle = currentAngle;
       const endAngle = currentAngle + sliceAngle;
 
@@ -185,7 +193,7 @@ export class PortfolioAnalyserComponent implements OnInit {
       slices.push({
         key: entry.code,
         label: entry.name,
-        percentage,
+        percentage: normalizedPercentage,
         value: entry.value,
         color: this.gicsSectorColors[entry.code] ?? this.pieColors[index % this.pieColors.length],
         path,

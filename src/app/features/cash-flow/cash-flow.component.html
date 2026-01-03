@@ -3,7 +3,7 @@
     <h1>Income/Expenses</h1>
     <p>Track your income, expenses, and savings rate</p>
   </div>
-  <button class="btn btn--secondary" (click)="loadSummary()">
+  <button mat-stroked-button (click)="loadSummary()">
     Refresh
   </button>
 </div>
@@ -11,7 +11,9 @@
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
@@ -49,18 +51,21 @@
 <!-- Tab Navigation -->
 <div class="tabs">
   <button
+    mat-button
     class="tabs__tab"
     [class.tabs__tab--active]="activeTab() === 'income'"
     (click)="setTab('income')">
     Income
   </button>
   <button
+    mat-button
     class="tabs__tab"
     [class.tabs__tab--active]="activeTab() === 'expenses'"
     (click)="setTab('expenses')">
     Expenses
   </button>
   <button
+    mat-button
     class="tabs__tab"
     [class.tabs__tab--active]="activeTab() === 'statements'"
     (click)="setTab('statements')">

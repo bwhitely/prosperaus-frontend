@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe, PercentPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,6 +24,7 @@ import { TickerAutocompleteComponent } from '../../shared/components/ticker-auto
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     CurrencyPipe,
     DatePipe,
     PercentPipe,

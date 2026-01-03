@@ -8,6 +8,51 @@ import {
 } from '../../shared/models/projection.model';
 import { ScenarioResponse } from '../../shared/models/scenario.model';
 
+export interface ProjectionPrefillData {
+  personal?: {
+    currentAge?: number;
+    targetRetirementAge?: number;
+  };
+  superannuation?: {
+    currentBalance?: number;
+    salarySacrifice?: number;
+  };
+  incomeSources?: Array<{
+    name?: string;
+    sourceType?: string;
+    amount?: number;
+    frequency?: string;
+  }>;
+  ppor?: {
+    currentValue?: number;
+    mortgageBalance?: number;
+    interestRate?: number;
+    offsetBalance?: number;
+    remainingTermYears?: number;
+  };
+  investmentProperties?: Array<{
+    name?: string;
+    currentValue?: number;
+    mortgageBalance?: number;
+    interestRate?: number;
+    weeklyRent?: number;
+    annualExpenses?: number;
+  }>;
+  shares?: {
+    currentValue?: number;
+  };
+  cash?: {
+    currentBalance?: number;
+  };
+  expenses?: {
+    annualAmount?: number;
+  };
+  tax?: {
+    marginalTaxRate?: number;
+    includeFrankingCredits?: boolean;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -40,5 +85,12 @@ export class ProjectionService {
    */
   getScenarios(): Observable<ScenarioResponse[]> {
     return this.http.get<ScenarioResponse[]>(`${this.apiUrl}/scenarios`);
+  }
+
+  /**
+   * Get prefill data from user's profile, assets, income, and expenses.
+   */
+  getPrefillData(): Observable<ProjectionPrefillData> {
+    return this.http.get<ProjectionPrefillData>(`${this.apiUrl}/prefill`);
   }
 }

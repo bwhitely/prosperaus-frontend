@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SubscriptionService } from '../../../core/services/subscription.service';
 
 @Component({
   selector: 'app-navbar',
@@ -27,12 +28,14 @@ import { AuthService } from '../../../core/auth/auth.service';
 })
 export class NavbarComponent {
   private authService = inject(AuthService);
+  private subscriptionService = inject(SubscriptionService);
   private router = inject(Router);
 
   isMobileMenuOpen = signal(false);
 
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
+  isPro = this.subscriptionService.isPro;
 
   toggleMobileMenu(): void {
     this.isMobileMenuOpen.update(open => !open);

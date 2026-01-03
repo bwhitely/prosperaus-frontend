@@ -5,6 +5,10 @@
   </div>
   <div class="page-header__actions">
     @if (holdings().length > 0 && !showForm()) {
+      <a mat-stroked-button routerLink="/dividends">
+        <mat-icon>paid</mat-icon>
+        <span>Dividends</span>
+      </a>
       <button
         mat-stroked-button
         (click)="refreshAllPrices()"

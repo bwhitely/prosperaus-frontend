@@ -1,13 +1,20 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PropertyService } from '../../core/services/property.service';
+import { CashLiabilityService } from '../../core/services/cash-liability.service';
 import { PropertyResponse, PropertyRequest, MortgageResponse, MortgageRequest } from '../../shared/models/property.model';
+import { CashAccountRequest, CashAccountResponse } from '../../shared/models/cash-liability.model';
 
 @Component({
   selector: 'app-properties',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './properties.component.html',
   styleUrl: './properties.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -15,8 +22,10 @@ import { PropertyResponse, PropertyRequest, MortgageResponse, MortgageRequest } 
 export class PropertiesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private propertyService = inject(PropertyService);
+  private cashLiabilityService = inject(CashLiabilityService);
 
   properties = signal<PropertyResponse[]>([]);
+  cashAccounts = signal<CashAccountResponse[]>([]);
   mortgages = signal<Map<string, MortgageResponse[]>>(new Map());
   isLoading = signal(true);
   error = signal<string | null>(null);
@@ -62,6 +71,16 @@ export class PropertiesComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProperties();
+    this.loadCashAccounts();
+  }
+
+  loadCashAccounts(): void {
+    this.cashLiabilityService.getCashAccounts().subscribe({
+      next: (accounts) => this.cashAccounts.set(accounts),
+      error: () => {
+        // Silent fail - offset sync is optional
+      }
+    });
   }
 
   loadProperties(): void {
@@ -244,10 +263,19 @@ export class PropertiesComponent implements OnInit {
       ? this.propertyService.updateMortgage(editing.id, request)
       : this.propertyService.createMortgage(request);
 
-    operation.subscribe({
+    operation.pipe(
+      switchMap((mortgage: MortgageResponse) => {
+        // Sync offset account if offset balance > 0
+        if (request.offsetBalance && request.offsetBalance > 0) {
+          return this.syncOffsetAccount(mortgage, request.offsetBalance);
+        }
+        return of(mortgage);
+      })
+    ).subscribe({
       next: () => {
         this.loadMortgagesForProperty(propertyId);
         this.loadProperties(); // Refresh equity calculations
+        this.loadCashAccounts(); // Refresh cash accounts
         this.closeMortgageForm();
         this.isSubmitting.set(false);
       },
@@ -256,6 +284,41 @@ export class PropertiesComponent implements OnInit {
         this.isSubmitting.set(false);
       }
     });
+  }
+
+  /**
+   * Sync offset account in Cash & Liabilities when a mortgage has offset > 0.
+   * Creates a new offset account if none exists, or updates existing one.
+   */
+  private syncOffsetAccount(mortgage: MortgageResponse, offsetBalance: number) {
+    // Find existing offset account linked to this mortgage
+    const existingOffset = this.cashAccounts().find(
+      a => a.accountType === 'offset' && a.linkedMortgageId === mortgage.id
+    );
+
+    // Find the property name for the account name
+    const property = this.properties().find(p => p.id === mortgage.propertyId);
+    const lenderName = mortgage.lender || 'Mortgage';
+    const propertyName = property?.name || 'Property';
+    const accountName = `${lenderName} Offset - ${propertyName}`;
+
+    const cashRequest: CashAccountRequest = {
+      accountName: accountName,
+      institution: mortgage.lender,
+      accountType: 'offset',
+      balance: offsetBalance,
+      linkedMortgageId: mortgage.id
+    };
+
+    if (existingOffset) {
+      return this.cashLiabilityService.updateCashAccount(existingOffset.id, cashRequest).pipe(
+        catchError(() => of(null)) // Silent fail
+      );
+    } else {
+      return this.cashLiabilityService.createCashAccount(cashRequest).pipe(
+        catchError(() => of(null)) // Silent fail
+      );
+    }
   }
 
   deleteMortgage(mortgage: MortgageResponse): void {

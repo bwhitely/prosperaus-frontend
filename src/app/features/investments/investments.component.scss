@@ -304,53 +304,37 @@
   color: $color-negative;
 }
 
-// Modal
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: $z-index-modal;
-  padding: $spacing-lg;
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+// Inline form
+.inline-form {
+  margin-bottom: $spacing-lg;
+  border: 2px solid $color-primary;
   border-radius: $radius-lg;
+  background: $color-surface;
 
-  mat-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  &__header {
     padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.05);
     border-bottom: 1px solid $color-border;
+
+    h3 {
+      margin: 0;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $color-primary;
+    }
   }
 
-  mat-card-title {
-    font-size: $font-size-lg;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .modal-close {
-    margin-left: auto;
-  }
-
-  mat-card-content {
+  &__body {
     padding: $spacing-lg;
   }
 
-  mat-card-actions {
-    padding: $spacing-md $spacing-lg;
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
     gap: $spacing-sm;
+    padding: $spacing-md $spacing-lg;
+    border-top: 1px solid $color-border;
+    background: $color-background;
   }
 }
 

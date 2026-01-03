@@ -1,5 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, PercentPipe } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { CashFlowService } from '../../core/services/cash-flow.service';
 import { CashFlowSummaryResponse } from '../../shared/models/cash-flow.model';
 import { IncomeListComponent } from './components/income-list/income-list.component';
@@ -15,6 +17,8 @@ type TabType = 'income' | 'expenses' | 'statements';
     CommonModule,
     CurrencyPipe,
     PercentPipe,
+    MatButtonModule,
+    MatIconModule,
     IncomeListComponent,
     ExpenseListComponent,
     StatementUploadComponent

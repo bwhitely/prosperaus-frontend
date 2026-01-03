@@ -106,7 +106,53 @@ export class EquityRecyclingComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadPrefillData();
     this.loadScenarios();
+    const interestCtrl = this.form.get('interestRate');
+
+    interestCtrl?.valueChanges.subscribe(value => {
+      if (value === null || value === undefined) return;
+  
+      const rounded = Math.round(value * 100) / 100;
+  
+      if (value !== rounded) {
+        interestCtrl.setValue(rounded, { emitEvent: false });
+      }
+    });
+  }
+
+  loadPrefillData(): void {
+    this.equityRecyclingService.getPrefillData().subscribe({
+      next: (data) => {
+        if (data && Object.keys(data).length > 0) {
+          const patchData: Record<string, number> = {};
+
+          if (data.propertyValue) {
+            patchData['propertyValue'] = data.propertyValue;
+          }
+          if (data.mortgageBalance !== undefined) {
+            patchData['mortgageBalance'] = data.mortgageBalance;
+          }
+          if (data.interestRate) {
+            // Backend returns decimal (0.065), form expects percentage (6.5)
+            patchData['interestRate'] = data.interestRate * 100;
+          }
+          if (data.offsetBalance !== undefined) {
+            patchData['offsetBalance'] = data.offsetBalance;
+          }
+          if (data.marginalTaxRate !== undefined) {
+            patchData['marginalTaxRate'] = data.marginalTaxRate;
+          }
+
+          if (Object.keys(patchData).length > 0) {
+            this.form.patchValue(patchData);
+          }
+        }
+      },
+      error: () => {
+        // Silently fail - form stays with defaults
+      }
+    });
   }
 
   // Scenario methods
@@ -275,4 +321,5 @@ export class EquityRecyclingComponent implements OnInit {
   formatPercent(value: number): string {
     return (value * 100).toFixed(2) + '%';
   }
+
 }

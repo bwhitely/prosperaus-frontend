@@ -297,76 +297,43 @@
   align-items: center;
 }
 
-// Analysis Modal
+// Inline Analysis Card
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: $spacing-md;
-}
-
-.modal {
-  background: $color-surface;
+.inline-analysis {
+  margin-bottom: $spacing-lg;
+  border: 2px solid $color-primary;
   border-radius: $radius-lg;
-  box-shadow: $shadow-lg;
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-
-  &--large {
-    max-width: 800px;
-  }
+  background: $color-surface;
 
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: $spacing-lg;
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.05);
     border-bottom: 1px solid $color-border;
 
     h2 {
       margin: 0;
       font-size: $font-size-xl;
-      color: $color-text-primary;
-    }
-  }
-
-  &__close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: $color-text-muted;
-    padding: 0;
-    line-height: 1;
-
-    &:hover {
-      color: $color-text-primary;
+      font-weight: 600;
+      color: $color-primary;
     }
   }
 
   &__body {
     padding: $spacing-lg;
+    max-height: 70vh;
     overflow-y: auto;
-    flex: 1;
   }
 
   &__footer {
-    padding: $spacing-md $spacing-lg;
-    border-top: 1px solid $color-border;
     display: flex;
     justify-content: flex-end;
     gap: $spacing-sm;
+    padding: $spacing-md $spacing-lg;
+    border-top: 1px solid $color-border;
+    background: $color-background;
   }
 }
 

@@ -2,14 +2,17 @@ import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@ang
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SuperAccountService } from '../../core/services/super-account.service';
+import { IncomeService } from '../../core/services/income.service';
 import { SuperAccountRequest, SuperAccountResponse } from '../../shared/models/super-account.model';
+import { IncomeSourceResponse } from '../../shared/models/cash-flow.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-super-accounts',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatIconModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatIconModule, MatButtonModule, MatTooltipModule],
   templateUrl: './super-accounts.component.html',
   styleUrl: './super-accounts.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class SuperAccountsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private superService = inject(SuperAccountService);
+  private incomeService = inject(IncomeService);
 
   accounts = signal<SuperAccountResponse[]>([]);
   isLoading = signal(true);
@@ -26,6 +30,10 @@ export class SuperAccountsComponent implements OnInit {
   editingAccount = signal<SuperAccountResponse | null>(null);
   isSubmitting = signal(false);
   showAdvanced = signal(false);
+
+  // For SG auto-calculation
+  salaryIncome = signal<IncomeSourceResponse[]>([]);
+  calculatedSgYtd = signal<number | null>(null);
 
   form: FormGroup = this.fb.group({
     fundName: ['', [Validators.required, Validators.maxLength(100)]],
@@ -56,6 +64,64 @@ export class SuperAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAccounts();
+    this.loadSalaryIncome();
+  }
+
+  /**
+   * Load salary income sources for SG calculation
+   */
+  loadSalaryIncome(): void {
+    this.incomeService.getActive().subscribe({
+      next: (incomes) => {
+        const salaries = incomes.filter(i => i.sourceType === 'salary');
+        this.salaryIncome.set(salaries);
+        this.calculateSgYtd();
+      },
+      error: () => {
+        // Silent fail - SG calculation is optional
+      }
+    });
+  }
+
+  /**
+   * Calculate YTD employer (SG) contributions based on salary and FY progress.
+   * Australian FY runs July 1 to June 30.
+   * SG rate is 12% from July 2025.
+   */
+  calculateSgYtd(): void {
+    const salaries = this.salaryIncome();
+    if (salaries.length === 0) {
+      this.calculatedSgYtd.set(null);
+      return;
+    }
+
+    // Sum all annual salary income
+    const totalAnnualSalary = salaries.reduce((sum, s) => sum + s.annualisedAmount, 0);
+
+    // Calculate annual SG (12%)
+    const sgRate = 0.12;
+    const annualSg = totalAnnualSalary * sgRate;
+
+    // Calculate months elapsed in current FY
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0 = Jan, 6 = July
+    const currentYear = now.getFullYear();
+
+    // FY starts in July (month 6)
+    // If current month >= July, we're in FY that started this year
+    // Otherwise, FY started last July
+    let monthsElapsed: number;
+    if (currentMonth >= 6) {
+      // July onwards - count from July this year
+      monthsElapsed = currentMonth - 6 + 1; // +1 because we include current month
+    } else {
+      // Jan-June - count from July last year (6 months) + months this year
+      monthsElapsed = 6 + currentMonth + 1;
+    }
+
+    // Pro-rate the annual SG
+    const sgYtd = Math.round((annualSg * monthsElapsed) / 12);
+    this.calculatedSgYtd.set(sgYtd);
   }
 
   loadAccounts(): void {
@@ -89,14 +155,20 @@ export class SuperAccountsComponent implements OnInit {
 
   openAddForm(): void {
     this.editingAccount.set(null);
+
+    // Pre-fill employer SG if calculated
+    const sgYtd = this.calculatedSgYtd();
+
     this.form.reset({
-      employerContributionsYtd: 0,
+      employerContributionsYtd: sgYtd ?? 0,
       salarySacrificeYtd: 0,
       personalConcessionalYtd: 0,
       nonConcessionalYtd: 0,
       hasInsurance: false
     });
-    this.showAdvanced.set(false);
+
+    // Auto-expand advanced section if we have SG to show
+    this.showAdvanced.set(sgYtd !== null && sgYtd > 0);
     this.showForm.set(true);
   }
 
@@ -173,5 +245,19 @@ export class SuperAccountsComponent implements OnInit {
 
   toggleAdvanced(): void {
     this.showAdvanced.update(v => !v);
+  }
+
+  /**
+   * Get the number of months elapsed in the current FY for display purposes.
+   */
+  getMonthsElapsedInFy(): number {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+
+    if (currentMonth >= 6) {
+      return currentMonth - 6 + 1;
+    } else {
+      return 6 + currentMonth + 1;
+    }
   }
 }

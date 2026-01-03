@@ -8,7 +8,9 @@
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
@@ -69,16 +71,16 @@
     </div>
   }
 
-  <!-- Country & Asset Type Allocation Charts -->
-  <div class="analysis-grid">
+  <!-- Allocation Charts - 3 in a row -->
+  <div class="allocation-charts-row">
     <!-- Country Allocation -->
-    <div class="card analysis-card">
+    <div class="card allocation-chart-card">
       <div class="card__header">
-        <h2>Country Allocation</h2>
+        <h2>Country</h2>
       </div>
       <div class="card__body">
         @if (countryEntries().length > 0) {
-          <div class="pie-chart-container">
+          <div class="pie-chart-centered">
             <svg viewBox="0 0 200 200" class="pie-chart">
               @for (slice of countryPieSlices(); track slice.key) {
                 <path
@@ -86,36 +88,35 @@
                   [attr.fill]="slice.color"
                   class="pie-slice"
                 >
-                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}%</title>
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}% ({{ slice.value | currency:'AUD':'symbol-narrow':'1.0-0' }})</title>
                 </path>
               }
-              <!-- Center circle for donut effect -->
               <circle cx="100" cy="100" r="45" class="pie-center" />
             </svg>
-            <div class="pie-legend">
+            <div class="pie-legend-compact">
               @for (slice of countryPieSlices(); track slice.key) {
-                <div class="pie-legend__item">
-                  <span class="pie-legend__color" [style.background-color]="slice.color"></span>
-                  <span class="pie-legend__label">{{ slice.label }}</span>
-                  <span class="pie-legend__value">{{ slice.percentage | number:'1.1-1' }}%</span>
+                <div class="pie-legend-compact__item">
+                  <span class="pie-legend-compact__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend-compact__label">{{ slice.label }}</span>
+                  <span class="pie-legend-compact__value">{{ slice.percentage | number:'1.0-0' }}%</span>
                 </div>
               }
             </div>
           </div>
         } @else {
-          <p class="no-data">No country allocation data available</p>
+          <p class="no-data">No data</p>
         }
       </div>
     </div>
 
     <!-- Asset Type Allocation -->
-    <div class="card analysis-card">
+    <div class="card allocation-chart-card">
       <div class="card__header">
         <h2>Asset Type</h2>
       </div>
       <div class="card__body">
         @if (hasAssetTypes()) {
-          <div class="pie-chart-container">
+          <div class="pie-chart-centered">
             <svg viewBox="0 0 200 200" class="pie-chart">
               @for (slice of assetTypePieSlices(); track slice.key) {
                 <path
@@ -123,67 +124,63 @@
                   [attr.fill]="slice.color"
                   class="pie-slice"
                 >
-                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}%</title>
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}% ({{ slice.value | currency:'AUD':'symbol-narrow':'1.0-0' }})</title>
                 </path>
               }
-              <!-- Center circle for donut effect -->
               <circle cx="100" cy="100" r="45" class="pie-center" />
             </svg>
-            <div class="pie-legend">
+            <div class="pie-legend-compact">
               @for (slice of assetTypePieSlices(); track slice.key) {
-                <div class="pie-legend__item">
-                  <span class="pie-legend__color" [style.background-color]="slice.color"></span>
-                  <span class="pie-legend__label">{{ slice.label }}</span>
-                  <span class="pie-legend__value">{{ slice.percentage | number:'1.1-1' }}%</span>
+                <div class="pie-legend-compact__item">
+                  <span class="pie-legend-compact__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend-compact__label">{{ slice.label }}</span>
+                  <span class="pie-legend-compact__value">{{ slice.percentage | number:'1.0-0' }}%</span>
                 </div>
               }
             </div>
           </div>
         } @else {
-          <p class="no-data">No asset type data available</p>
+          <p class="no-data">No data</p>
         }
       </div>
     </div>
-  </div>
 
-  <!-- GICS Sector Allocation (Full Width) -->
-  @if (hasGicsSectors()) {
-    <div class="card">
+    <!-- GICS Sector Allocation -->
+    <div class="card allocation-chart-card">
       <div class="card__header">
-        <h2>GICS Sector Allocation</h2>
-        <span class="card__subtitle">Equity sector breakdown based on Global Industry Classification Standard</span>
+        <h2>GICS Sectors</h2>
       </div>
       <div class="card__body">
-        <div class="gics-allocation">
-          <div class="gics-chart-container">
-            <svg viewBox="0 0 200 200" class="pie-chart pie-chart--large">
+        @if (hasGicsSectors()) {
+          <div class="pie-chart-centered">
+            <svg viewBox="0 0 200 200" class="pie-chart">
               @for (slice of gicsSectorPieSlices(); track slice.key) {
                 <path
                   [attr.d]="slice.path"
                   [attr.fill]="slice.color"
                   class="pie-slice"
                 >
-                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}%</title>
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}% ({{ slice.value | currency:'AUD':'symbol-narrow':'1.0-0' }})</title>
                 </path>
               }
               <circle cx="100" cy="100" r="45" class="pie-center" />
             </svg>
+            <div class="pie-legend-compact pie-legend-compact--scrollable">
+              @for (slice of gicsSectorPieSlices(); track slice.key) {
+                <div class="pie-legend-compact__item">
+                  <span class="pie-legend-compact__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend-compact__label">{{ slice.label }}</span>
+                  <span class="pie-legend-compact__value">{{ slice.percentage | number:'1.0-0' }}%</span>
+                </div>
+              }
+            </div>
           </div>
-          <div class="gics-legend">
-            @for (entry of gicsSectorEntries(); track entry.code; let i = $index) {
-              <div class="gics-legend__item">
-                <span class="gics-legend__color" [style.background-color]="getGicsSectorColor(entry.code, i)"></span>
-                <span class="gics-legend__code">{{ entry.code }}</span>
-                <span class="gics-legend__name">{{ entry.name }}</span>
-                <span class="gics-legend__value">{{ entry.percentage | number:'1.1-1' }}%</span>
-                <span class="gics-legend__amount">{{ entry.value | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
-              </div>
-            }
-          </div>
-        </div>
+        } @else {
+          <p class="no-data">No equity holdings</p>
+        }
       </div>
     </div>
-  }
+  </div>
 
   <!-- Fee & Franking Analysis -->
   <div class="analysis-grid">

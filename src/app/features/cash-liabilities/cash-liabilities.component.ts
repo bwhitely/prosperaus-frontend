@@ -1,6 +1,9 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CashLiabilityService } from '../../core/services/cash-liability.service';
 import {
   CashAccountRequest, CashAccountResponse,
@@ -10,7 +13,7 @@ import {
 @Component({
   selector: 'app-cash-liabilities',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './cash-liabilities.component.html',
   styleUrl: './cash-liabilities.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

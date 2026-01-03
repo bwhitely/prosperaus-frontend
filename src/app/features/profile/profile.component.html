@@ -1,14 +1,826 @@
+<!-- Page Header -->
 <div class="page-header">
   <div class="page-header__content">
-    <h1>Profile</h1>
-    <p class="subtitle">Manage your account settings</p>
+    <h1>Financial Profile</h1>
+    <p class="subtitle">Manage your personal details, income, assets, and liabilities</p>
   </div>
 </div>
 
-<mat-card class="placeholder-card">
-  <mat-card-content>
-    <mat-icon>construction</mat-icon>
-    <h3>Coming Soon</h3>
-    <p>This feature is under development. Check back soon!</p>
-  </mat-card-content>
-</mat-card>
+<!-- Loading State -->
+@if (isProfileLoading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading your profile...</p>
+  </div>
+} @else {
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button
+      class="tabs__tab"
+      [class.tabs__tab--active]="activeTab() === 'personal'"
+      (click)="setTab('personal')">
+      <mat-icon>person</mat-icon>
+      Personal
+    </button>
+    <button
+      class="tabs__tab"
+      [class.tabs__tab--active]="activeTab() === 'income'"
+      (click)="setTab('income')">
+      <mat-icon>account_balance_wallet</mat-icon>
+      Income & Expenses
+    </button>
+    <button
+      class="tabs__tab"
+      [class.tabs__tab--active]="activeTab() === 'assets'"
+      (click)="setTab('assets')">
+      <mat-icon>trending_up</mat-icon>
+      Assets
+    </button>
+    <button
+      class="tabs__tab"
+      [class.tabs__tab--active]="activeTab() === 'liabilities'"
+      (click)="setTab('liabilities')">
+      <mat-icon>credit_card</mat-icon>
+      Liabilities
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    @switch (activeTab()) {
+      <!-- Personal Tab -->
+      @case ('personal') {
+        <mat-card class="profile-card">
+          <mat-card-header>
+            <mat-card-title>Personal Details</mat-card-title>
+            <mat-card-subtitle>Your profile information used across all calculators</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="personalForm" class="personal-form">
+              <!-- Email (read-only) -->
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput [value]="profile()?.email" disabled>
+                  <mat-hint>Email cannot be changed</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <!-- Display Name -->
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Display Name</mat-label>
+                  <input matInput formControlName="displayName" placeholder="Your name">
+                  @if (personalForm.get('displayName')?.hasError('required')) {
+                    <mat-error>Name is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Date of Birth -->
+              <div class="form-row form-row--double">
+                <mat-form-field appearance="outline">
+                  <mat-label>Date of Birth</mat-label>
+                  <input matInput type="date" formControlName="dateOfBirth">
+                  @if (personalForm.get('dateOfBirth')?.hasError('required')) {
+                    <mat-error>Date of birth is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <div class="age-display">
+                  @if (currentAge() !== null) {
+                    <span class="age-label">Current Age</span>
+                    <span class="age-value">{{ currentAge() }} years</span>
+                  }
+                </div>
+              </div>
+
+              <div class="form-section-title">Tax Settings</div>
+
+              <!-- Tax Residency -->
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Tax Residency</mat-label>
+                  <mat-select formControlName="taxResidency">
+                    @for (option of taxResidencyOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- Marginal Tax Rate -->
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Marginal Tax Rate</mat-label>
+                  <mat-select formControlName="marginalTaxRate">
+                    @for (option of taxRateOptions; track option.value) {
+                      <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>Your highest tax bracket (FY 2025-26)</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <!-- Private Health Insurance -->
+              <div class="form-row">
+                <mat-checkbox formControlName="hasPrivateHealthInsurance">
+                  I have private health insurance
+                </mat-checkbox>
+                <span class="checkbox-hint">Affects Medicare Levy Surcharge calculations</span>
+              </div>
+
+              <div class="form-section-title">Retirement Planning</div>
+
+              <!-- Retirement Age -->
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Target Retirement Age</mat-label>
+                  <input matInput type="number" formControlName="retirementAge" min="55" max="100">
+                  <mat-hint>Used for FIRE and super calculations</mat-hint>
+                  @if (personalForm.get('retirementAge')?.hasError('min')) {
+                    <mat-error>Must be at least 55</mat-error>
+                  }
+                  @if (personalForm.get('retirementAge')?.hasError('max')) {
+                    <mat-error>Must be 100 or less</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Save Button -->
+              <div class="form-actions">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="saveProfile()"
+                  [disabled]="personalForm.invalid || isSaving()">
+                  @if (isSaving()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                    Saving...
+                  } @else {
+                    <mat-icon>save</mat-icon>
+                    Save Changes
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Subscription Card -->
+        <mat-card class="subscription-card">
+          <mat-card-header>
+            <mat-card-title>Subscription</mat-card-title>
+            <mat-card-subtitle>Manage your ProsperAus subscription</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="subscription-status">
+              <div class="subscription-status__info">
+                <span class="subscription-status__label">Current Plan</span>
+                <span class="subscription-status__value" [class]="'subscription-status__value--' + getSubscriptionStatusClass()">
+                  {{ getSubscriptionStatusLabel() }}
+                </span>
+              </div>
+
+              @if (subscription()?.currentPeriodEnd) {
+                <div class="subscription-status__info">
+                  <span class="subscription-status__label">
+                    @if (subscription()?.cancelAtPeriodEnd) {
+                      Access Until
+                    } @else {
+                      Renews On
+                    }
+                  </span>
+                  <span class="subscription-status__date">
+                    {{ subscription()?.currentPeriodEnd | date:'mediumDate' }}
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="subscription-actions">
+              @if (isPro()) {
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  (click)="manageSubscription()"
+                  [disabled]="isSubscriptionLoading()">
+                  @if (isSubscriptionLoading()) {
+                    <mat-spinner diameter="18"></mat-spinner>
+                  } @else {
+                    <mat-icon>settings</mat-icon>
+                  }
+                  Manage Subscription
+                </button>
+              } @else {
+                <a mat-flat-button color="primary" routerLink="/pricing">
+                  <mat-icon>star</mat-icon>
+                  Upgrade to Pro
+                </a>
+              }
+            </div>
+
+            @if (!isPro()) {
+              <div class="subscription-benefits">
+                <p>Unlock all premium features:</p>
+                <ul>
+                  <li>Net Worth Dashboard with history tracking</li>
+                  <li>Portfolio Analyser with MER insights</li>
+                  <li>AI-powered Bank Statement Analysis</li>
+                  <li>Net Worth Projections</li>
+                  <li>Dividend & Distribution Tracker</li>
+                </ul>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Income & Expenses Tab -->
+      @case ('income') {
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+          <div class="summary-card">
+            <span class="summary-card__label">Annual Income</span>
+            <span class="summary-card__value positive">
+              {{ ((cashFlowSummary()?.totalMonthlyIncome ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+            <span class="summary-card__hint">
+              {{ (cashFlowSummary()?.totalMonthlyIncome ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
+            </span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Annual Expenses</span>
+            <span class="summary-card__value negative">
+              {{ ((cashFlowSummary()?.totalMonthlyExpenses ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+            <span class="summary-card__hint">
+              {{ (cashFlowSummary()?.totalMonthlyExpenses ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}/month
+            </span>
+          </div>
+          <div class="summary-card" [class]="'summary-card--' + getSavingsRateClass()">
+            <span class="summary-card__label">Savings Rate</span>
+            <span class="summary-card__value" [class]="getSavingsRateClass()">
+              {{ ((cashFlowSummary()?.savingsRate ?? 0) * 100) | number:'1.1-1' }}%
+            </span>
+            <span class="summary-card__hint">
+              {{ ((cashFlowSummary()?.monthlySavings ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}/year
+            </span>
+          </div>
+        </div>
+
+        <!-- Income/Expense Sub-tabs -->
+        <div class="sub-tabs">
+          <app-income-list (changed)="onIncomeExpenseChanged()"></app-income-list>
+        </div>
+        <div class="sub-tabs" style="margin-top: 2rem;">
+          <app-expense-list (changed)="onIncomeExpenseChanged()"></app-expense-list>
+        </div>
+      }
+
+      <!-- Assets Tab -->
+      @case ('assets') {
+        <!-- Summary Cards -->
+        <div class="summary-cards summary-cards--four">
+          <div class="summary-card">
+            <mat-icon class="summary-card__icon">home</mat-icon>
+            <span class="summary-card__label">Properties</span>
+            <span class="summary-card__value">
+              {{ (netWorth()?.assetBreakdown?.propertyValue ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="summary-card">
+            <mat-icon class="summary-card__icon">savings</mat-icon>
+            <span class="summary-card__label">Superannuation</span>
+            <span class="summary-card__value">
+              {{ (netWorth()?.assetBreakdown?.superBalance ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="summary-card">
+            <mat-icon class="summary-card__icon">show_chart</mat-icon>
+            <span class="summary-card__label">Investments</span>
+            <span class="summary-card__value">
+              {{ (netWorth()?.assetBreakdown?.investmentValue ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="summary-card">
+            <mat-icon class="summary-card__icon">account_balance</mat-icon>
+            <span class="summary-card__label">Cash & Savings</span>
+            <span class="summary-card__value">
+              {{ (netWorth()?.assetBreakdown?.cashBalance ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="total-card">
+          <span class="total-label">Total Assets</span>
+          <span class="total-value positive">
+            {{ (netWorth()?.totalAssets ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </span>
+        </div>
+
+        <!-- Expandable Sections -->
+        <mat-accordion class="asset-sections">
+          <!-- Properties -->
+          <mat-expansion-panel
+            [expanded]="isAssetSectionExpanded('properties')"
+            (opened)="toggleAssetSection('properties')"
+            (closed)="toggleAssetSection('properties')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>home</mat-icon>
+                Properties
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ properties().length || 0 }} properties
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (isSectionLoading('properties')) {
+              <div class="section-loading">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+            } @else if (properties().length === 0) {
+              <div class="empty-section">
+                <p>No properties added yet.</p>
+                <a mat-stroked-button routerLink="/properties">
+                  <mat-icon>add</mat-icon>
+                  Add Property
+                </a>
+              </div>
+            } @else {
+              <div class="asset-list">
+                @for (property of properties(); track property.id) {
+                  <div class="asset-item">
+                    <div class="asset-item__main">
+                      <span class="asset-item__name">{{ property.name }}</span>
+                      <span class="asset-item__type">{{ property.isInvestment ? 'Investment Property' : 'Primary Residence' }}</span>
+                    </div>
+                    <div class="asset-item__values">
+                      <div class="asset-item__value">
+                        <span class="label">Value</span>
+                        <span class="amount">{{ property.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                      <div class="asset-item__value">
+                        <span class="label">Equity</span>
+                        <span class="amount positive">{{ property.equity | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/properties">
+                  <mat-icon>edit</mat-icon>
+                  Manage Properties
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+
+          <!-- Superannuation -->
+          <mat-expansion-panel
+            [expanded]="isAssetSectionExpanded('super')"
+            (opened)="toggleAssetSection('super')"
+            (closed)="toggleAssetSection('super')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>savings</mat-icon>
+                Superannuation
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ superAccounts().length || 0 }} accounts
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (isSectionLoading('super')) {
+              <div class="section-loading">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+            } @else if (superAccounts().length === 0) {
+              <div class="empty-section">
+                <p>No super accounts added yet.</p>
+                <a mat-stroked-button routerLink="/super">
+                  <mat-icon>add</mat-icon>
+                  Add Super Account
+                </a>
+              </div>
+            } @else {
+              <div class="asset-list">
+                @for (account of superAccounts(); track account.id) {
+                  <div class="asset-item">
+                    <div class="asset-item__main">
+                      <span class="asset-item__name">{{ account.fundName }}</span>
+                      <span class="asset-item__type">Accumulation</span>
+                    </div>
+                    <div class="asset-item__values">
+                      <div class="asset-item__value">
+                        <span class="label">Balance</span>
+                        <span class="amount">{{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/super">
+                  <mat-icon>edit</mat-icon>
+                  Manage Super
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+
+          <!-- Investments -->
+          <mat-expansion-panel
+            [expanded]="isAssetSectionExpanded('investments')"
+            (opened)="toggleAssetSection('investments')"
+            (closed)="toggleAssetSection('investments')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>show_chart</mat-icon>
+                Investments
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ investments().length || 0 }} holdings
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (isSectionLoading('investments')) {
+              <div class="section-loading">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+            } @else if (investments().length === 0) {
+              <div class="empty-section">
+                <p>No investments added yet.</p>
+                <a mat-stroked-button routerLink="/investments">
+                  <mat-icon>add</mat-icon>
+                  Add Investment
+                </a>
+              </div>
+            } @else {
+              <div class="asset-list">
+                @for (holding of investments(); track holding.id) {
+                  <div class="asset-item">
+                    <div class="asset-item__main">
+                      <span class="asset-item__ticker">{{ holding.ticker }}</span>
+                      <span class="asset-item__units">{{ holding.units | number:'1.0-4' }} units</span>
+                    </div>
+                    <div class="asset-item__values">
+                      <div class="asset-item__value">
+                        <span class="label">Value</span>
+                        <span class="amount">{{ (holding.currentValue || holding.costBase) | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                      <div class="asset-item__value">
+                        <span class="label">Cost Base</span>
+                        <span class="amount">{{ holding.costBase | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/investments">
+                  <mat-icon>edit</mat-icon>
+                  Manage Investments
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+
+          <!-- Cash & Savings -->
+          <mat-expansion-panel
+            [expanded]="isAssetSectionExpanded('cash')"
+            (opened)="toggleAssetSection('cash')"
+            (closed)="toggleAssetSection('cash')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>account_balance</mat-icon>
+                Cash & Savings
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ cashAccounts().length || 0 }} accounts
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (isSectionLoading('cash')) {
+              <div class="section-loading">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+            } @else if (cashAccounts().length === 0) {
+              <div class="empty-section">
+                <p>No cash accounts added yet.</p>
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>add</mat-icon>
+                  Add Account
+                </a>
+              </div>
+            } @else {
+              <div class="asset-list">
+                @for (account of cashAccounts(); track account.id) {
+                  <div class="asset-item">
+                    <div class="asset-item__main">
+                      <span class="asset-item__name">{{ account.accountName }}</span>
+                      <span class="asset-item__type">{{ account.accountType }}</span>
+                    </div>
+                    <div class="asset-item__values">
+                      <div class="asset-item__value">
+                        <span class="label">Balance</span>
+                        <span class="amount">{{ account.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                      @if (account.interestRate) {
+                        <div class="asset-item__value">
+                          <span class="label">Rate</span>
+                          <span class="amount">{{ account.interestRate | percent:'1.2-2' }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>edit</mat-icon>
+                  Manage Accounts
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+        </mat-accordion>
+      }
+
+      <!-- Liabilities Tab -->
+      @case ('liabilities') {
+        <!-- Summary Cards -->
+        <div class="summary-cards summary-cards--three">
+          <div class="summary-card summary-card--negative">
+            <mat-icon class="summary-card__icon">home</mat-icon>
+            <span class="summary-card__label">Mortgages</span>
+            <span class="summary-card__value negative">
+              {{ (netWorth()?.liabilityBreakdown?.mortgageBalance ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="summary-card summary-card--negative">
+            <mat-icon class="summary-card__icon">credit_card</mat-icon>
+            <span class="summary-card__label">Credit Cards</span>
+            <span class="summary-card__value negative">
+              {{ (netWorth()?.liabilityBreakdown?.creditCardBalance ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+          <div class="summary-card summary-card--negative">
+            <mat-icon class="summary-card__icon">payments</mat-icon>
+            <span class="summary-card__label">Other Loans</span>
+            <span class="summary-card__value negative">
+              {{ ((netWorth()?.liabilityBreakdown?.personalLoans ?? 0) +
+                  (netWorth()?.liabilityBreakdown?.carLoans ?? 0) +
+                  (netWorth()?.liabilityBreakdown?.hecsHelp ?? 0) +
+                  (netWorth()?.liabilityBreakdown?.otherLiabilities ?? 0)) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="total-card total-card--negative">
+          <span class="total-label">Total Liabilities</span>
+          <span class="total-value negative">
+            {{ (netWorth()?.totalLiabilities ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </span>
+        </div>
+
+        <!-- Expandable Sections -->
+        <mat-accordion class="liability-sections">
+          <!-- Mortgages (show from properties) -->
+          <mat-expansion-panel
+            [expanded]="isLiabilitySectionExpanded('mortgages')"
+            (opened)="toggleLiabilitySection('mortgages')"
+            (closed)="toggleLiabilitySection('mortgages')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>home</mat-icon>
+                Mortgages
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ (netWorth()?.liabilityBreakdown?.mortgageBalance ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="liability-hint">
+              <mat-icon>info</mat-icon>
+              <span>Mortgages are managed through Properties. <a routerLink="/properties">Manage Properties</a></span>
+            </div>
+          </mat-expansion-panel>
+
+          <!-- Credit Cards -->
+          <mat-expansion-panel
+            [expanded]="isLiabilitySectionExpanded('creditCards')"
+            (opened)="toggleLiabilitySection('creditCards')"
+            (closed)="toggleLiabilitySection('creditCards')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>credit_card</mat-icon>
+                Credit Cards
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ (netWorth()?.liabilityBreakdown?.creditCardBalance ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (isSectionLoading('liabilities')) {
+              <div class="section-loading">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+            } @else if (getLiabilitiesByType('credit_card').length === 0) {
+              <div class="empty-section">
+                <p>No credit cards added.</p>
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>add</mat-icon>
+                  Add Credit Card
+                </a>
+              </div>
+            } @else {
+              <div class="liability-list">
+                @for (card of getLiabilitiesByType('credit_card'); track card.id) {
+                  <div class="liability-item">
+                    <div class="liability-item__main">
+                      <span class="liability-item__name">{{ card.name }}</span>
+                      @if (card.institution) {
+                        <span class="liability-item__institution">{{ card.institution }}</span>
+                      }
+                    </div>
+                    <div class="liability-item__values">
+                      <div class="liability-item__value">
+                        <span class="label">Balance</span>
+                        <span class="amount negative">{{ card.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                      @if (card.creditLimit) {
+                        <div class="liability-item__value">
+                          <span class="label">Limit</span>
+                          <span class="amount">{{ card.creditLimit | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>edit</mat-icon>
+                  Manage Credit Cards
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+
+          <!-- Personal Loans -->
+          <mat-expansion-panel
+            [expanded]="isLiabilitySectionExpanded('personalLoans')"
+            (opened)="toggleLiabilitySection('personalLoans')"
+            (closed)="toggleLiabilitySection('personalLoans')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>payments</mat-icon>
+                Personal Loans
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ (netWorth()?.liabilityBreakdown?.personalLoans ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (getLiabilitiesByType('personal_loan').length === 0) {
+              <div class="empty-section">
+                <p>No personal loans added.</p>
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>add</mat-icon>
+                  Add Personal Loan
+                </a>
+              </div>
+            } @else {
+              <div class="liability-list">
+                @for (loan of getLiabilitiesByType('personal_loan'); track loan.id) {
+                  <div class="liability-item">
+                    <div class="liability-item__main">
+                      <span class="liability-item__name">{{ loan.name }}</span>
+                    </div>
+                    <div class="liability-item__values">
+                      <div class="liability-item__value">
+                        <span class="label">Balance</span>
+                        <span class="amount negative">{{ loan.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                      @if (loan.interestRate) {
+                        <div class="liability-item__value">
+                          <span class="label">Rate</span>
+                          <span class="amount">{{ loan.interestRate | percent:'1.2-2' }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>edit</mat-icon>
+                  Manage Loans
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+
+          <!-- Car Loans -->
+          <mat-expansion-panel
+            [expanded]="isLiabilitySectionExpanded('carLoans')"
+            (opened)="toggleLiabilitySection('carLoans')"
+            (closed)="toggleLiabilitySection('carLoans')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>directions_car</mat-icon>
+                Car Loans
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ (netWorth()?.liabilityBreakdown?.carLoans ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (getLiabilitiesByType('car_loan').length === 0) {
+              <div class="empty-section">
+                <p>No car loans added.</p>
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>add</mat-icon>
+                  Add Car Loan
+                </a>
+              </div>
+            } @else {
+              <div class="liability-list">
+                @for (loan of getLiabilitiesByType('car_loan'); track loan.id) {
+                  <div class="liability-item">
+                    <div class="liability-item__main">
+                      <span class="liability-item__name">{{ loan.name }}</span>
+                    </div>
+                    <div class="liability-item__values">
+                      <div class="liability-item__value">
+                        <span class="label">Balance</span>
+                        <span class="amount negative">{{ loan.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>edit</mat-icon>
+                  Manage Loans
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+
+          <!-- HECS/HELP -->
+          <mat-expansion-panel
+            [expanded]="isLiabilitySectionExpanded('hecs')"
+            (opened)="toggleLiabilitySection('hecs')"
+            (closed)="toggleLiabilitySection('hecs')">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>school</mat-icon>
+                HECS/HELP
+              </mat-panel-title>
+              <mat-panel-description>
+                {{ (netWorth()?.liabilityBreakdown?.hecsHelp ?? 0) | currency:'AUD':'symbol-narrow':'1.0-0' }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            @if (getLiabilitiesByType('hecs_help').length === 0) {
+              <div class="empty-section">
+                <p>No HECS/HELP debt added.</p>
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>add</mat-icon>
+                  Add HECS/HELP
+                </a>
+              </div>
+            } @else {
+              <div class="liability-list">
+                @for (debt of getLiabilitiesByType('hecs_help'); track debt.id) {
+                  <div class="liability-item">
+                    <div class="liability-item__main">
+                      <span class="liability-item__name">{{ debt.name }}</span>
+                    </div>
+                    <div class="liability-item__values">
+                      <div class="liability-item__value">
+                        <span class="label">Balance</span>
+                        <span class="amount negative">{{ debt.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="section-actions">
+                <a mat-stroked-button routerLink="/cash">
+                  <mat-icon>edit</mat-icon>
+                  Manage HECS/HELP
+                </a>
+              </div>
+            }
+          </mat-expansion-panel>
+        </mat-accordion>
+      }
+    }
+  </div>
+}

@@ -125,10 +125,66 @@ export class PropertyAnalyserComponent {
   }
 
   ngOnInit(): void {
+    this.loadPrefillData();
     // Initial calculation
     if (this.form.valid) {
       this.calculate();
     }
+    const interestCtrl = this.form.get('interestRate');
+
+    interestCtrl?.valueChanges.subscribe(value => {
+      if (value === null || value === undefined) return;
+  
+      const rounded = Math.round(value * 100) / 100;
+  
+      if (value !== rounded) {
+        interestCtrl.setValue(rounded, { emitEvent: false });
+      }
+    });
+  }
+
+  loadPrefillData(): void {
+    this.propertyService.getPrefillData().subscribe({
+      next: (data) => {
+        if (data && Object.keys(data).length > 0) {
+          const patchData: Record<string, unknown> = {};
+
+          if (data.purchasePrice) {
+            patchData['purchasePrice'] = data.purchasePrice;
+          }
+          if (data.depositAmount) {
+            patchData['depositAmount'] = data.depositAmount;
+          }
+          if (data.interestRate) {
+            // Backend returns decimal (0.065), form expects percentage (6.5)
+            patchData['interestRate'] = data.interestRate * 100;
+          }
+          if (data.loanTermYears) {
+            patchData['loanTermYears'] = data.loanTermYears;
+          }
+          if (data.weeklyRent) {
+            patchData['weeklyRent'] = data.weeklyRent;
+          }
+          if (data.otherExpenses !== undefined) {
+            patchData['otherExpenses'] = data.otherExpenses;
+          }
+          if (data.marginalTaxRate) {
+            // Backend returns decimal (0.37), form expects percentage (37)
+            patchData['marginalTaxRate'] = data.marginalTaxRate * 100;
+          }
+          if (data.isInterestOnly !== undefined) {
+            patchData['isInterestOnly'] = data.isInterestOnly;
+          }
+
+          if (Object.keys(patchData).length > 0) {
+            this.form.patchValue(patchData);
+          }
+        }
+      },
+      error: () => {
+        // Silently fail - form stays with defaults
+      }
+    });
   }
 
   calculate(): void {

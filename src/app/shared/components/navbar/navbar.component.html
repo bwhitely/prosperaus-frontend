@@ -12,12 +12,40 @@
           Dashboard
         </a>
 
-        <a mat-button routerLink="/portfolio" routerLinkActive="active" class="navbar__link">
-          Portfolio
-        </a>
-        <a mat-button routerLink="/income-expenses" routerLinkActive="active" class="navbar__link">
-          Income/Expenses
-        </a>
+        <!-- My Finances Menu -->
+        <button mat-button [matMenuTriggerFor]="financesMenu" class="navbar__link">
+          My Finances
+          <mat-icon iconPositionEnd>expand_more</mat-icon>
+        </button>
+        <mat-menu #financesMenu="matMenu" class="navbar__menu navbar__menu--sections">
+          <div class="navbar__menu-section-header">Assets</div>
+          <button mat-menu-item (click)="navigateTo('/properties')">
+            <mat-icon>home</mat-icon>
+            <span>Properties</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/super')">
+            <mat-icon>savings</mat-icon>
+            <span>Super Accounts</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/investments')">
+            <mat-icon>show_chart</mat-icon>
+            <span>Investment Holdings</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/cash')">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>Cash & Liabilities</span>
+          </button>
+          <mat-divider></mat-divider>
+          <div class="navbar__menu-section-header">Tracking</div>
+          <button mat-menu-item (click)="navigateTo('/income-expenses')">
+            <mat-icon>payments</mat-icon>
+            <span>Income & Expenses</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/portfolio')">
+            <mat-icon>pie_chart</mat-icon>
+            <span>Portfolio Analysis</span>
+          </button>
+        </mat-menu>
 
         <!-- Tools Menu -->
         <button mat-button [matMenuTriggerFor]="toolsMenu" class="navbar__link">
@@ -45,23 +73,43 @@
             <mat-icon>home</mat-icon>
             <span>Property Analyser</span>
           </button>
+          <button mat-menu-item (click)="navigateTo('/mortgage-calculator')">
+            <mat-icon>account_balance</mat-icon>
+            <span>Mortgage Calculator</span>
+          </button>
         </mat-menu>
       </nav>
 
       <!-- Desktop User Menu -->
       <div class="navbar__actions hide-mobile">
+        @if (isPro()) {
+          <span class="navbar__pro-badge">Pro</span>
+        } @else {
+          <a mat-stroked-button color="primary" routerLink="/pricing" class="navbar__upgrade-btn">
+            Upgrade
+          </a>
+        }
         <button mat-icon-button [matMenuTriggerFor]="userMenu" class="navbar__avatar">
           <mat-icon>person</mat-icon>
         </button>
         <mat-menu #userMenu="matMenu" xPosition="before">
           <div class="navbar__menu-header">
             {{ user()?.email }}
+            @if (isPro()) {
+              <span class="navbar__menu-badge">Pro</span>
+            }
           </div>
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="navigateTo('/profile')">
             <mat-icon>settings</mat-icon>
-            <span>Settings</span>
+            <span>Profile</span>
           </button>
+          @if (!isPro()) {
+            <button mat-menu-item (click)="navigateTo('/pricing')">
+              <mat-icon>star</mat-icon>
+              <span>Upgrade to Pro</span>
+            </button>
+          }
           <mat-divider></mat-divider>
           <button mat-menu-item (click)="signOut()" class="navbar__menu-item--danger">
             <mat-icon>logout</mat-icon>
@@ -77,6 +125,7 @@
     } @else {
       <!-- Desktop Navigation (Not Authenticated) -->
       <div class="navbar__actions hide-mobile">
+        <a mat-button routerLink="/pricing">Pricing</a>
         <a mat-button routerLink="/auth/login">Sign in</a>
         <a mat-flat-button color="primary" routerLink="/auth/signup">Get Started</a>
       </div>
@@ -99,6 +148,35 @@
           <mat-icon>dashboard</mat-icon>
           Dashboard
         </a>
+
+        <div class="navbar__mobile-section">My Finances - Assets</div>
+        <a mat-button class="navbar__mobile-link" routerLink="/properties" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>home</mat-icon>
+          Properties
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/super" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>savings</mat-icon>
+          Super Accounts
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/investments" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>show_chart</mat-icon>
+          Investment Holdings
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/cash" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>account_balance_wallet</mat-icon>
+          Cash & Liabilities
+        </a>
+
+        <div class="navbar__mobile-section">My Finances - Tracking</div>
+        <a mat-button class="navbar__mobile-link" routerLink="/income-expenses" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>payments</mat-icon>
+          Income & Expenses
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/portfolio" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>pie_chart</mat-icon>
+          Portfolio Analysis
+        </a>
+
         <div class="navbar__mobile-section">Tools</div>
         <a mat-button class="navbar__mobile-link" routerLink="/projections" routerLinkActive="active" (click)="toggleMobileMenu()">
           <mat-icon>trending_up</mat-icon>
@@ -120,30 +198,39 @@
           <mat-icon>home</mat-icon>
           Property Analyser
         </a>
-        <a mat-button class="navbar__mobile-link" routerLink="/analyse" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <mat-icon>receipt_long</mat-icon>
-          Expenses Analyser
+        <a mat-button class="navbar__mobile-link" routerLink="/mortgage-calculator" routerLinkActive="active" (click)="toggleMobileMenu()">
+          <mat-icon>account_balance</mat-icon>
+          Mortgage Calculator
         </a>
-        <div class="navbar__mobile-section">Portfolio</div>
-        <a mat-button class="navbar__mobile-link" routerLink="/portfolio" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <mat-icon>pie_chart</mat-icon>
-          Portfolio
-        </a>
-        <a mat-button class="navbar__mobile-link" routerLink="/cash-flow" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <mat-icon>account_balance_wallet</mat-icon>
-          Cash Flow
-        </a>
+
         <div class="navbar__mobile-section">Account</div>
+        @if (isPro()) {
+          <div class="navbar__mobile-pro-status">
+            <mat-icon>verified</mat-icon>
+            Pro Member
+          </div>
+        }
         <a mat-button class="navbar__mobile-link" routerLink="/profile" routerLinkActive="active" (click)="toggleMobileMenu()">
           <mat-icon>settings</mat-icon>
-          Settings
+          Profile
         </a>
+        @if (!isPro()) {
+          <a mat-button class="navbar__mobile-link navbar__mobile-link--upgrade" routerLink="/pricing" (click)="toggleMobileMenu()">
+            <mat-icon>star</mat-icon>
+            Upgrade to Pro
+          </a>
+        }
         <button mat-button class="navbar__mobile-link navbar__mobile-link--danger" (click)="signOut()">
           <mat-icon>logout</mat-icon>
           Sign out
         </button>
       } @else {
+        <a mat-button class="navbar__mobile-link" routerLink="/pricing" (click)="toggleMobileMenu()">
+          <mat-icon>sell</mat-icon>
+          Pricing
+        </a>
         <a mat-button class="navbar__mobile-link" routerLink="/auth/login" (click)="toggleMobileMenu()">
+          <mat-icon>login</mat-icon>
           Sign in
         </a>
         <a mat-flat-button color="primary" class="navbar__mobile-link--primary" routerLink="/auth/signup" (click)="toggleMobileMenu()">

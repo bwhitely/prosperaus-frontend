@@ -5,125 +5,123 @@
   </div>
 }
 
-<!-- Analysis Results Modal -->
+<!-- Analysis Results Inline Card -->
 @if (showAnalysisResults() && analysisResult()) {
-  <div class="modal-overlay" (click)="closeAnalysisResults()">
-    <div class="modal modal--large" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h2>AI Spending Analysis</h2>
-        <button class="modal__close" (click)="closeAnalysisResults()">&times;</button>
-      </div>
-      <div class="modal__body">
-        <!-- Summary Cards -->
-        <div class="analysis-summary">
-          <div class="analysis-card">
-            <span class="analysis-card__label">Total Spending</span>
-            <span class="analysis-card__value negative">
-              {{ analysisResult()!.spendingSummary.totalSpending | currency:'AUD':'symbol-narrow':'1.0-0' }}
-            </span>
-          </div>
-          <div class="analysis-card">
-            <span class="analysis-card__label">Total Income</span>
-            <span class="analysis-card__value positive">
-              {{ analysisResult()!.spendingSummary.totalIncome | currency:'AUD':'symbol-narrow':'1.0-0' }}
-            </span>
-          </div>
-          <div class="analysis-card">
-            <span class="analysis-card__label">Net Flow</span>
-            <span class="analysis-card__value" [class.positive]="analysisResult()!.summary.netFlow >= 0" [class.negative]="analysisResult()!.summary.netFlow < 0">
-              {{ analysisResult()!.summary.netFlow | currency:'AUD':'symbol-narrow':'1.0-0' }}
-            </span>
-          </div>
-          <div class="analysis-card">
-            <span class="analysis-card__label">Transactions</span>
-            <span class="analysis-card__value">
-              {{ analysisResult()!.summary.totalTransactions }}
-            </span>
-          </div>
+  <div class="card inline-analysis">
+    <div class="inline-analysis__header">
+      <h2>AI Spending Analysis</h2>
+      <button class="btn btn--icon" (click)="closeAnalysisResults()">&times;</button>
+    </div>
+    <div class="inline-analysis__body">
+      <!-- Summary Cards -->
+      <div class="analysis-summary">
+        <div class="analysis-card">
+          <span class="analysis-card__label">Total Spending</span>
+          <span class="analysis-card__value negative">
+            {{ analysisResult()!.spendingSummary.totalSpending | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </span>
         </div>
+        <div class="analysis-card">
+          <span class="analysis-card__label">Total Income</span>
+          <span class="analysis-card__value positive">
+            {{ analysisResult()!.spendingSummary.totalIncome | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </span>
+        </div>
+        <div class="analysis-card">
+          <span class="analysis-card__label">Net Flow</span>
+          <span class="analysis-card__value" [class.positive]="analysisResult()!.summary.netFlow >= 0" [class.negative]="analysisResult()!.summary.netFlow < 0">
+            {{ analysisResult()!.summary.netFlow | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </span>
+        </div>
+        <div class="analysis-card">
+          <span class="analysis-card__label">Transactions</span>
+          <span class="analysis-card__value">
+            {{ analysisResult()!.summary.totalTransactions }}
+          </span>
+        </div>
+      </div>
 
-        <!-- Spending Breakdown -->
-        <div class="analysis-section">
-          <h3>Spending by Category</h3>
-          <div class="spending-bars">
-            @for (cat of getSpendingCategories(); track cat.name) {
-              <div class="spending-bar">
-                <div class="spending-bar__label">
-                  <span>{{ cat.name }}</span>
-                  <span>{{ cat.amount | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
-                </div>
-                <div class="spending-bar__track">
-                  <div class="spending-bar__fill" [style.width.%]="cat.percentage"></div>
-                </div>
+      <!-- Spending Breakdown -->
+      <div class="analysis-section">
+        <h3>Spending by Category</h3>
+        <div class="spending-bars">
+          @for (cat of getSpendingCategories(); track cat.name) {
+            <div class="spending-bar">
+              <div class="spending-bar__label">
+                <span>{{ cat.name }}</span>
+                <span>{{ cat.amount | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
               </div>
+              <div class="spending-bar__track">
+                <div class="spending-bar__fill" [style.width.%]="cat.percentage"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      @if (analysisResult()!.insights.length > 0) {
+        <div class="analysis-section">
+          <h3>Key Insights</h3>
+          <ul class="insights-list">
+            @for (insight of analysisResult()!.insights; track insight) {
+              <li class="insight-item">
+                <span class="insight-icon">💡</span>
+                {{ insight }}
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- Optimisation Suggestions -->
+      @if (analysisResult()!.optimisationSuggestions.length > 0) {
+        <div class="analysis-section">
+          <h3>Saving Opportunities</h3>
+          <ul class="suggestions-list">
+            @for (suggestion of analysisResult()!.optimisationSuggestions; track suggestion) {
+              <li class="suggestion-item">
+                <span class="suggestion-icon">💰</span>
+                {{ suggestion }}
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- Top Merchants -->
+      @if (analysisResult()!.spendingSummary.topMerchants.length > 0) {
+        <div class="analysis-section">
+          <h3>Top Spending Places</h3>
+          <div class="merchants-list">
+            @for (merchant of analysisResult()!.spendingSummary.topMerchants; track merchant) {
+              <span class="merchant-tag">{{ merchant }}</span>
             }
           </div>
         </div>
+      }
 
-        <!-- AI Insights -->
-        @if (analysisResult()!.insights.length > 0) {
-          <div class="analysis-section">
-            <h3>Key Insights</h3>
-            <ul class="insights-list">
-              @for (insight of analysisResult()!.insights; track insight) {
-                <li class="insight-item">
-                  <span class="insight-icon">💡</span>
-                  {{ insight }}
-                </li>
-              }
-            </ul>
-          </div>
-        }
-
-        <!-- Optimisation Suggestions -->
-        @if (analysisResult()!.optimisationSuggestions.length > 0) {
-          <div class="analysis-section">
-            <h3>Saving Opportunities</h3>
-            <ul class="suggestions-list">
-              @for (suggestion of analysisResult()!.optimisationSuggestions; track suggestion) {
-                <li class="suggestion-item">
-                  <span class="suggestion-icon">💰</span>
-                  {{ suggestion }}
-                </li>
-              }
-            </ul>
-          </div>
-        }
-
-        <!-- Top Merchants -->
-        @if (analysisResult()!.spendingSummary.topMerchants.length > 0) {
-          <div class="analysis-section">
-            <h3>Top Spending Places</h3>
-            <div class="merchants-list">
-              @for (merchant of analysisResult()!.spendingSummary.topMerchants; track merchant) {
-                <span class="merchant-tag">{{ merchant }}</span>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- Category Suggestions -->
-        @if (analysisResult()!.categorySuggestions.length > 0 && analysisResult()!.uploadId) {
-          <div class="analysis-section">
-            <h3>Auto-Categorisation Available</h3>
-            <p class="section-hint">
-              AI has suggested categories for {{ analysisResult()!.categorySuggestions.length }} transactions.
-            </p>
-            <button class="btn btn--primary" (click)="applySuggestions()">
-              Apply All Suggestions
-            </button>
-          </div>
-        }
-
-        <!-- Privacy Notice -->
-        <div class="privacy-notice">
-          <span class="privacy-icon">🔒</span>
-          <p>Your data is processed securely and not shared with third parties. Transaction details are summarised before analysis.</p>
+      <!-- Category Suggestions -->
+      @if (analysisResult()!.categorySuggestions.length > 0 && analysisResult()!.uploadId) {
+        <div class="analysis-section">
+          <h3>Auto-Categorisation Available</h3>
+          <p class="section-hint">
+            AI has suggested categories for {{ analysisResult()!.categorySuggestions.length }} transactions.
+          </p>
+          <button class="btn btn--primary" (click)="applySuggestions()">
+            Apply All Suggestions
+          </button>
         </div>
+      }
+
+      <!-- Privacy Notice -->
+      <div class="privacy-notice">
+        <span class="privacy-icon">🔒</span>
+        <p>Your data is processed securely and not shared with third parties. Transaction details are summarised before analysis.</p>
       </div>
-      <div class="modal__footer">
-        <button class="btn btn--secondary" (click)="closeAnalysisResults()">Close</button>
-      </div>
+    </div>
+    <div class="inline-analysis__footer">
+      <button class="btn btn--secondary" (click)="closeAnalysisResults()">Close</button>
     </div>
   </div>
 }

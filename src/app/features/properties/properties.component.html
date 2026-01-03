@@ -4,7 +4,7 @@
     <p>Manage your property portfolio and mortgages</p>
   </div>
   @if (!showPropertyForm() && !showMortgageForm()) {
-    <button class="btn btn--primary" (click)="openAddPropertyForm()">
+    <button mat-flat-button color="primary" (click)="openAddPropertyForm()">
       + Add Property
     </button>
   }
@@ -13,7 +13,9 @@
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
-    <button class="alert__close" (click)="error.set(null)">&times;</button>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 
@@ -102,10 +104,10 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closePropertyForm()">
+        <button mat-stroked-button type="button" (click)="closePropertyForm()">
           Cancel
         </button>
-        <button type="submit" class="btn btn--primary" [disabled]="propertyForm.invalid || isSubmitting()">
+        <button mat-flat-button color="primary" type="submit" [disabled]="propertyForm.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editingProperty() ? 'Update' : 'Add') }} Property
         </button>
       </div>
@@ -193,10 +195,10 @@
       </div>
 
       <div class="inline-form__footer">
-        <button type="button" class="btn btn--secondary" (click)="closeMortgageForm()">
+        <button mat-stroked-button type="button" (click)="closeMortgageForm()">
           Cancel
         </button>
-        <button type="submit" class="btn btn--primary" [disabled]="mortgageForm.invalid || isSubmitting()">
+        <button mat-flat-button color="primary" type="submit" [disabled]="mortgageForm.invalid || isSubmitting()">
           {{ isSubmitting() ? 'Saving...' : (editingMortgage() ? 'Update' : 'Add') }} Mortgage
         </button>
       </div>
@@ -214,7 +216,7 @@
     <div class="empty-state__icon">🏠</div>
     <h3>No properties yet</h3>
     <p>Add your first property to start tracking your real estate portfolio.</p>
-    <button class="btn btn--primary" (click)="openAddPropertyForm()">
+    <button mat-flat-button color="primary" (click)="openAddPropertyForm()">
       Add Your First Property
     </button>
   </div>
@@ -230,11 +232,11 @@
             }
           </div>
           <div class="property-card__actions">
-            <button class="btn btn--icon" (click)="openEditPropertyForm(property)" title="Edit">
-              ✏️
+            <button mat-icon-button (click)="openEditPropertyForm(property)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
             </button>
-            <button class="btn btn--icon btn--danger" (click)="deleteProperty(property)" title="Delete">
-              🗑️
+            <button mat-icon-button color="warn" (click)="deleteProperty(property)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>
@@ -274,7 +276,7 @@
         <div class="property-card__mortgages">
           <div class="mortgages-header">
             <h4>Mortgages</h4>
-            <button class="btn btn--sm btn--secondary" (click)="openAddMortgageForm(property.id)">
+            <button mat-stroked-button (click)="openAddMortgageForm(property.id)">
               + Add
             </button>
           </div>
@@ -301,11 +303,11 @@
                     </span>
                   </div>
                   <div class="mortgage-item__actions">
-                    <button class="btn btn--icon btn--sm" (click)="openEditMortgageForm(mortgage)" title="Edit">
-                      ✏️
+                    <button mat-icon-button (click)="openEditMortgageForm(mortgage)" matTooltip="Edit">
+                      <mat-icon>edit</mat-icon>
                     </button>
-                    <button class="btn btn--icon btn--sm btn--danger" (click)="deleteMortgage(mortgage)" title="Delete">
-                      🗑️
+                    <button mat-icon-button color="warn" (click)="deleteMortgage(mortgage)" matTooltip="Delete">
+                      <mat-icon>delete</mat-icon>
                     </button>
                   </div>
                 </div>
