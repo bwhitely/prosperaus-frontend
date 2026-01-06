@@ -345,8 +345,61 @@
           </mat-tab>
 
           <!-- Cash Flow Tab -->
-          <mat-tab label="Cash Flow">
+          <mat-tab label="Income/Expenses">
             <div class="tab-content">
+
+                  @if (cashFlowSummary(); as s) {
+              <div class="cashflow-summary">
+                <mat-card class="summary-mini">
+                  <mat-card-content>
+                    <div class="kpi">
+                      <span class="label">Net Cash Flow (before tax)</span>
+                      <span class="value" [class.negative]="s.beforeTax < 0">
+                        {{ formatCurrency(s.beforeTax) }}
+                      </span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <mat-card class="summary-mini">
+                  <mat-card-content>
+                    <div class="kpi">
+                      <span class="label">Tax Benefit</span>
+                      <span class="value positive">
+                        {{ formatCurrency(s.taxBenefit) }}
+                      </span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <mat-card class="summary-mini">
+                  <mat-card-content>
+                    <div class="kpi">
+                      <span class="label">Net After Tax</span>
+                      <span class="value" [class.negative]="s.afterTax < 0" [class.positive]="s.afterTax >= 0">
+                        {{ formatCurrency(s.afterTax) }}
+                      </span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <mat-card class="summary-mini">
+                  <mat-card-content>
+                    <div class="kpi">
+                      <span class="label">Break-even Weekly Rent (est.)</span>
+                      <span class="value">
+                        @if (s.breakEvenWeeklyRent !== null) {
+                          {{ formatCurrency(s.breakEvenWeeklyRent) }}
+                        } @else {
+                          —
+                        }
+                      </span>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            }
+
               <div class="detail-section">
                 <h4>Year 1 Cash Flow Breakdown</h4>
                 <div class="cashflow-table">

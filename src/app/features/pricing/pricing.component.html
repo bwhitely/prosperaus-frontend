@@ -14,9 +14,9 @@
         <h2 class="plan__name">Free</h2>
         <div class="plan__price">
           <span class="plan__amount">$0</span>
-          <span class="plan__period">/month</span>
+          <span class="plan__period">/forever</span>
         </div>
-        <p class="plan__description">Perfect for trying out our calculators</p>
+        <p class="plan__description">Try our calculators</p>
       </div>
 
       <ul class="plan__features">
@@ -45,17 +45,59 @@
       </div>
     </div>
 
-    <!-- Pro Plan -->
-    <div class="plan plan--pro">
-      <div class="plan__badge">Most Popular</div>
-
+    <!-- Pro Monthly Plan -->
+    <div class="plan plan--monthly">
       <div class="plan__header">
-        <h2 class="plan__name">Pro</h2>
+        <h2 class="plan__name">Pro Monthly</h2>
         <div class="plan__price">
           <span class="plan__amount">$9.99</span>
           <span class="plan__period">/month</span>
         </div>
-        <p class="plan__description">Full access to all features</p>
+        <p class="plan__description">Full access, flexible billing</p>
+      </div>
+
+      <ul class="plan__features">
+        @for (feature of features; track feature.name) {
+          <li class="plan__feature plan__feature--included">
+            <svg class="plan__icon plan__icon--check" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ feature.name }}</span>
+          </li>
+        }
+      </ul>
+
+      <div class="plan__action">
+        @if (isPro()) {
+          <button
+            class="btn btn--secondary"
+            (click)="manageSubscription()"
+            [disabled]="isLoading()">
+            {{ isLoading() ? 'Loading...' : 'Manage Subscription' }}
+          </button>
+        } @else {
+          <button
+            class="btn btn--secondary"
+            (click)="subscribe('monthly')"
+            [disabled]="isLoading()">
+            {{ isLoading() ? 'Loading...' : 'Subscribe Monthly' }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Pro Yearly Plan -->
+    <div class="plan plan--yearly">
+      <div class="plan__badge">Best Value</div>
+
+      <div class="plan__header">
+        <h2 class="plan__name">Pro Yearly</h2>
+        <div class="plan__price">
+          <span class="plan__amount">$99.99</span>
+          <span class="plan__period">/year</span>
+          <span class="plan__savings">Save 17%</span>
+        </div>
+        <p class="plan__description">$8.33/month, billed annually</p>
       </div>
 
       <ul class="plan__features">
@@ -80,9 +122,9 @@
         } @else {
           <button
             class="btn btn--primary"
-            (click)="subscribe()"
+            (click)="subscribe('yearly')"
             [disabled]="isLoading()">
-            {{ isLoading() ? 'Loading...' : 'Subscribe Now' }}
+            {{ isLoading() ? 'Loading...' : 'Subscribe Yearly' }}
           </button>
         }
       </div>
@@ -116,8 +158,8 @@
       </div>
 
       <div class="faq-item">
-        <h4>Do you offer annual billing?</h4>
-        <p>Yes! Annual billing is available at $99.99/year (save ~17%). Contact us to switch to annual billing.</p>
+        <h4>Can I switch between monthly and yearly?</h4>
+        <p>Yes! You can change your billing frequency anytime through the customer portal. Changes take effect at the start of your next billing period.</p>
       </div>
     </div>
   </div>

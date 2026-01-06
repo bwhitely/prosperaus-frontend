@@ -74,10 +74,11 @@ export class SubscriptionService {
 
   /**
    * Create a Stripe Checkout session and redirect to payment.
+   * @param plan 'monthly' or 'yearly'
    */
-  createCheckoutSession(): Observable<CheckoutResponse> {
+  createCheckoutSession(plan: 'monthly' | 'yearly' = 'monthly'): Observable<CheckoutResponse> {
     this.loadingState.set(true);
-    return this.http.post<CheckoutResponse>(`${this.apiUrl}/checkout`, {}).pipe(
+    return this.http.post<CheckoutResponse>(`${this.apiUrl}/checkout?plan=${plan}`, {}).pipe(
       tap({
         next: (response) => {
           this.loadingState.set(false);

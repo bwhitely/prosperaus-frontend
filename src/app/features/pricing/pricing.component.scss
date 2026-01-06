@@ -29,12 +29,15 @@
 
 .pricing__plans {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-xl;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
   margin-bottom: $spacing-3xl;
 
-  @media (max-width: $breakpoint-md) {
+  @media (max-width: $breakpoint-lg) {
     grid-template-columns: 1fr;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -42,7 +45,7 @@
   background: $color-surface;
   border: 1px solid $color-border;
   border-radius: $radius-xl;
-  padding: $spacing-xl;
+  padding: $spacing-lg;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -52,7 +55,13 @@
     box-shadow: $shadow-lg;
   }
 
-  &--pro {
+  &--monthly {
+    .plan__icon--check {
+      color: $color-primary;
+    }
+  }
+
+  &--yearly {
     border-color: $color-primary;
     border-width: 2px;
     box-shadow: $shadow-md;
@@ -96,6 +105,7 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
+  flex-wrap: wrap;
   gap: $spacing-xs;
   margin-bottom: $spacing-sm;
 }
@@ -110,6 +120,16 @@
 .plan__period {
   font-size: $font-size-base;
   color: $color-text-muted;
+}
+
+.plan__savings {
+  font-size: $font-size-xs;
+  color: $color-text-inverse;
+  font-weight: $font-weight-semibold;
+  background: $color-positive;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-full;
+  margin-left: $spacing-sm;
 }
 
 .plan__description {

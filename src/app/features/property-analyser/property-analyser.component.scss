@@ -584,3 +584,40 @@
 .negative {
   color: $color-negative !important;
 }
+
+.cashflow-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary-mini {
+  .kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .label {
+      font-size: 12px;
+      opacity: 0.75;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  .cashflow-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .cashflow-summary {
+    grid-template-columns: 1fr;
+  }
+}

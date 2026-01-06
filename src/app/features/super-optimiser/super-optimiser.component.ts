@@ -54,6 +54,9 @@ export class SuperOptimiserComponent implements OnInit {
   showAdvanced = signal(false);
   showSpouseSection = signal(false);
 
+  // ✅ SG auto-calculation (approx) based on annual gross income + FY progress
+  calculatedSgYtd = signal<number | null>(null);
+
   form: FormGroup = this.fb.group({
     // Required fields
     annualGrossIncome: [120000, [Validators.required, Validators.min(0)]],
@@ -104,6 +107,9 @@ export class SuperOptimiserComponent implements OnInit {
       debounceTime(500),
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
     ).subscribe(() => {
+      // keep SG estimate up to date with income changes, but don't override user edits
+      this.recalculateSgYtdAndMaybePrefill();
+
       if (this.form.valid) {
         this.calculate();
       }
@@ -114,15 +120,82 @@ export class SuperOptimiserComponent implements OnInit {
     this.loadPrefillData();
   }
 
+  /**
+   * Australian FY runs July 1 to June 30.
+   * Returns elapsed months in the current FY (1..12).
+   */
+  getMonthsElapsedInFy(): number {
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0=Jan, 6=Jul
+    return currentMonth >= 6 ? currentMonth - 6 + 1 : 6 + currentMonth + 1;
+  }
+
+  /**
+   * Estimate SG YTD based on:
+   * - annualGrossIncome
+   * - months elapsed in current FY
+   * - SG rate (assumed 12%)
+   */
+  private estimateSgYtdFromIncome(): number | null {
+    const annualGrossIncome = Number(this.form.get('annualGrossIncome')?.value ?? 0);
+    if (!Number.isFinite(annualGrossIncome) || annualGrossIncome <= 0) return null;
+
+    const monthsElapsed = this.getMonthsElapsedInFy();
+
+    // SG rate assumption
+    const sgRate = 0.12;
+
+    const annualSg = annualGrossIncome * sgRate;
+    const sgYtd = Math.round((annualSg * monthsElapsed) / 12);
+
+    return sgYtd;
+  }
+
+  /**
+   * Prefill Employer SG (YTD) only if the user hasn't touched the field.
+   * Avoids overriding manual entry.
+   */
+  private maybePrefillEmployerSg(sgYtd: number | null): void {
+    if (sgYtd === null) return;
+
+    const ctrl = this.form.get('employerContributionsYtd');
+    if (!ctrl) return;
+
+    // If user has typed, do not override.
+    if (ctrl.dirty) return;
+
+    const current = Number(ctrl.value ?? 0);
+
+    // Only prefill when it’s empty/zero (default)
+    if (!Number.isFinite(current) || current === 0) {
+      ctrl.setValue(sgYtd, { emitEvent: false });
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+  /**
+   * Recompute calculatedSgYtd and prefill employer SG when appropriate.
+   */
+  private recalculateSgYtdAndMaybePrefill(): void {
+    const sgYtd = this.estimateSgYtdFromIncome();
+    this.calculatedSgYtd.set(sgYtd);
+    this.maybePrefillEmployerSg(sgYtd);
+  }
+
   loadPrefillData(): void {
     this.isPrefilling.set(true);
+
     this.superOptimiserService.getPrefillData().subscribe({
       next: (data) => {
         if (data) {
           this.form.patchValue({
             annualGrossIncome: data.annualGrossIncome ?? this.form.get('annualGrossIncome')?.value,
             currentSuperBalance: data.currentSuperBalance ?? this.form.get('currentSuperBalance')?.value,
+
+            // If backend has an exact/known value, keep it.
+            // If it's missing, we'll estimate & prefill below.
             employerContributionsYtd: data.employerContributionsYtd ?? 0,
+
             salarySacrificeYtd: data.salarySacrificeYtd ?? 0,
             personalConcessionalYtd: data.personalConcessionalYtd ?? 0,
             nonConcessionalYtd: data.nonConcessionalYtd ?? 0,
@@ -131,10 +204,17 @@ export class SuperOptimiserComponent implements OnInit {
             age: data.age
           });
         }
+
+        // ✅ after we patch income, compute estimate and prefill if employer SG is still 0 and untouched
+        this.recalculateSgYtdAndMaybePrefill();
+
         this.isPrefilling.set(false);
         this.calculate();
       },
       error: () => {
+        // Even if prefill API fails, still estimate from current form values
+        this.recalculateSgYtdAndMaybePrefill();
+
         this.isPrefilling.set(false);
         this.calculate();
       }

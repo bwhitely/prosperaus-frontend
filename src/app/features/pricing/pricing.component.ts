@@ -43,7 +43,7 @@ export class PricingComponent {
     { name: 'Data Export (CSV)', free: false, pro: true },
   ];
 
-  subscribe(): void {
+  subscribe(plan: 'monthly' | 'yearly'): void {
     if (!this.isLoggedIn()) {
       // Redirect to login with return URL
       this.router.navigate(['/auth/login'], {
@@ -53,7 +53,7 @@ export class PricingComponent {
     }
 
     this.isLoading.set(true);
-    this.subscriptionService.createCheckoutSession().subscribe({
+    this.subscriptionService.createCheckoutSession(plan).subscribe({
       error: (err) => {
         console.error('Failed to create checkout session:', err);
         this.isLoading.set(false);

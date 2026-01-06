@@ -63,6 +63,56 @@ export class PropertyAnalyserComponent {
     };
   });
 
+  cashFlowSummary = computed(() => {
+    const r = this.result();
+    if (!r) return null;
+
+    const cf = r.year1CashFlow;
+
+    const beforeTax = cf.netCashFlow ?? 0;
+    const taxBenefit = r.taxBenefit ?? 0;
+    const afterTax = beforeTax + taxBenefit;
+
+    // Break-even weekly rent (estimate)
+    // Uses observed Year-1 ratios to approximate variable components:
+    // - vacancyRatio = vacancyAllowance / grossRent
+    // - managementRatio = managementFees / netRent
+    const grossRent = cf.grossRent ?? 0;
+    const vacancyAllowance = cf.vacancyAllowance ?? 0;
+    const netRent = cf.netRent ?? 0;
+
+    const managementFees = cf.managementFees ?? 0;
+    const totalExpenses = cf.totalExpenses ?? 0;
+    const interestPayments = cf.interestPayments ?? 0;
+
+    let breakEvenWeeklyRent: number | null = null;
+
+    if (grossRent > 0 && netRent > 0) {
+      const vacancyRatio = Math.min(Math.max(vacancyAllowance / grossRent, 0), 0.9);
+      const managementRatio = Math.min(Math.max(managementFees / netRent, 0), 0.9);
+
+      // Treat everything except management fees as "fixed" for the estimate
+      const fixedExpenses = Math.max(totalExpenses - managementFees, 0);
+
+      // Need: netRent - (fixedExpenses + managementRatio*netRent) - interestPayments = 0
+      // => netRent*(1 - managementRatio) = fixedExpenses + interestPayments
+      const requiredNetRent = (fixedExpenses + interestPayments) / Math.max(1 - managementRatio, 0.0001);
+
+      // netRent = grossRent*(1 - vacancyRatio)
+      const requiredGrossRent = requiredNetRent / Math.max(1 - vacancyRatio, 0.0001);
+
+      breakEvenWeeklyRent = requiredGrossRent / 52;
+    }
+
+    return {
+      beforeTax,
+      taxBenefit,
+      afterTax,
+      breakEvenWeeklyRent
+    };
+  });
+
+
   // Form with validation
   form: FormGroup = this.fb.group({
     // Purchase Details

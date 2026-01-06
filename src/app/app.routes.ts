@@ -114,14 +114,16 @@ export const routes: Routes = [
     title: 'Profile - ProsperAus'
   },
 
-  // Pro features (require auth + onboarding + Pro subscription)
+  // Dashboard (auth + onboarding, but NOT paywalled - all users can see their net worth)
   {
     path: 'dashboard',
     loadComponent: () => import('./features/dashboard/dashboard.component')
       .then(m => m.DashboardComponent),
-    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
+    canActivate: [authGuard, onboardingGuard],
     title: 'Dashboard - ProsperAus'
   },
+
+  // Pro features (require auth + onboarding + Pro subscription)
   {
     path: 'portfolio',
     loadComponent: () => import('./features/portfolio-analyser/portfolio-analyser.component')

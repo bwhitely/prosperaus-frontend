@@ -333,4 +333,16 @@ export class MortgageCalculatorComponent implements OnInit, AfterViewInit, OnDes
     const result = this.result();
     return result?.yearlyBreakdown || [];
   }
+
+  roundInterestRateTo2dp(): void {
+    const ctrl = this.form.get('interestRate');
+    if (!ctrl) return;
+
+    const n = Number(ctrl.value);
+    if (!Number.isFinite(n)) return;
+
+    const rounded = Math.round(n * 100) / 100;
+    ctrl.setValue(rounded, { emitEvent: true });
+  }
+
 }
