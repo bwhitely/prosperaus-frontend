@@ -1,7 +1,7 @@
 <div class="page-header">
   <div class="page-header__content">
     <h1>Investments</h1>
-    <p class="subtitle">Track your shares, ETFs, and other investments</p>
+    <p class="subtitle">Track, manage, and analyse your shares, ETFs, and other investments</p>
   </div>
   <div class="page-header__actions">
     @if (holdings().length > 0 && !showForm()) {
@@ -86,13 +86,46 @@
 
         @if (lastQuote() && !editingHolding()) {
           <div class="quote-preview">
-            <span class="quote-preview__symbol">{{ lastQuote()!.symbol }}</span>
-            <span class="quote-preview__price">{{ lastQuote()!.price | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
-            @if (lastQuote()!.change) {
-              <span class="quote-preview__change" [class.positive]="lastQuote()!.change > 0" [class.negative]="lastQuote()!.change < 0">
-                {{ lastQuote()!.change >= 0 ? '+' : '' }}{{ lastQuote()!.change | currency:'AUD':'symbol-narrow':'1.2-2' }}
-                ({{ lastQuote()!.changePercent >= 0 ? '+' : '' }}{{ lastQuote()!.changePercent | number:'1.2-2' }}%)
-              </span>
+            <div class="quote-preview__main">
+              <span class="quote-preview__symbol">{{ lastQuote()!.symbol }}</span>
+              @if (lastQuote()!.quoteType) {
+                <span class="quote-preview__type">{{ lastQuote()!.quoteType }}</span>
+              }
+              <span class="quote-preview__price">{{ lastQuote()!.price | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+              @if (lastQuote()!.change) {
+                <span class="quote-preview__change" [class.positive]="lastQuote()!.change > 0" [class.negative]="lastQuote()!.change < 0">
+                  {{ lastQuote()!.change >= 0 ? '+' : '' }}{{ lastQuote()!.change | currency:'AUD':'symbol-narrow':'1.2-2' }}
+                  ({{ lastQuote()!.changePercent >= 0 ? '+' : '' }}{{ lastQuote()!.changePercent | number:'1.2-2' }}%)
+                </span>
+              }
+            </div>
+            @if (lastQuote()!.mer || lastQuote()!.yield || lastQuote()!.category) {
+              <div class="quote-preview__details">
+                @if (lastQuote()!.mer) {
+                  <span class="quote-preview__detail">
+                    <span class="detail-label">MER:</span>
+                    <span class="detail-value">{{ formatMer(lastQuote()!.mer) }}</span>
+                  </span>
+                }
+                @if (lastQuote()!.yield) {
+                  <span class="quote-preview__detail">
+                    <span class="detail-label">Yield:</span>
+                    <span class="detail-value">{{ formatYield(lastQuote()!.yield) }}</span>
+                  </span>
+                }
+                @if (lastQuote()!.category) {
+                  <span class="quote-preview__detail">
+                    <span class="detail-label">Category:</span>
+                    <span class="detail-value">{{ lastQuote()!.category }}</span>
+                  </span>
+                }
+                @if (lastQuote()!.fundFamily) {
+                  <span class="quote-preview__detail">
+                    <span class="detail-label">Issuer:</span>
+                    <span class="detail-value">{{ lastQuote()!.fundFamily }}</span>
+                  </span>
+                }
+              </div>
             }
           </div>
         }
@@ -111,17 +144,26 @@
           <mat-form-field appearance="outline">
             <mat-label>Total Cost Base</mat-label>
             <span matTextPrefix>$&nbsp;</span>
-            <input matInput type="number" formControlName="costBase" step="0.01">
+            <input matInput type="number" formControlName="costBase" step="0.01" appTwoDecimal>
             <mat-hint>Total amount paid including brokerage</mat-hint>
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Current Price</mat-label>
-          <span matTextPrefix>$&nbsp;</span>
-          <input matInput type="number" formControlName="currentPrice" step="0.01">
-          <mat-hint>Auto-filled from market data when available</mat-hint>
-        </mat-form-field>
+        <div class="form-row form-row--price-mer">
+          <mat-form-field appearance="outline">
+            <mat-label>Current Price</mat-label>
+            <span matTextPrefix>$&nbsp;</span>
+            <input matInput type="number" formControlName="currentPrice" step="0.01">
+            <mat-hint>Auto-filled from market data when available</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>MER</mat-label>
+            <input matInput type="number" formControlName="merPercent" step="0.01" min="0">
+            <span matTextSuffix>%</span>
+            <mat-hint>Example: 0.07 for 0.07%</mat-hint>
+          </mat-form-field>
+        </div>
 
         <!-- Advanced Options -->
         <mat-expansion-panel class="advanced-panel">
@@ -183,6 +225,159 @@
       </mat-card-content>
     </mat-card>
   </div>
+
+  <!-- Overlap Warnings -->
+  @if (analysis()?.overlapWarnings?.length) {
+    <div class="overlap-warnings">
+      <h2>Portfolio Overlap Warnings</h2>
+      @for (warning of analysis()!.overlapWarnings; track warning.tickers.join(',')) {
+        <div class="overlap-warning" [class]="getSeverityClass(warning.severity)">
+          <div class="overlap-warning__header">
+            <span class="overlap-warning__tickers">
+              @for (ticker of warning.tickers; track ticker; let last = $last) {
+                <span class="ticker-badge ticker-badge--small">{{ ticker }}</span>
+                @if (!last) { <span class="ticker-separator">+</span> }
+              }
+            </span>
+            <span class="overlap-warning__percent">{{ warning.overlapPercentage | number:'1.0-0' }}% of portfolio</span>
+          </div>
+          <p class="overlap-warning__description">{{ warning.description }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Allocation Charts -->
+  <div class="allocation-charts-row">
+    <!-- Country Allocation -->
+    <div class="card allocation-chart-card">
+      <div class="card__header"><h2>Country</h2></div>
+      <div class="card__body">
+        @if (countryEntries().length > 0) {
+          <div class="pie-chart-centered">
+            <svg viewBox="0 0 200 200" class="pie-chart">
+              @for (slice of countryPieSlices(); track slice.key) {
+                <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice">
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}% ({{ slice.value | currency:'AUD':'symbol-narrow':'1.0-0' }})</title>
+                </path>
+              }
+              <circle cx="100" cy="100" r="45" class="pie-center" />
+            </svg>
+            <div class="pie-legend-compact">
+              @for (slice of countryPieSlices(); track slice.key) {
+                <div class="pie-legend-compact__item">
+                  <span class="pie-legend-compact__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend-compact__label">{{ slice.label }}</span>
+                  <span class="pie-legend-compact__value">{{ slice.percentage | number:'1.0-0' }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="no-data">No data</p>
+        }
+      </div>
+    </div>
+
+    <!-- Asset Type Allocation -->
+    <div class="card allocation-chart-card">
+      <div class="card__header"><h2>Asset Type</h2></div>
+      <div class="card__body">
+        @if (hasAssetTypes()) {
+          <div class="pie-chart-centered">
+            <svg viewBox="0 0 200 200" class="pie-chart">
+              @for (slice of assetTypePieSlices(); track slice.key) {
+                <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice">
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}% ({{ slice.value | currency:'AUD':'symbol-narrow':'1.0-0' }})</title>
+                </path>
+              }
+              <circle cx="100" cy="100" r="45" class="pie-center" />
+            </svg>
+            <div class="pie-legend-compact">
+              @for (slice of assetTypePieSlices(); track slice.key) {
+                <div class="pie-legend-compact__item">
+                  <span class="pie-legend-compact__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend-compact__label">{{ slice.label }}</span>
+                  <span class="pie-legend-compact__value">{{ slice.percentage | number:'1.0-0' }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="no-data">No data</p>
+        }
+      </div>
+    </div>
+
+    <!-- GICS Sector Allocation -->
+    <div class="card allocation-chart-card">
+      <div class="card__header"><h2>Sector Allocation</h2></div>
+      <div class="card__body">
+        @if (hasGicsSectors()) {
+          <div class="pie-chart-centered">
+            <svg viewBox="0 0 200 200" class="pie-chart">
+              @for (slice of gicsSectorPieSlices(); track slice.key) {
+                <path [attr.d]="slice.path" [attr.fill]="slice.color" class="pie-slice">
+                  <title>{{ slice.label }}: {{ slice.percentage | number:'1.1-1' }}% ({{ slice.value | currency:'AUD':'symbol-narrow':'1.0-0' }})</title>
+                </path>
+              }
+              <circle cx="100" cy="100" r="45" class="pie-center" />
+            </svg>
+            <div class="pie-legend-compact pie-legend-compact--scrollable">
+              @for (slice of gicsSectorPieSlices(); track slice.key) {
+                <div class="pie-legend-compact__item">
+                  <span class="pie-legend-compact__color" [style.background-color]="slice.color"></span>
+                  <span class="pie-legend-compact__label">{{ slice.label }}</span>
+                  <span class="pie-legend-compact__value">{{ slice.percentage | number:'1.0-0' }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="no-data">No equity holdings</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Fee & Franking Analysis -->
+  @if (analysis()) {
+    <div class="analysis-grid">
+      <div class="card analysis-card">
+        <div class="card__header"><h2>Fee Analysis</h2></div>
+        <div class="card__body">
+          <div class="metrics-list">
+            <div class="metric">
+              <span class="metric__label">Weighted Average MER</span>
+              <span class="metric__value">{{ formatMer(analysis()!.weightedAverageMer) }}</span>
+            </div>
+            <div class="metric">
+              <span class="metric__label">Estimated Annual Fees</span>
+              <span class="metric__value">{{ analysis()!.estimatedAnnualFees | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          </div>
+          <p class="metric__note">Lower MER = more money stays invested. Index ETFs typically have MERs under 0.20%.</p>
+        </div>
+      </div>
+
+      <div class="card analysis-card">
+        <div class="card__header"><h2>Franking Credits</h2></div>
+        <div class="card__body">
+          <div class="metrics-list">
+            <div class="metric">
+              <span class="metric__label">Estimated Dividend Yield</span>
+              <span class="metric__value">{{ analysis()!.estimatedDividendYield | number:'1.1-1' }}%</span>
+            </div>
+            <div class="metric">
+              <span class="metric__label">Est. Annual Franking Credits</span>
+              <span class="metric__value positive">{{ analysis()!.estimatedAnnualFrankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+          </div>
+          <p class="metric__note">Franking credits reduce your tax. Australian equity ETFs typically provide the most franking credits.</p>
+        </div>
+      </div>
+    </div>
+  }
 }
 
 @if (isLoading()) {
@@ -218,6 +413,7 @@
             <th class="text-right">Current Price</th>
             <th class="text-right">MER</th>
             <th class="text-right">Franking</th>
+            <th class="text-right">Est. Yield</th>
             <th class="text-right">Value</th>
             <th class="text-right">Gain/Loss</th>
             <th></th>
@@ -259,6 +455,13 @@
                   <span class="text-muted">-</span>
                 }
               </td>
+              <td class="text-right mono">
+                @if (holding.estimatedDividendYield != null) {
+                  {{ holding.estimatedDividendYield * 100 | number:'1.1-1' }}%
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
               <td class="text-right mono">{{ holding.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</td>
               <td class="text-right mono" [class]="getGainLossClass(holding.unrealisedGainLoss)">
                 {{ holding.unrealisedGainLoss >= 0 ? '+' : '' }}{{ holding.unrealisedGainLoss | currency:'AUD':'symbol-narrow':'1.0-0' }}
@@ -276,7 +479,7 @@
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="7"><strong>Total</strong></td>
+            <td colspan="8"><strong>Total</strong></td>
             <td class="text-right mono"><strong>{{ getTotalValue() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong></td>
             <td class="text-right mono" [class]="getGainLossClass(getTotalGainLoss())">
               <strong>{{ getTotalGainLoss() >= 0 ? '+' : '' }}{{ getTotalGainLoss() | currency:'AUD':'symbol-narrow':'1.0-0' }}</strong>

@@ -22,6 +22,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
+import { TwoDecimalDirective } from '../../shared/directives/two-decimal.directive';
 import { Chart, registerables } from 'chart.js';
 import { MortgageCalculatorService } from '../../core/services/mortgage-calculator.service';
 import {
@@ -51,7 +52,8 @@ Chart.register(...registerables);
     MatExpansionModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatTabsModule
+    MatTabsModule,
+    TwoDecimalDirective
   ],
   templateUrl: './mortgage-calculator.component.html',
   styleUrl: './mortgage-calculator.component.scss',
@@ -334,15 +336,5 @@ export class MortgageCalculatorComponent implements OnInit, AfterViewInit, OnDes
     return result?.yearlyBreakdown || [];
   }
 
-  roundInterestRateTo2dp(): void {
-    const ctrl = this.form.get('interestRate');
-    if (!ctrl) return;
-
-    const n = Number(ctrl.value);
-    if (!Number.isFinite(n)) return;
-
-    const rounded = Math.round(n * 100) / 100;
-    ctrl.setValue(rounded, { emitEvent: true });
-  }
 
 }

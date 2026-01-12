@@ -42,6 +42,9 @@ export class BankStatementService {
     if (request?.periodEnd) {
       formData.append('periodEnd', request.periodEnd);
     }
+    if (request?.bankFormat) {
+      formData.append('bankFormat', request.bankFormat);
+    }
 
     return this.http.post<BankStatementUploadResponse>(`${this.apiUrl}/upload`, formData);
   }

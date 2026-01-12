@@ -47,7 +47,7 @@
             <div class="form-row">
               <mat-form-field appearance="outline">
                 <mat-label>Interest Rate</mat-label>
-                <input matInput type="number" formControlName="interestRate" step="0.1">
+                <input matInput type="number" formControlName="interestRate" step="0.01" appTwoDecimal>
                 <span matTextSuffix>&nbsp;%</span>
               </mat-form-field>
 
@@ -216,11 +216,11 @@
     } @else if (result(); as r) {
       <!-- Summary Cards -->
       <div class="summary-cards">
-        <mat-card class="summary-card" [class.negative]="r.isNegativelyGeared">
+        <mat-card class="summary-card" [class.negative]="r.isNegativelyGeared" [class.positive-geared]="!r.isNegativelyGeared">
           <mat-card-content>
             <mat-icon>{{ r.isNegativelyGeared ? 'trending_down' : 'trending_up' }}</mat-icon>
             <span class="label">{{ r.isNegativelyGeared ? 'Negatively Geared' : 'Positively Geared' }}</span>
-            <span class="value" [class.negative]="r.netPositionAfterTax < 0">
+            <span class="value" [class.negative]="r.netPositionAfterTax < 0" [class.positive]="r.netPositionAfterTax >= 0">
               {{ formatCurrency(r.netPositionAfterTax) }}
             </span>
             <span class="sublabel">Net position after tax (Year 1)</span>
@@ -249,10 +249,10 @@
 
         <mat-card class="summary-card">
           <mat-card-content>
-            <mat-icon>account_balance</mat-icon>
-            <span class="label">Cash-on-Cash Return</span>
-            <span class="value" [class.negative]="r.cashOnCashReturn < 0">{{ formatPercent(r.cashOnCashReturn) }}</span>
-            <span class="sublabel">Cash flow / upfront costs</span>
+            <mat-icon>receipt_long</mat-icon>
+            <span class="label">Tax Benefit (Year 1)</span>
+            <span class="value positive">{{ formatCurrency(r.taxBenefit) }}</span>
+            <span class="sublabel">Estimated tax refund</span>
           </mat-card-content>
         </mat-card>
       </div>

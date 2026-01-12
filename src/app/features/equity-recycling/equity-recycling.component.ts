@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -11,11 +12,15 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { TwoDecimalDirective } from '../../shared/directives/two-decimal.directive';
 import { EquityRecyclingService } from '../../core/services/equity-recycling.service';
 import { ScenarioService } from '../../core/services/scenario.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { EquityRecyclingRequest, EquityRecyclingResponse } from '../../shared/models/equity-recycling.model';
 import { ScenarioRequest, ScenarioResponse } from '../../shared/models/scenario.model';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-equity-recycling',
@@ -23,6 +28,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     CurrencyPipe,
     DecimalPipe,
     DatePipe,
@@ -35,7 +41,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     MatExpansionModule,
     MatProgressSpinnerModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatButtonToggleModule,
+    TwoDecimalDirective
   ],
   templateUrl: './equity-recycling.component.html',
   styleUrl: './equity-recycling.component.scss',
@@ -45,6 +53,11 @@ export class EquityRecyclingComponent implements OnInit {
   private fb = inject(FormBuilder);
   private equityRecyclingService = inject(EquityRecyclingService);
   private scenarioService = inject(ScenarioService);
+  private authService = inject(AuthService);
+  private confirmDialog = inject(ConfirmDialogService);
+
+  // Auth state for conditional UI
+  isAuthenticated = this.authService.isAuthenticated;
 
   result = signal<EquityRecyclingResponse | null>(null);
   isLoading = signal(false);
@@ -80,6 +93,9 @@ export class EquityRecyclingComponent implements OnInit {
     frankingRate: [100, [Validators.min(0), Validators.max(100)]]
   });
 
+  // Scenario mode for projections: 'conservative' | 'expected' | 'bullish'
+  scenarioMode = signal<'conservative' | 'expected' | 'bullish'>('expected');
+
   availableEquity = computed(() => {
     const result = this.result();
     return result?.availableEquity ?? 0;
@@ -88,6 +104,51 @@ export class EquityRecyclingComponent implements OnInit {
   totalBenefit = computed(() => {
     const result = this.result();
     return result?.totalBenefit ?? 0;
+  });
+
+  // Computed cashflow details
+  cashflowDetails = computed(() => {
+    const result = this.result();
+    const formValue = this.form.value;
+    if (!result) return null;
+
+    const monthlyInterest = result.annualInterestCost / 12;
+    const amountRecycled = result.amountRecycled;
+    const dividendYield = (formValue.dividendYield || 4) / 100;
+    const expectedAnnualDividends = amountRecycled * dividendYield;
+    const monthlyDividends = expectedAnnualDividends / 12;
+
+    return {
+      annualInterestCost: result.annualInterestCost,
+      monthlyInterestCost: monthlyInterest,
+      expectedAnnualDividends,
+      monthlyDividends,
+      annualNetCashflow: expectedAnnualDividends - result.annualInterestCost,
+      monthlyNetCashflow: monthlyDividends - monthlyInterest
+    };
+  });
+
+  // Adjusted projections based on scenario mode
+  adjustedProjections = computed(() => {
+    const result = this.result();
+    const mode = this.scenarioMode();
+    if (!result?.yearlyProjections) return [];
+
+    // Return adjustment factors for different scenarios
+    const adjustmentFactor = mode === 'conservative' ? -0.03 : mode === 'bullish' ? 0.02 : 0;
+
+    return result.yearlyProjections.map((proj, index) => {
+      // Apply compound adjustment
+      const yearFactor = Math.pow(1 + adjustmentFactor, index + 1);
+      const adjustedRecyclingValue = proj.recyclingValue * yearFactor;
+      const adjustedNetBenefit = adjustedRecyclingValue - proj.baselineValue;
+
+      return {
+        ...proj,
+        adjustedRecyclingValue,
+        adjustedNetBenefit
+      };
+    });
   });
 
   constructor() {
@@ -106,8 +167,11 @@ export class EquityRecyclingComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadPrefillData();
-    this.loadScenarios();
+    // Only load user-specific data if authenticated
+    if (this.isAuthenticated()) {
+      this.loadPrefillData();
+      this.loadScenarios();
+    }
     const interestCtrl = this.form.get('interestRate');
 
     interestCtrl?.valueChanges.subscribe(value => {
@@ -236,17 +300,20 @@ export class EquityRecyclingComponent implements OnInit {
 
   deleteScenario(scenario: ScenarioResponse, event: Event): void {
     event.stopPropagation();
-    if (!confirm(`Delete "${scenario.name}"?`)) return;
-
-    this.scenarioService.delete(scenario.id).subscribe({
-      next: () => {
-        if (this.currentScenarioId() === scenario.id) {
-          this.currentScenarioId.set(null);
-        }
-        this.loadScenarios();
-      },
-      error: () => this.error.set('Failed to delete scenario')
-    });
+    this.confirmDialog.confirmDelete(scenario.name)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.scenarioService.delete(scenario.id))
+      )
+      .subscribe({
+        next: () => {
+          if (this.currentScenarioId() === scenario.id) {
+            this.currentScenarioId.set(null);
+          }
+          this.loadScenarios();
+        },
+        error: () => this.error.set('Failed to delete scenario')
+      });
   }
 
   newScenario(): void {
@@ -320,6 +387,19 @@ export class EquityRecyclingComponent implements OnInit {
 
   formatPercent(value: number): string {
     return (value * 100).toFixed(2) + '%';
+  }
+
+  setScenarioMode(mode: 'conservative' | 'expected' | 'bullish'): void {
+    this.scenarioMode.set(mode);
+  }
+
+  getScenarioLabel(): string {
+    const mode = this.scenarioMode();
+    switch (mode) {
+      case 'conservative': return 'Conservative (-3% from expected)';
+      case 'bullish': return 'Bullish (+2% from expected)';
+      default: return 'Expected (based on inputs)';
+    }
   }
 
 }

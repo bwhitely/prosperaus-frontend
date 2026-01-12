@@ -511,3 +511,208 @@
     }
   }
 }
+
+// Projections Table
+.projections-table {
+  overflow-x: auto;
+}
+
+.projections-header,
+.projections-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 0.8fr 1fr 1fr 1fr;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  align-items: center;
+
+  @include respond-to(md) {
+    grid-template-columns: 2fr 1fr 0.8fr 1fr 1fr 1fr;
+  }
+}
+
+.projections-header {
+  background: $color-background;
+  border-radius: $radius-md $radius-md 0 0;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.projections-row {
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba($color-primary, 0.02);
+  }
+}
+
+.col-ticker {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.projection-ticker {
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.projection-name {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.col-value,
+.col-yield,
+.col-dividend,
+.col-franking,
+.col-frequency {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  text-align: right;
+}
+
+.col-frequency {
+  font-family: $font-family-base;
+  color: $color-text-secondary;
+}
+
+// Tax Report
+.tax-report {
+  margin-bottom: $spacing-lg;
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md;
+    border-bottom: 1px solid $color-border;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+
+    &--total {
+      background: rgba($color-primary, 0.05);
+      margin: $spacing-md (-$spacing-lg) (-$spacing-lg);
+      padding: $spacing-lg;
+      font-weight: 600;
+      font-size: $font-size-lg;
+    }
+  }
+
+  &__label {
+    color: $color-text-secondary;
+    font-size: $font-size-base;
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-weight: 600;
+    font-size: $font-size-lg;
+    color: $color-text-primary;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+    justify-content: flex-end;
+    padding-top: $spacing-md;
+    border-top: 1px solid $color-border;
+    margin-top: $spacing-md;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+    }
+  }
+}
+
+// Tax Breakdown Table
+.tax-breakdown-table {
+  overflow-x: auto;
+}
+
+.tax-breakdown-header,
+.tax-breakdown-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  align-items: center;
+}
+
+.tax-breakdown-header {
+  background: $color-background;
+  border-radius: $radius-md $radius-md 0 0;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tax-breakdown-row {
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.col-security {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.security-ticker {
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.security-name {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+}
+
+.col-unfranked,
+.col-franked,
+.col-credits {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  text-align: right;
+}
+
+// Disclaimer
+.disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba($color-warning, 0.1);
+  border: 1px solid rgba($color-warning, 0.2);
+  border-radius: $radius-md;
+  margin-top: $spacing-md;
+
+  mat-icon {
+    color: $color-warning;
+    flex-shrink: 0;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  span {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.5;
+  }
+}

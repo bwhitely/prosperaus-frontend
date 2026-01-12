@@ -16,9 +16,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FireService } from '../../core/services/fire.service';
 import { ScenarioService } from '../../core/services/scenario.service';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import { FireProjectionRequest, FireProjectionResponse, YearProjection } from '../../shared/models/fire.model';
 import { ScenarioRequest, ScenarioResponse } from '../../shared/models/scenario.model';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-fire-calculator',
@@ -51,6 +52,7 @@ export class FireCalculatorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private fireService = inject(FireService);
   private scenarioService = inject(ScenarioService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   result = signal<FireProjectionResponse | null>(null);
   isLoading = signal(false);
@@ -229,17 +231,20 @@ export class FireCalculatorComponent implements OnInit {
 
   deleteScenario(scenario: ScenarioResponse, event: Event): void {
     event.stopPropagation();
-    if (!confirm(`Delete "${scenario.name}"?`)) return;
-
-    this.scenarioService.delete(scenario.id).subscribe({
-      next: () => {
-        if (this.currentScenarioId() === scenario.id) {
-          this.currentScenarioId.set(null);
-        }
-        this.loadScenarios();
-      },
-      error: () => this.error.set('Failed to delete scenario')
-    });
+    this.confirmDialog.confirmDelete(scenario.name)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.scenarioService.delete(scenario.id))
+      )
+      .subscribe({
+        next: () => {
+          if (this.currentScenarioId() === scenario.id) {
+            this.currentScenarioId.set(null);
+          }
+          this.loadScenarios();
+        },
+        error: () => this.error.set('Failed to delete scenario')
+      });
   }
 
   newScenario(): void {

@@ -36,7 +36,8 @@
 .form-panel {
   mat-card {
     border-radius: $radius-lg;
-    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
+    box-shadow: $shadow-card;
   }
 }
 
@@ -131,7 +132,8 @@
 .summary-card {
   text-align: center;
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-card;
 
   mat-card-content {
     display: flex;
@@ -178,12 +180,21 @@
       color: $color-warning;
     }
   }
+
+  &.positive-geared {
+    border-top: 3px solid $color-positive;
+
+    mat-card-content mat-icon {
+      color: $color-positive;
+    }
+  }
 }
 
 // Insights card
 .insights-card {
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-card;
   margin-bottom: $spacing-lg;
 
   mat-card-header {
@@ -229,7 +240,8 @@
 // Tabs card
 .tabs-card {
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-card;
   overflow: hidden;
 }
 

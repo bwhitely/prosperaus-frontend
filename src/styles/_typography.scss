@@ -21,11 +21,12 @@ body {
 }
 
 // ===========================================
-// HEADINGS - Elegant Display Typography
+// HEADINGS - Financial Gravitas Typography
+// Design principle: 600 weight for all headlines (trustworthy, professional)
 // ===========================================
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
-  font-weight: $font-weight-semibold;
+  font-weight: $font-weight-semibold; // 600 - consistent across all headlines
   line-height: $line-height-tight;
   color: $color-text-primary;
   letter-spacing: $letter-spacing-tight;
@@ -34,7 +35,7 @@ h1, h2, h3, h4, h5, h6 {
 // Large headings use display font
 h1, h2 {
   font-family: $font-family-display;
-  font-weight: $font-weight-medium;
+  font-weight: $font-weight-semibold; // 600 - not 500, for financial gravitas
 }
 
 h1 {

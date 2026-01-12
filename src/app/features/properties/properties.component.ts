@@ -1,20 +1,22 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { switchMap, catchError, filter } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TwoDecimalDirective } from '../../shared/directives/two-decimal.directive';
 import { PropertyService } from '../../core/services/property.service';
 import { CashLiabilityService } from '../../core/services/cash-liability.service';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import { PropertyResponse, PropertyRequest, MortgageResponse, MortgageRequest } from '../../shared/models/property.model';
 import { CashAccountRequest, CashAccountResponse } from '../../shared/models/cash-liability.model';
 
 @Component({
   selector: 'app-properties',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, MatButtonModule, MatIconModule, MatTooltipModule, TwoDecimalDirective],
   templateUrl: './properties.component.html',
   styleUrl: './properties.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,6 +25,7 @@ export class PropertiesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private propertyService = inject(PropertyService);
   private cashLiabilityService = inject(CashLiabilityService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   properties = signal<PropertyResponse[]>([]);
   cashAccounts = signal<CashAccountResponse[]>([]);
@@ -190,14 +193,15 @@ export class PropertiesComponent implements OnInit {
   }
 
   deleteProperty(property: PropertyResponse): void {
-    if (!confirm(`Are you sure you want to delete "${property.name}"? This will also delete all associated mortgages.`)) {
-      return;
-    }
-
-    this.propertyService.deleteProperty(property.id).subscribe({
-      next: () => this.loadProperties(),
-      error: (err) => this.error.set('Failed to delete property')
-    });
+    this.confirmDialog.confirmDelete(property.name, 'This will also delete all associated mortgages.')
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.propertyService.deleteProperty(property.id))
+      )
+      .subscribe({
+        next: () => this.loadProperties(),
+        error: () => this.error.set('Failed to delete property')
+      });
   }
 
   // Mortgage Form
@@ -322,16 +326,18 @@ export class PropertiesComponent implements OnInit {
   }
 
   deleteMortgage(mortgage: MortgageResponse): void {
-    if (!confirm('Are you sure you want to delete this mortgage?')) {
-      return;
-    }
-
-    this.propertyService.deleteMortgage(mortgage.id).subscribe({
-      next: () => {
-        this.loadMortgagesForProperty(mortgage.propertyId);
-        this.loadProperties();
-      },
-      error: (err) => this.error.set('Failed to delete mortgage')
-    });
+    const mortgageName = mortgage.loanName || mortgage.lender || 'this mortgage';
+    this.confirmDialog.confirmDelete(mortgageName)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.propertyService.deleteMortgage(mortgage.id))
+      )
+      .subscribe({
+        next: () => {
+          this.loadMortgagesForProperty(mortgage.propertyId);
+          this.loadProperties();
+        },
+        error: () => this.error.set('Failed to delete mortgage')
+      });
   }
 }

@@ -4,7 +4,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { filter, switchMap } from 'rxjs/operators';
+import { TwoDecimalDirective } from '../../shared/directives/two-decimal.directive';
 import { CashLiabilityService } from '../../core/services/cash-liability.service';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import {
   CashAccountRequest, CashAccountResponse,
   LiabilityRequest, LiabilityResponse, LiabilityType
@@ -13,7 +16,7 @@ import {
 @Component({
   selector: 'app-cash-liabilities',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, MatButtonModule, MatIconModule, MatTooltipModule, TwoDecimalDirective],
   templateUrl: './cash-liabilities.component.html',
   styleUrl: './cash-liabilities.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,6 +24,7 @@ import {
 export class CashLiabilitiesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private service = inject(CashLiabilityService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   activeTab = signal<'cash' | 'liabilities'>('cash');
 
@@ -188,12 +192,15 @@ export class CashLiabilitiesComponent implements OnInit {
   }
 
   deleteCashAccount(account: CashAccountResponse): void {
-    if (!confirm(`Delete "${account.accountName}"?`)) return;
-
-    this.service.deleteCashAccount(account.id).subscribe({
-      next: () => this.loadData(),
-      error: () => this.error.set('Failed to delete cash account')
-    });
+    this.confirmDialog.confirmDelete(account.accountName)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.service.deleteCashAccount(account.id))
+      )
+      .subscribe({
+        next: () => this.loadData(),
+        error: () => this.error.set('Failed to delete cash account')
+      });
   }
 
   // Liability Form
@@ -269,12 +276,15 @@ export class CashLiabilitiesComponent implements OnInit {
   }
 
   deleteLiability(liability: LiabilityResponse): void {
-    if (!confirm(`Delete "${liability.name}"?`)) return;
-
-    this.service.deleteLiability(liability.id).subscribe({
-      next: () => this.loadData(),
-      error: () => this.error.set('Failed to delete liability')
-    });
+    this.confirmDialog.confirmDelete(liability.name)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.service.deleteLiability(liability.id))
+      )
+      .subscribe({
+        next: () => this.loadData(),
+        error: () => this.error.set('Failed to delete liability')
+      });
   }
 
   getLiabilityTypeLabel(type: string): string {

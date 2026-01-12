@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TwoDecimalDirective } from '../../shared/directives/two-decimal.directive';
 import { ProjectionService } from '../../core/services/projection.service';
 import { ScenarioService } from '../../core/services/scenario.service';
 import {
@@ -42,7 +43,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     MatProgressSpinnerModule,
     MatProgressBarModule,
     MatCheckboxModule,
-    MatTooltipModule
+    MatTooltipModule,
+    TwoDecimalDirective
   ],
   templateUrl: './projections.component.html',
   styleUrl: './projections.component.scss',

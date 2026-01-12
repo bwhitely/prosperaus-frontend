@@ -77,3 +77,24 @@ export interface DistributionSummaryResponse {
   holdingSummaries: HoldingDistributionSummary[];
   historicalYears: YearSummary[];
 }
+
+// Projection types
+export interface HoldingProjection {
+  holdingId: string;
+  ticker: string;
+  securityName?: string;
+  currentValue: number;
+  dividendYield: number;
+  projectedDividend: number;
+  estimatedFrankingPercentage: number;
+  estimatedFrankingCredits: number;
+  grossedUpProjected: number;
+  distributionFrequency?: string;
+}
+
+export interface DividendProjectionResponse {
+  totalProjectedDividends: number;
+  totalEstimatedFrankingCredits: number;
+  totalGrossedUpProjected: number;
+  holdingProjections: HoldingProjection[];
+}

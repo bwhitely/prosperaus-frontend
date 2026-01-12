@@ -4,6 +4,12 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { InvestmentHoldingRequest, InvestmentHoldingResponse, StockQuote, SecuritySearchResult } from '../../shared/models/investment.model';
 
+export interface RefreshResult {
+  status: string;
+  message: string;
+  holdingsRefreshed: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -32,11 +38,20 @@ export class InvestmentService {
   }
 
   /**
-   * Fetch stock quote from EODHD.
-   * For Australian stocks on ASX, append .AU to the ticker (e.g., VAS.AU).
+   * Fetch stock/ETF quote from Yahoo Finance.
+   * For Australian stocks on ASX, append .AX (e.g., VAS.AX) or .AU (will be converted).
+   * Returns price, MER, yield, sector weightings, and top holdings for ETFs.
    */
   getQuote(ticker: string): Observable<StockQuote> {
     return this.http.get<StockQuote>(`${this.apiUrl}/quote/${ticker}`);
+  }
+
+  /**
+   * Refresh prices and ETF metadata for all user's holdings from Yahoo Finance.
+   * This fetches latest prices, MER, yield, sector allocations, and country allocations.
+   */
+  refreshAllPrices(): Observable<RefreshResult> {
+    return this.http.post<RefreshResult>(`${this.apiUrl}/refresh`, {});
   }
 
   /**

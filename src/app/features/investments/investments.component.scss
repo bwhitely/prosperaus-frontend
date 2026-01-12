@@ -389,22 +389,44 @@
 // Quote preview
 .quote-preview {
   display: flex;
-  align-items: center;
-  gap: $spacing-md;
-  padding: $spacing-sm $spacing-md;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md;
   background: rgba($color-primary, 0.05);
   border-radius: $radius-md;
   margin-bottom: $spacing-md;
+  border: 1px solid rgba($color-primary, 0.1);
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
 
   &__symbol {
     font-weight: 600;
     color: $color-primary;
+    font-size: $font-size-lg;
+  }
+
+  &__type {
+    display: inline-block;
+    padding: 2px $spacing-xs;
+    background: $color-primary;
+    color: white;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   &__price {
     font-family: $font-family-mono;
     font-variant-numeric: tabular-nums;
     font-weight: 600;
+    font-size: $font-size-lg;
   }
 
   &__change {
@@ -418,6 +440,32 @@
 
     &.negative {
       color: $color-negative;
+    }
+  }
+
+  &__details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    padding-top: $spacing-sm;
+    border-top: 1px solid rgba($color-primary, 0.1);
+  }
+
+  &__detail {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+
+    .detail-label {
+      color: $color-text-muted;
+      font-weight: 500;
+    }
+
+    .detail-value {
+      color: $color-text-primary;
+      font-family: $font-family-mono;
+      font-variant-numeric: tabular-nums;
     }
   }
 }
@@ -434,4 +482,254 @@
     color: $color-text-muted;
     font-size: $font-size-sm;
   }
+}
+
+// ===========================================
+// Portfolio Analysis Styles
+// ===========================================
+
+// 3-column allocation charts row
+.allocation-charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+
+  @media (max-width: $breakpoint-lg) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Card styling for allocation charts
+.card {
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+
+  &__header {
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $color-border;
+
+    h2 {
+      font-size: $font-size-base;
+      font-weight: 600;
+      margin: 0;
+      color: $color-text-primary;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+  }
+}
+
+.allocation-chart-card {
+  .card__header h2 {
+    font-size: $font-size-base;
+    margin: 0;
+  }
+
+  .card__body {
+    padding-top: $spacing-sm;
+  }
+}
+
+// Centered pie chart with legend below
+.pie-chart-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+// Compact legend for 3-column layout
+.pie-legend-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs $spacing-md;
+  justify-content: center;
+  width: 100%;
+
+  &--scrollable {
+    max-height: 140px;
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-xs;
+  }
+
+  &__color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    color: $color-text-secondary;
+    white-space: nowrap;
+  }
+
+  &__value {
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+  }
+}
+
+// Pie Chart Styles
+.pie-chart {
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.pie-slice {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform-origin: center;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+.pie-center {
+  fill: $color-surface;
+}
+
+// Analysis grid (for Fee/Franking cards)
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.analysis-card {
+  height: 100%;
+}
+
+// Metrics
+.metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: $color-text-primary;
+  }
+
+  &__note {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    line-height: 1.5;
+  }
+}
+
+// Overlap warnings
+.overlap-warnings {
+  margin-bottom: $spacing-lg;
+
+  h2 {
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.overlap-warning {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  border-left: 4px solid;
+
+  &.severity--low {
+    background: rgba(#3182ce, 0.05);
+    border-color: #3182ce;
+  }
+
+  &.severity--medium {
+    background: rgba($color-warning, 0.05);
+    border-color: $color-warning;
+  }
+
+  &.severity--high {
+    background: rgba($color-negative, 0.05);
+    border-color: $color-negative;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+  }
+
+  &__tickers {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  &__percent {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-family: $font-family-mono;
+  }
+
+  &__description {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin: 0;
+  }
+}
+
+.ticker-separator {
+  color: $color-text-muted;
+}
+
+.ticker-badge--small {
+  font-size: $font-size-xs;
+  padding: 2px 6px;
+}
+
+.no-data {
+  text-align: center;
+  color: $color-text-muted;
+  font-size: $font-size-sm;
+  padding: $spacing-lg;
 }

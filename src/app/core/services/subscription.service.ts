@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { FREE_ACCESS_MODE } from '../auth/subscription.guard';
 
 export type SubscriptionStatus =
   | 'FREE'
@@ -45,9 +46,10 @@ export class SubscriptionService {
   subscription = this.subscriptionState.asReadonly();
   isLoading = this.loadingState.asReadonly();
 
-  isPro = computed(() => this.subscriptionState()?.isPro ?? false);
-  isActive = computed(() => this.subscriptionState()?.isActive ?? false);
-  isFree = computed(() => !this.isActive());
+  // In FREE_ACCESS_MODE, everyone is treated as Pro
+  isPro = computed(() => FREE_ACCESS_MODE || (this.subscriptionState()?.isPro ?? false));
+  isActive = computed(() => FREE_ACCESS_MODE || (this.subscriptionState()?.isActive ?? false));
+  isFree = computed(() => !FREE_ACCESS_MODE && !this.isActive());
 
   /**
    * Get the current user's subscription details.

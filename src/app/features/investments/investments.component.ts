@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, PercentPipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, CurrencyPipe, DatePipe, PercentPipe, DecimalPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil, filter, switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -15,8 +14,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { InvestmentService } from '../../core/services/investment.service';
-import { InvestmentHoldingRequest, InvestmentHoldingResponse, StockQuote, SecuritySearchResult } from '../../shared/models/investment.model';
+import { PortfolioService } from '../../core/services/portfolio.service';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
+import { InvestmentHoldingRequest, InvestmentHoldingResponse, StockQuote, SecuritySearchResult, PortfolioAnalysisResponse, CountryAllocation, GicsSectorAllocation, AssetTypeAllocation } from '../../shared/models/investment.model';
 import { TickerAutocompleteComponent } from '../../shared/components/ticker-autocomplete/ticker-autocomplete.component';
+
+interface PieSlice {
+  key: string;
+  label: string;
+  percentage: number;
+  value: number;
+  color: string;
+  path: string;
+  labelX: number;
+  labelY: number;
+}
 
 @Component({
   selector: 'app-investments',
@@ -28,6 +40,7 @@ import { TickerAutocompleteComponent } from '../../shared/components/ticker-auto
     CurrencyPipe,
     DatePipe,
     PercentPipe,
+    DecimalPipe,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -47,6 +60,8 @@ import { TickerAutocompleteComponent } from '../../shared/components/ticker-auto
 export class InvestmentsComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private investmentService = inject(InvestmentService);
+  private portfolioService = inject(PortfolioService);
+  private confirmDialog = inject(ConfirmDialogService);
   private destroy$ = new Subject<void>();
 
   holdings = signal<InvestmentHoldingResponse[]>([]);
@@ -69,6 +84,40 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
   isRefreshingPrices = signal(false);
   refreshProgress = signal({ current: 0, total: 0 });
 
+  // Portfolio analysis
+  analysis = signal<PortfolioAnalysisResponse | null>(null);
+  isLoadingAnalysis = signal(false);
+
+  // Pie chart colors
+  private readonly pieColors = [
+    '#7c3aed', '#3b82f6', '#14b8a6', '#f59e0b', '#ec4899',
+    '#06b6d4', '#10b981', '#6366f1', '#f97316', '#8b5cf6',
+    '#ef4444', '#84cc16',
+  ];
+
+  private readonly gicsSectorColors: Record<string, string> = {
+    '10': '#f97316', '15': '#84cc16', '20': '#6366f1', '25': '#ec4899',
+    '30': '#f59e0b', '35': '#ef4444', '40': '#3b82f6', '45': '#7c3aed',
+    '50': '#14b8a6', '55': '#78716c', '60': '#06b6d4',
+  };
+
+  private readonly assetTypeColors: Record<string, string> = {
+    'EQUITIES': '#7c3aed', 'BONDS': '#3b82f6', 'CASH': '#10b981',
+    'GOLD': '#f59e0b', 'PROPERTY': '#06b6d4',
+  };
+
+  // Computed values for allocations
+  countryEntries = computed(() => this.analysis()?.countryAllocation ?? []);
+  gicsSectorEntries = computed(() => this.analysis()?.gicsSectorAllocation ?? []);
+  assetTypeEntries = computed(() => this.analysis()?.assetTypeAllocation ?? []);
+
+  countryPieSlices = computed(() => this.createPieSlicesFromCountry(this.countryEntries()));
+  gicsSectorPieSlices = computed(() => this.createPieSlicesFromGicsNormalized(this.gicsSectorEntries()));
+  assetTypePieSlices = computed(() => this.createPieSlicesFromAssetType(this.assetTypeEntries()));
+
+  hasGicsSectors = computed(() => this.gicsSectorEntries().length > 0);
+  hasAssetTypes = computed(() => this.assetTypeEntries().length > 0);
+
   form: FormGroup = this.fb.group({
     ticker: ['', [Validators.required, Validators.maxLength(10)]],
     securityName: [''],
@@ -76,7 +125,8 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     units: [null, [Validators.required, Validators.min(0.0001)]],
     costBase: [null, [Validators.required, Validators.min(0)]],
     acquisitionDate: [''],
-    currentPrice: [null]
+    currentPrice: [null],
+    merPercent: [null, [Validators.min(0)]]
   });
 
   securityTypes = [
@@ -119,8 +169,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     this.isFetchingQuote.set(true);
     this.quoteError.set(null);
 
-    // For Australian stocks, try with .AU suffix if no suffix present
-    const normalizedTicker = ticker.toUpperCase();
+    // Normalize ticker for API call
     const tickerToFetch = ticker.toUpperCase();
 
     this.investmentService.getQuote(tickerToFetch).subscribe({
@@ -128,35 +177,55 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
         this.lastQuote.set(quote);
         this.isFetchingQuote.set(false);
 
-        // Auto-fill the current price if not already set
+        // Auto-fill form fields from quote
         if (!this.form.get('currentPrice')?.value && quote.price) {
           this.form.patchValue({ currentPrice: quote.price });
         }
+
+        // Auto-fill security name if available
+        if (!this.form.get('securityName')?.value && quote.name) {
+          this.form.patchValue({ securityName: quote.name });
+        }
+
+        // Auto-fill security type based on quoteType
+        if (quote.quoteType) {
+          const typeMap: Record<string, string> = {
+            'ETF': 'etf',
+            'EQUITY': 'stock',
+            'MUTUALFUND': 'etf'
+          };
+          const mappedType = typeMap[quote.quoteType.toUpperCase()] || 'other';
+          this.form.patchValue({ securityType: mappedType });
+        }
+
+        // Auto-fill MER
+        const merControl = this.form.get('merPercent');
+        if ((merControl?.value === null || merControl?.value === undefined || merControl?.value === '') && quote.mer != null) {
+          merControl?.patchValue(quote.mer * 100); // quote.mer is stored as fraction (e.g. 0.0007), UI is percent (0.07)
+        }
       },
       error: () => {
-        // Try without suffix for US stocks
-        if (tickerToFetch.endsWith('.AU')) {
-          this.investmentService.getQuote(normalizedTicker).subscribe({
-            next: (quote) => {
-              this.lastQuote.set(quote);
-              this.isFetchingQuote.set(false);
-              if (!this.form.get('currentPrice')?.value && quote.price) {
-                this.form.patchValue({ currentPrice: quote.price });
-              }
-            },
-            error: () => {
-              this.quoteError.set('Could not fetch price. You can enter it manually.');
-              this.isFetchingQuote.set(false);
-              this.lastQuote.set(null);
-            }
-          });
-        } else {
-          this.quoteError.set('Could not fetch price. You can enter it manually.');
-          this.isFetchingQuote.set(false);
-          this.lastQuote.set(null);
-        }
+        this.quoteError.set('Could not fetch price. You can enter it manually.');
+        this.isFetchingQuote.set(false);
+        this.lastQuote.set(null);
       }
     });
+  }
+
+  /**
+   * Format MER for display (e.g., 0.0007 -> "0.07%")
+   */
+  formatMer(mer: number | undefined): string {
+    if (mer === undefined || mer === null) return '-';
+    return (mer * 100).toFixed(2) + '%';
+  }
+
+  /**
+   * Format yield for display (e.g., 0.035 -> "3.50%")
+   */
+  formatYield(yieldValue: number | undefined): string {
+    if (yieldValue === undefined || yieldValue === null) return '-';
+    return (yieldValue * 100).toFixed(2) + '%';
   }
 
   loadHoldings(): void {
@@ -167,10 +236,30 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
       next: (holdings) => {
         this.holdings.set(holdings);
         this.isLoading.set(false);
+        this.loadAnalysis();
       },
       error: () => {
         this.error.set('Failed to load investments');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadAnalysis(): void {
+    if (this.holdings().length === 0) {
+      this.analysis.set(null);
+      return;
+    }
+    this.isLoadingAnalysis.set(true);
+
+    this.portfolioService.analyseUserPortfolio().subscribe({
+      next: (analysis) => {
+        this.analysis.set(analysis);
+        this.isLoadingAnalysis.set(false);
+      },
+      error: () => {
+        // Analysis errors shouldn't block CRUD operations
+        this.isLoadingAnalysis.set(false);
       }
     });
   }
@@ -195,7 +284,7 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
 
   openAddForm(): void {
     this.editingHolding.set(null);
-    this.form.reset({ securityType: 'etf' });
+    this.form.reset({ securityType: 'etf', merPercent: null });
     this.lastQuote.set(null);
     this.quoteError.set(null);
     this.showForm.set(true);
@@ -210,7 +299,8 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
       units: holding.units,
       costBase: holding.costBase,
       acquisitionDate: holding.acquisitionDate || '',
-      currentPrice: holding.currentPrice
+      currentPrice: holding.currentPrice,
+      merPercent: holding.mer != null ? holding.mer * 100 : null
     });
     this.showForm.set(true);
   }
@@ -244,6 +334,12 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     this.isSubmitting.set(true);
     const formValue = this.form.value;
 
+    const merPercent = formValue.merPercent;
+    const merFraction =
+      merPercent === null || merPercent === undefined || merPercent === ''
+        ? undefined
+        : Number(merPercent) / 100;
+
     const request: InvestmentHoldingRequest = {
       ticker: formValue.ticker.toUpperCase(),
       securityName: formValue.securityName || undefined,
@@ -251,7 +347,8 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
       units: formValue.units,
       costBase: formValue.costBase,
       acquisitionDate: formValue.acquisitionDate || undefined,
-      currentPrice: formValue.currentPrice || undefined
+      currentPrice: formValue.currentPrice || undefined,
+      mer: merFraction
     };
 
     const editing = this.editingHolding();
@@ -273,14 +370,15 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
   }
 
   delete(holding: InvestmentHoldingResponse): void {
-    if (!confirm(`Are you sure you want to delete ${holding.ticker}?`)) {
-      return;
-    }
-
-    this.investmentService.delete(holding.id).subscribe({
-      next: () => this.loadHoldings(),
-      error: () => this.error.set('Failed to delete investment')
-    });
+    this.confirmDialog.confirmDelete(holding.ticker)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.investmentService.delete(holding.id))
+      )
+      .subscribe({
+        next: () => this.loadHoldings(),
+        error: () => this.error.set('Failed to delete investment')
+      });
   }
 
   getGainLossClass(value: number): string {
@@ -290,8 +388,8 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Refresh prices for all holdings from EODHD API.
-   * Fetches quotes in parallel and updates each holding.
+   * Refresh prices and ETF metadata for all holdings from Yahoo Finance.
+   * Uses the backend API which fetches quotes, MER, yield, sector and country allocations.
    */
   refreshAllPrices(): void {
     const holdingsList = this.holdings();
@@ -301,64 +399,14 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     this.refreshProgress.set({ current: 0, total: holdingsList.length });
     this.error.set(null);
 
-    // Create an array of quote fetch observables
-    const quoteRequests = holdingsList.map(holding =>
-      this.investmentService.getQuote(holding.ticker).pipe(
-        map(quote => ({ holding, quote, success: true as const })),
-        catchError(() => of({ holding, quote: null, success: false as const }))
-      )
-    );
-
-    // Execute all in parallel
-    forkJoin(quoteRequests).subscribe({
-      next: (results) => {
-        let updatedCount = 0;
-        let current = 0;
-
-        // Update each holding that got a successful quote
-        const updateRequests = results
-          .filter(r => r.success && r.quote)
-          .map(r => {
-            const request: InvestmentHoldingRequest = {
-              ticker: r.holding.ticker,
-              securityName: r.holding.securityName,
-              securityType: r.holding.securityType,
-              units: r.holding.units,
-              costBase: r.holding.costBase,
-              acquisitionDate: r.holding.acquisitionDate,
-              currentPrice: r.quote!.price
-            };
-            return this.investmentService.update(r.holding.id, request).pipe(
-              map(() => {
-                current++;
-                this.refreshProgress.set({ current, total: holdingsList.length });
-                return true;
-              }),
-              catchError(() => of(false))
-            );
-          });
-
-        if (updateRequests.length === 0) {
-          this.isRefreshingPrices.set(false);
-          this.error.set('Could not fetch prices for any holdings');
-          return;
-        }
-
-        forkJoin(updateRequests).subscribe({
-          next: (updateResults) => {
-            updatedCount = updateResults.filter(Boolean).length;
-            this.loadHoldings();
-            this.isRefreshingPrices.set(false);
-          },
-          error: () => {
-            this.error.set('Failed to update some prices');
-            this.isRefreshingPrices.set(false);
-            this.loadHoldings();
-          }
-        });
+    this.investmentService.refreshAllPrices().subscribe({
+      next: (result) => {
+        this.refreshProgress.set({ current: result.holdingsRefreshed, total: holdingsList.length });
+        this.loadHoldings();
+        this.isRefreshingPrices.set(false);
       },
-      error: () => {
-        this.error.set('Failed to refresh prices');
+      error: (err) => {
+        this.error.set(err.error?.message || 'Failed to refresh prices');
         this.isRefreshingPrices.set(false);
       }
     });
@@ -379,5 +427,113 @@ export class InvestmentsComponent implements OnInit, OnDestroy {
     if (diffDays < 7) return `${diffDays}d ago`;
 
     return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  }
+
+  getSeverityClass(severity: string): string {
+    return `severity--${severity}`;
+  }
+
+  // Pie chart methods
+  private createPieSlicesFromCountry(entries: CountryAllocation[]): PieSlice[] {
+    if (entries.length === 0) return [];
+
+    const slices: PieSlice[] = [];
+    const centerX = 100, centerY = 100, radius = 80;
+    let currentAngle = -90;
+
+    entries.forEach((entry, index) => {
+      const sliceAngle = (entry.percentage / 100) * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sliceAngle;
+
+      const path = this.createArcPath(centerX, centerY, radius, startAngle, endAngle);
+      const midAngle = startAngle + sliceAngle / 2;
+      const labelRadius = radius * 0.65;
+      const labelX = centerX + labelRadius * Math.cos((midAngle * Math.PI) / 180);
+      const labelY = centerY + labelRadius * Math.sin((midAngle * Math.PI) / 180);
+
+      slices.push({
+        key: entry.code, label: entry.name, percentage: entry.percentage, value: entry.value,
+        color: this.pieColors[index % this.pieColors.length], path, labelX, labelY,
+      });
+      currentAngle = endAngle;
+    });
+    return slices;
+  }
+
+  private createPieSlicesFromGicsNormalized(entries: GicsSectorAllocation[]): PieSlice[] {
+    if (entries.length === 0) return [];
+
+    const totalPercentage = entries.reduce((sum, e) => sum + e.percentage, 0);
+    if (totalPercentage === 0) return [];
+
+    const slices: PieSlice[] = [];
+    const centerX = 100, centerY = 100, radius = 80;
+    let currentAngle = -90;
+
+    entries.forEach((entry, index) => {
+      const normalizedPercentage = (entry.percentage / totalPercentage) * 100;
+      const sliceAngle = (normalizedPercentage / 100) * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sliceAngle;
+
+      const path = this.createArcPath(centerX, centerY, radius, startAngle, endAngle);
+      const midAngle = startAngle + sliceAngle / 2;
+      const labelRadius = radius * 0.65;
+      const labelX = centerX + labelRadius * Math.cos((midAngle * Math.PI) / 180);
+      const labelY = centerY + labelRadius * Math.sin((midAngle * Math.PI) / 180);
+
+      slices.push({
+        key: entry.code, label: entry.name, percentage: normalizedPercentage, value: entry.value,
+        color: this.gicsSectorColors[entry.code] ?? this.pieColors[index % this.pieColors.length], path, labelX, labelY,
+      });
+      currentAngle = endAngle;
+    });
+    return slices;
+  }
+
+  private createPieSlicesFromAssetType(entries: AssetTypeAllocation[]): PieSlice[] {
+    if (entries.length === 0) return [];
+
+    const slices: PieSlice[] = [];
+    const centerX = 100, centerY = 100, radius = 80;
+    let currentAngle = -90;
+
+    entries.forEach((entry, index) => {
+      const sliceAngle = (entry.percentage / 100) * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + sliceAngle;
+
+      const path = this.createArcPath(centerX, centerY, radius, startAngle, endAngle);
+      const midAngle = startAngle + sliceAngle / 2;
+      const labelRadius = radius * 0.65;
+      const labelX = centerX + labelRadius * Math.cos((midAngle * Math.PI) / 180);
+      const labelY = centerY + labelRadius * Math.sin((midAngle * Math.PI) / 180);
+
+      slices.push({
+        key: entry.type, label: entry.displayName, percentage: entry.percentage, value: entry.value,
+        color: this.assetTypeColors[entry.type] ?? this.pieColors[index % this.pieColors.length], path, labelX, labelY,
+      });
+      currentAngle = endAngle;
+    });
+    return slices;
+  }
+
+  private createArcPath(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+    if (endAngle - startAngle >= 359.99) {
+      return `M ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy}`;
+    }
+
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+
+    const x1 = cx + r * Math.cos(startRad);
+    const y1 = cy + r * Math.sin(startRad);
+    const x2 = cx + r * Math.cos(endRad);
+    const y2 = cy + r * Math.sin(endRad);
+
+    const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
   }
 }

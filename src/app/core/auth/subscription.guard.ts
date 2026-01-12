@@ -4,11 +4,25 @@ import { SubscriptionService } from '../services/subscription.service';
 import { AuthService } from './auth.service';
 
 /**
+ * FEATURE FLAG: Set to true to bypass all subscription checks.
+ * This makes all Pro features free until Basiq (OpenBanking) integration is complete.
+ * TODO: Set to false when ready to enable paid subscriptions.
+ */
+export const FREE_ACCESS_MODE = true;
+
+/**
  * Guard that requires an active Pro subscription.
  * Redirects to pricing page if user doesn't have Pro access.
  * Should be used after authGuard to ensure user is authenticated first.
+ *
+ * NOTE: Currently bypassed when FREE_ACCESS_MODE is true.
  */
 export const paidFeatureGuard: CanActivateFn = async (route, state) => {
+  // BYPASS: Free access mode - all features available without subscription
+  if (FREE_ACCESS_MODE) {
+    return true;
+  }
+
   const subscriptionService = inject(SubscriptionService);
   const authService = inject(AuthService);
   const router = inject(Router);

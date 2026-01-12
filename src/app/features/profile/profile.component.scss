@@ -95,7 +95,8 @@
 .subscription-card {
   max-width: 600px;
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-card;
 
   mat-card-header {
     margin-bottom: $spacing-lg;
@@ -404,7 +405,8 @@
   mat-expansion-panel {
     margin-bottom: $spacing-md;
     border-radius: $radius-lg !important;
-    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
+    box-shadow: $shadow-card;
 
     &::before {
       display: none;

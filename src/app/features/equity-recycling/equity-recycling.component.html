@@ -7,18 +7,25 @@
     }
   </div>
   <div class="page-header__actions">
-    <button mat-stroked-button (click)="newScenario()">
-      <mat-icon>add</mat-icon>
-      New
-    </button>
-    <button mat-stroked-button (click)="openLoadForm()" [disabled]="scenarios().length === 0">
-      <mat-icon>folder_open</mat-icon>
-      Load ({{ scenarios().length }})
-    </button>
-    <button mat-flat-button color="primary" (click)="openSaveForm()" [disabled]="!result()">
-      <mat-icon>save</mat-icon>
-      {{ currentScenarioId() ? 'Update' : 'Save' }}
-    </button>
+    @if (isAuthenticated()) {
+      <button mat-stroked-button (click)="newScenario()">
+        <mat-icon>add</mat-icon>
+        New
+      </button>
+      <button mat-stroked-button (click)="openLoadForm()" [disabled]="scenarios().length === 0">
+        <mat-icon>folder_open</mat-icon>
+        Load ({{ scenarios().length }})
+      </button>
+      <button mat-flat-button color="primary" (click)="openSaveForm()" [disabled]="!result()">
+        <mat-icon>save</mat-icon>
+        {{ currentScenarioId() ? 'Update' : 'Save' }}
+      </button>
+    } @else {
+      <a mat-flat-button color="primary" routerLink="/auth/signup">
+        <mat-icon>person_add</mat-icon>
+        Sign Up to Save
+      </a>
+    }
   </div>
 </div>
 
@@ -65,7 +72,7 @@
             <div class="form-row">
               <mat-form-field appearance="outline">
                 <mat-label>Interest Rate</mat-label>
-                <input matInput type="number" formControlName="interestRate" step="0.01">
+                <input matInput type="number" formControlName="interestRate" step="0.01" appTwoDecimal>
                 <span matTextSuffix>%</span>
               </mat-form-field>
 
@@ -219,6 +226,16 @@
             <div class="breakdown-item">
               <span class="breakdown-label">Interest Cost</span>
               <span class="breakdown-value negative">-{{ r.annualInterestCost | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+              @if (cashflowDetails(); as cf) {
+                <span class="breakdown-monthly">({{ cf.monthlyInterestCost | currency:'AUD':'symbol-narrow':'1.0-0' }}/mth)</span>
+              }
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Expected Dividends</span>
+              @if (cashflowDetails(); as cf) {
+                <span class="breakdown-value positive">+{{ cf.expectedAnnualDividends | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                <span class="breakdown-monthly">({{ cf.monthlyDividends | currency:'AUD':'symbol-narrow':'1.0-0' }}/mth)</span>
+              }
             </div>
             <div class="breakdown-item">
               <span class="breakdown-label">Tax Deduction</span>
@@ -230,8 +247,17 @@
                 {{ r.taxBenefits.frankingCredits >= 0 ? '+' : '' }}{{ r.taxBenefits.frankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}
               </span>
             </div>
+            <div class="breakdown-item breakdown-item--highlight">
+              <span class="breakdown-label">Net Cash Flow (pre-tax)</span>
+              @if (cashflowDetails(); as cf) {
+                <span class="breakdown-value" [class.positive]="cf.annualNetCashflow > 0" [class.negative]="cf.annualNetCashflow < 0">
+                  {{ cf.annualNetCashflow | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                </span>
+                <span class="breakdown-monthly">({{ cf.monthlyNetCashflow | currency:'AUD':'symbol-narrow':'1.0-0' }}/mth)</span>
+              }
+            </div>
             <div class="breakdown-item breakdown-item--total">
-              <span class="breakdown-label">Net Annual Cost</span>
+              <span class="breakdown-label">Net Annual Cost (after tax)</span>
               <span class="breakdown-value" [class.positive]="r.netAnnualCost < 0" [class.negative]="r.netAnnualCost > 0">
                 {{ r.netAnnualCost | currency:'AUD':'symbol-narrow':'1.0-0' }}
               </span>
@@ -274,25 +300,81 @@
           <mat-card-title>Year-by-Year Projection</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="projection-chart">
-            @for (projection of r.yearlyProjections; track projection.year) {
-              <div class="projection-bar">
-                <div class="projection-bar__header">
-                  <span class="projection-bar__year">Year {{ projection.year }}</span>
-                  <span class="projection-bar__value" [class.positive]="projection.netBenefit > 0" [class.negative]="projection.netBenefit < 0">
-                    {{ projection.netBenefit | currency:'AUD':'symbol-narrow':'1.0-0' }}
-                  </span>
+          <!-- Scenario Toggle -->
+          <div class="scenario-toggles">
+            <span class="scenario-label">Scenario:</span>
+            <mat-button-toggle-group [value]="scenarioMode()" (change)="setScenarioMode($event.value)" class="scenario-toggle-group">
+              <mat-button-toggle value="conservative" matTooltip="Returns 3% below expected">
+                <mat-icon>trending_down</mat-icon>
+                Conservative
+              </mat-button-toggle>
+              <mat-button-toggle value="expected" matTooltip="Based on your input parameters">
+                <mat-icon>trending_flat</mat-icon>
+                Expected
+              </mat-button-toggle>
+              <mat-button-toggle value="bullish" matTooltip="Returns 2% above expected">
+                <mat-icon>trending_up</mat-icon>
+                Bullish
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+
+          <!-- Visual Chart -->
+          <div class="projection-visual-chart">
+            @for (projection of adjustedProjections(); track projection.year; let i = $index) {
+              <div class="projection-chart-bar" [class.selected]="i === adjustedProjections().length - 1">
+                <div class="chart-bar-container">
+                  <div
+                    class="chart-bar chart-bar--baseline"
+                    [style.height.%]="(projection.baselineValue / adjustedProjections()[adjustedProjections().length - 1].adjustedRecyclingValue) * 70"
+                    matTooltip="Baseline: {{ projection.baselineValue | currency:'AUD':'symbol-narrow':'1.0-0' }}">
+                  </div>
+                  <div
+                    class="chart-bar chart-bar--recycling"
+                    [style.height.%]="(projection.adjustedRecyclingValue / adjustedProjections()[adjustedProjections().length - 1].adjustedRecyclingValue) * 70"
+                    matTooltip="With Recycling: {{ projection.adjustedRecyclingValue | currency:'AUD':'symbol-narrow':'1.0-0' }}">
+                  </div>
                 </div>
-                <div class="projection-bar__track">
-                  @if (projection.netBenefit > 0) {
-                    <div
-                      class="projection-bar__fill projection-bar__fill--positive"
-                      [style.width.%]="(projection.netBenefit / r.totalBenefit) * 100">
-                    </div>
-                  }
-                </div>
+                <span class="chart-bar-year">Y{{ projection.year }}</span>
               </div>
             }
+          </div>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color legend-color--baseline"></span>
+              <span>Baseline (Do Nothing)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color legend-color--recycling"></span>
+              <span>With Equity Recycling</span>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <div class="projection-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Baseline</th>
+                  <th>With Recycling</th>
+                  <th>Net Benefit</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (projection of adjustedProjections(); track projection.year) {
+                  <tr>
+                    <td>{{ projection.year }}</td>
+                    <td class="mono">{{ projection.baselineValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</td>
+                    <td class="mono">{{ projection.adjustedRecyclingValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</td>
+                    <td class="mono" [class.positive]="projection.adjustedNetBenefit > 0" [class.negative]="projection.adjustedNetBenefit < 0">
+                      {{ projection.adjustedNetBenefit | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
         </mat-card-content>
       </mat-card>
@@ -310,73 +392,83 @@
   </div>
 </div>
 
-<!-- Save Scenario Inline Form -->
-@if (showSaveForm()) {
-  <mat-card class="inline-form">
-    <mat-card-header class="inline-form__header">
-      <mat-card-title>{{ currentScenarioId() ? 'Update Scenario' : 'Save Scenario' }}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="inline-form__body">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Scenario Name</mat-label>
-        <input
-          matInput
-          type="text"
-          [value]="scenarioName()"
-          (input)="scenarioName.set($any($event.target).value)"
-          placeholder="e.g., Primary residence - aggressive">
-      </mat-form-field>
-    </mat-card-content>
-    <mat-card-actions align="end" class="inline-form__footer">
-      <button mat-stroked-button (click)="closeSaveForm()">Cancel</button>
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="saveScenario()"
-        [disabled]="!scenarioName().trim() || isSaving()">
-        @if (isSaving()) {
-          <mat-spinner diameter="18"></mat-spinner>
-        }
-        {{ isSaving() ? 'Saving...' : (currentScenarioId() ? 'Update' : 'Save') }}
-      </button>
-    </mat-card-actions>
-  </mat-card>
+<!-- Save Scenario Modal Overlay (only for authenticated users) -->
+@if (isAuthenticated() && showSaveForm()) {
+  <div class="modal-overlay" (click)="closeSaveForm()">
+    <mat-card class="modal-card" (click)="$event.stopPropagation()">
+      <mat-card-header class="modal-card__header">
+        <mat-card-title>{{ currentScenarioId() ? 'Update Scenario' : 'Save Scenario' }}</mat-card-title>
+        <button mat-icon-button (click)="closeSaveForm()" class="modal-close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content class="modal-card__body">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Scenario Name</mat-label>
+          <input
+            matInput
+            type="text"
+            [value]="scenarioName()"
+            (input)="scenarioName.set($any($event.target).value)"
+            placeholder="e.g., Primary residence - aggressive">
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions align="end" class="modal-card__footer">
+        <button mat-stroked-button (click)="closeSaveForm()">Cancel</button>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="saveScenario()"
+          [disabled]="!scenarioName().trim() || isSaving()">
+          @if (isSaving()) {
+            <mat-spinner diameter="18"></mat-spinner>
+          }
+          {{ isSaving() ? 'Saving...' : (currentScenarioId() ? 'Update' : 'Save') }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
 }
 
-<!-- Load Scenario Inline Form -->
-@if (showLoadForm()) {
-  <mat-card class="inline-form">
-    <mat-card-header class="inline-form__header">
-      <mat-card-title>Load Scenario</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="inline-form__body">
-      @if (scenarios().length === 0) {
-        <p class="empty-message">No saved scenarios yet.</p>
-      } @else {
-        <div class="scenario-list">
-          @for (scenario of scenarios(); track scenario.id) {
-            <div
-              class="scenario-item"
-              [class.scenario-item--active]="scenario.id === currentScenarioId()"
-              (click)="loadScenario(scenario)">
-              <div class="scenario-item__info">
-                <div class="scenario-item__name">{{ scenario.name }}</div>
-                <div class="scenario-item__date">Last updated: {{ scenario.updatedAt | date:'medium' }}</div>
+<!-- Load Scenario Modal Overlay (only for authenticated users) -->
+@if (isAuthenticated() && showLoadForm()) {
+  <div class="modal-overlay" (click)="closeLoadForm()">
+    <mat-card class="modal-card modal-card--wide" (click)="$event.stopPropagation()">
+      <mat-card-header class="modal-card__header">
+        <mat-card-title>Load Scenario</mat-card-title>
+        <button mat-icon-button (click)="closeLoadForm()" class="modal-close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content class="modal-card__body">
+        @if (scenarios().length === 0) {
+          <p class="empty-message">No saved scenarios yet.</p>
+        } @else {
+          <div class="scenario-list">
+            @for (scenario of scenarios(); track scenario.id) {
+              <div
+                class="scenario-item"
+                [class.scenario-item--active]="scenario.id === currentScenarioId()"
+                (click)="loadScenario(scenario)">
+                <div class="scenario-item__info">
+                  <div class="scenario-item__name">{{ scenario.name }}</div>
+                  <div class="scenario-item__date">Last updated: {{ scenario.updatedAt | date:'medium' }}</div>
+                </div>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteScenario(scenario, $event)"
+                  matTooltip="Delete scenario">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="deleteScenario(scenario, $event)"
-                matTooltip="Delete scenario">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          }
-        </div>
-      }
-    </mat-card-content>
-    <mat-card-actions align="end" class="inline-form__footer">
-      <button mat-stroked-button (click)="closeLoadForm()">Cancel</button>
-    </mat-card-actions>
-  </mat-card>
+            }
+          </div>
+        }
+      </mat-card-content>
+      <mat-card-actions align="end" class="modal-card__footer">
+        <button mat-stroked-button (click)="closeLoadForm()">Close</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
 }

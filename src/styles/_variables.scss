@@ -87,19 +87,26 @@ $radius-2xl: 24px;
 $radius-full: 9999px;
 
 // ===========================================
-// SHADOWS - Refined for light theme
+// SHADOWS - Layered depth for financial gravitas
+// Design principle: Subtle, layered shadows create professional depth
 // ===========================================
-$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
-$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+$shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.05);
 
-// Focus ring
-$shadow-focus: 0 0 0 3px rgba($color-primary, 0.2);
+// Card shadow - optimized for elevated cards with border
+$shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
+$shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-// Glow effects (legacy - adapted for light theme)
-$glow-gold: 0 0 0 3px rgba($color-primary, 0.15);
-$glow-emerald: 0 0 0 3px rgba($color-accent, 0.15);
+// Focus ring - accessible and visible
+$shadow-focus: 0 0 0 2px $color-surface, 0 0 0 4px rgba($color-primary, 0.4);
+$shadow-focus-inset: inset 0 0 0 2px rgba($color-primary, 0.3);
+
+// Legacy glow effects
+$glow-gold: 0 0 0 3px rgba($color-primary, 0.12);
+$glow-emerald: 0 0 0 3px rgba($color-accent, 0.12);
 
 // ===========================================
 // TYPOGRAPHY
@@ -112,7 +119,7 @@ $font-family-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sa
 $font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
 // Numbers - Tabular figures for clean alignment
-$font-family-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+$font-family-mono: 'Manrope', system-ui, sans-serif;
 
 // Font sizes
 $font-size-xs: 0.75rem;    // 12px

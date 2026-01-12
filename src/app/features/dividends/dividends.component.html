@@ -67,6 +67,12 @@
     <button mat-button class="tab" [class.tab--active]="activeTab() === 'list'" (click)="setTab('list')">
       All Distributions ({{ getFilteredDistributions().length }})
     </button>
+    <button mat-button class="tab" [class.tab--active]="activeTab() === 'projections'" (click)="setTab('projections')">
+      Projections
+    </button>
+    <button mat-button class="tab" [class.tab--active]="activeTab() === 'tax-report'" (click)="setTab('tax-report')">
+      Tax Report
+    </button>
   </div>
 
   <!-- Summary Tab -->
@@ -194,6 +200,159 @@
           }
         </div>
       }
+    </div>
+  }
+
+  <!-- Projections Tab -->
+  @if (activeTab() === 'projections') {
+    <div class="tab-content">
+      @if (projections()) {
+        <!-- Projection Summary Cards -->
+        <div class="summary-cards">
+          <div class="summary-card summary-card--positive">
+            <span class="summary-card__label">Est. Annual Dividends</span>
+            <span class="summary-card__value positive">{{ projections()!.totalProjectedDividends | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="summary-card summary-card--positive">
+            <span class="summary-card__label">Est. Franking Credits</span>
+            <span class="summary-card__value positive">{{ projections()!.totalEstimatedFrankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Est. Grossed Up</span>
+            <span class="summary-card__value">{{ projections()!.totalGrossedUpProjected | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <!-- Per-Holding Projections -->
+        @if (projections()!.holdingProjections.length > 0) {
+          <div class="card">
+            <div class="card__header">
+              <h3>Projected Dividends by Holding</h3>
+              <p class="card__subtitle">Based on current holdings and historical dividend yields</p>
+            </div>
+            <div class="card__body">
+              <div class="projections-table">
+                <div class="projections-header">
+                  <span class="col-ticker">Holding</span>
+                  <span class="col-value">Value</span>
+                  <span class="col-yield">Yield</span>
+                  <span class="col-dividend">Est. Dividend</span>
+                  <span class="col-franking">Est. Franking</span>
+                  <span class="col-frequency">Frequency</span>
+                </div>
+                @for (proj of projections()!.holdingProjections; track proj.holdingId) {
+                  <div class="projections-row">
+                    <div class="col-ticker">
+                      <span class="projection-ticker">{{ proj.ticker }}</span>
+                      <span class="projection-name">{{ proj.securityName }}</span>
+                    </div>
+                    <span class="col-value">{{ proj.currentValue | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                    <span class="col-yield">{{ proj.dividendYield * 100 | number:'1.1-2' }}%</span>
+                    <span class="col-dividend positive">{{ proj.projectedDividend | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                    <span class="col-franking">{{ proj.estimatedFrankingCredits | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                    <span class="col-frequency">{{ proj.distributionFrequency || 'Unknown' }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="disclaimer">
+            <mat-icon>info</mat-icon>
+            <span>Projections are estimates based on historical dividend yields and current holdings. Actual dividends may vary significantly.</span>
+          </div>
+        } @else {
+          <div class="card">
+            <div class="card__body">
+              <div class="empty-state">
+                <p>No projection data available. Add holdings with dividend yield information to see projections.</p>
+              </div>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="card">
+          <div class="card__body">
+            <div class="empty-state">
+              <p>Loading projection data...</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Tax Report Tab -->
+  @if (activeTab() === 'tax-report') {
+    <div class="tab-content">
+      <div class="card">
+        <div class="card__header">
+          <h3>ATO Tax Return - Item 11: Dividends</h3>
+          <p class="card__subtitle">FY {{ summary()!.financialYearDisplay }}</p>
+        </div>
+        <div class="card__body">
+          <div class="tax-report">
+            <div class="tax-report__row">
+              <span class="tax-report__label">A. Unfranked amount</span>
+              <span class="tax-report__value">{{ getUnfrankedDividends() | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="tax-report__row">
+              <span class="tax-report__label">B. Franked amount</span>
+              <span class="tax-report__value">{{ getFrankedDividends() | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="tax-report__row">
+              <span class="tax-report__label">C. Franking credit</span>
+              <span class="tax-report__value">{{ summary()!.totalFrankingCredits | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+            <div class="tax-report__row tax-report__row--total">
+              <span class="tax-report__label">Total (A + B + C)</span>
+              <span class="tax-report__value">{{ summary()!.totalGrossedUp | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+            </div>
+          </div>
+          <div class="tax-report__actions">
+            <button mat-stroked-button (click)="copyToClipboard()">
+              <mat-icon>content_copy</mat-icon>
+              Copy to Clipboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-Security Breakdown for Tax -->
+      @if (summary()!.holdingSummaries.length > 0) {
+        <div class="card mt-md">
+          <div class="card__header">
+            <h3>Per-Security Breakdown</h3>
+            <p class="card__subtitle">Individual holding details for tax statements</p>
+          </div>
+          <div class="card__body">
+            <div class="tax-breakdown-table">
+              <div class="tax-breakdown-header">
+                <span class="col-security">Security</span>
+                <span class="col-unfranked">Unfranked</span>
+                <span class="col-franked">Franked</span>
+                <span class="col-credits">Franking Credits</span>
+              </div>
+              @for (holding of summary()!.holdingSummaries; track holding.holdingId) {
+                <div class="tax-breakdown-row">
+                  <div class="col-security">
+                    <span class="security-ticker">{{ holding.ticker }}</span>
+                    <span class="security-name">{{ holding.securityName }}</span>
+                  </div>
+                  <span class="col-unfranked">{{ getHoldingUnfranked(holding) | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+                  <span class="col-franked">{{ getHoldingFranked(holding) | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+                  <span class="col-credits">{{ holding.totalFrankingCredits | currency:'AUD':'symbol-narrow':'1.2-2' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="disclaimer mt-md">
+        <mat-icon>warning</mat-icon>
+        <span>These figures are for reference only. Always verify against your dividend statements and consult a tax professional.</span>
+      </div>
     </div>
   }
 }

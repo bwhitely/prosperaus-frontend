@@ -87,7 +87,8 @@
 .calculator-inputs {
   mat-card {
     border-radius: $radius-lg;
-    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
+    box-shadow: $shadow-card;
   }
 
   mat-card-header {
@@ -109,7 +110,8 @@
 
   mat-card {
     border-radius: $radius-lg;
-    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
+    box-shadow: $shadow-card;
     margin-bottom: $spacing-lg;
   }
 
@@ -621,5 +623,251 @@
   &__date {
     font-size: $font-size-xs;
     color: $color-text-muted;
+  }
+}
+
+// Modal overlay
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: $spacing-lg;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: $radius-lg !important;
+  box-shadow: $shadow-xl !important;
+
+  &--wide {
+    max-width: 600px;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md $spacing-lg;
+    background: rgba($color-primary, 0.05);
+    border-bottom: 1px solid $color-border;
+
+    mat-card-title {
+      margin: 0;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $color-primary;
+    }
+  }
+
+  &__body {
+    padding: $spacing-lg;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    padding: $spacing-md $spacing-lg;
+    border-top: 1px solid $color-border;
+    background: $color-background;
+  }
+}
+
+.modal-close {
+  color: $color-text-muted;
+
+  &:hover {
+    color: $color-text-primary;
+  }
+}
+
+// Monthly breakdown text
+.breakdown-monthly {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-left: $spacing-xs;
+}
+
+// Breakdown item highlight
+.breakdown-item--highlight {
+  background: rgba($color-primary, 0.05);
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  margin: $spacing-sm 0;
+}
+
+// Scenario toggles
+.scenario-toggles {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+  flex-wrap: wrap;
+}
+
+.scenario-label {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+.scenario-toggle-group {
+  mat-button-toggle {
+    font-size: $font-size-xs;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: $spacing-xs;
+    }
+  }
+}
+
+// Visual chart
+.projection-visual-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200px;
+  padding: $spacing-md 0;
+  border-bottom: 1px solid $color-border;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.projection-chart-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  max-width: 60px;
+
+  &.selected {
+    .chart-bar-container {
+      opacity: 1;
+    }
+  }
+}
+
+.chart-bar-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.chart-bar {
+  width: 40%;
+  min-height: 4px;
+  border-radius: $radius-sm $radius-sm 0 0;
+  transition: height 0.3s ease;
+  cursor: pointer;
+
+  &--baseline {
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+  }
+
+  &--recycling {
+    background: linear-gradient(180deg, lighten($color-primary, 15%) 0%, $color-primary 100%);
+  }
+}
+
+.chart-bar-year {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  margin-top: $spacing-xs;
+}
+
+// Chart legend
+.chart-legend {
+  display: flex;
+  gap: $spacing-lg;
+  justify-content: center;
+  margin-bottom: $spacing-lg;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: $radius-sm;
+
+  &--baseline {
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+  }
+
+  &--recycling {
+    background: linear-gradient(180deg, lighten($color-primary, 15%) 0%, $color-primary 100%);
+  }
+}
+
+// Projection table
+.projection-table {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $spacing-sm $spacing-md;
+      text-align: right;
+      border-bottom: 1px solid $color-border;
+
+      &:first-child {
+        text-align: left;
+      }
+    }
+
+    th {
+      font-weight: 600;
+      color: $color-text-secondary;
+      background: $color-background;
+    }
+
+    td {
+      color: $color-text-primary;
+    }
+
+    .mono {
+      font-family: $font-family-mono;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .positive {
+      color: $color-positive;
+    }
+
+    .negative {
+      color: $color-negative;
+    }
   }
 }

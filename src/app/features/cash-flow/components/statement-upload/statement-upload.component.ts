@@ -1,13 +1,17 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { filter, switchMap } from 'rxjs/operators';
 import { BankStatementService } from '../../../../core/services/bank-statement.service';
 import { ExpenseService } from '../../../../core/services/expense.service';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import {
   BankStatementUploadResponse,
   BankTransactionResponse,
   ExpenseCategoryResponse,
-  StatementAnalysisResponse
+  StatementAnalysisResponse,
+  BankFormat,
+  BANK_FORMAT_OPTIONS
 } from '../../../../shared/models/cash-flow.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +29,7 @@ export class StatementUploadComponent implements OnInit {
   private fb = inject(FormBuilder);
   private statementService = inject(BankStatementService);
   private expenseService = inject(ExpenseService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   uploads = signal<BankStatementUploadResponse[]>([]);
   categories = signal<ExpenseCategoryResponse[]>([]);
@@ -35,6 +40,11 @@ export class StatementUploadComponent implements OnInit {
   isUploading = signal(false);
   uploadProgress = signal<string | null>(null);
   isDragOver = signal(false);
+  selectedFile = signal<File | null>(null);
+  isPdfFile = signal(false);
+
+  // Bank format options for PDF uploads
+  bankFormatOptions = BANK_FORMAT_OPTIONS;
 
   // Transactions view
   selectedUpload = signal<BankStatementUploadResponse | null>(null);
@@ -48,7 +58,8 @@ export class StatementUploadComponent implements OnInit {
 
   uploadForm: FormGroup = this.fb.group({
     accountName: [''],
-    institution: ['']
+    institution: [''],
+    bankFormat: ['']
   });
 
   ngOnInit(): void {
@@ -104,8 +115,36 @@ export class StatementUploadComponent implements OnInit {
   }
 
   handleFile(file: File): void {
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      this.error.set('Only CSV files are supported at this time');
+    const filename = file.name.toLowerCase();
+    const isCsv = filename.endsWith('.csv');
+    const isPdf = filename.endsWith('.pdf');
+
+    if (!isCsv && !isPdf) {
+      this.error.set('Only CSV and PDF files are supported');
+      return;
+    }
+
+    // Store file and set PDF flag
+    this.selectedFile.set(file);
+    this.isPdfFile.set(isPdf);
+
+    // For PDF files, wait for user to select bank format before uploading
+    if (isPdf) {
+      this.error.set(null);
+      return; // Don't auto-upload, wait for form submission
+    }
+
+    // For CSV files, upload immediately
+    this.uploadFile(file);
+  }
+
+  uploadFile(file: File): void {
+    const formValue = this.uploadForm.value;
+    const isPdf = file.name.toLowerCase().endsWith('.pdf');
+
+    // Validate bank format is selected for PDF
+    if (isPdf && !formValue.bankFormat) {
+      this.error.set('Please select your bank for PDF uploads');
       return;
     }
 
@@ -113,17 +152,19 @@ export class StatementUploadComponent implements OnInit {
     this.uploadProgress.set('Uploading...');
     this.error.set(null);
 
-    const formValue = this.uploadForm.value;
-
     this.statementService.uploadStatement(file, {
       accountName: formValue.accountName || undefined,
-      institution: formValue.institution || undefined
+      institution: formValue.institution || undefined,
+      bankFormat: isPdf ? formValue.bankFormat : undefined
     }).subscribe({
       next: (upload) => {
         this.uploadProgress.set(`Processed ${upload.transactionCount} transactions`);
         setTimeout(() => {
           this.isUploading.set(false);
           this.uploadProgress.set(null);
+          this.selectedFile.set(null);
+          this.isPdfFile.set(false);
+          this.uploadForm.patchValue({ bankFormat: '' });
           this.loadData();
         }, 1500);
       },
@@ -133,6 +174,19 @@ export class StatementUploadComponent implements OnInit {
         this.uploadProgress.set(null);
       }
     });
+  }
+
+  uploadSelectedPdf(): void {
+    const file = this.selectedFile();
+    if (file) {
+      this.uploadFile(file);
+    }
+  }
+
+  cancelPdfUpload(): void {
+    this.selectedFile.set(null);
+    this.isPdfFile.set(false);
+    this.uploadForm.patchValue({ bankFormat: '' });
   }
 
   viewTransactions(upload: BankStatementUploadResponse): void {
@@ -157,14 +211,15 @@ export class StatementUploadComponent implements OnInit {
   }
 
   deleteUpload(upload: BankStatementUploadResponse): void {
-    if (!confirm(`Are you sure you want to delete "${upload.filename}"? All transactions will be removed.`)) {
-      return;
-    }
-
-    this.statementService.deleteUpload(upload.id).subscribe({
-      next: () => this.loadData(),
-      error: () => this.error.set('Failed to delete statement')
-    });
+    this.confirmDialog.confirmDelete(upload.filename, 'All transactions will be removed.')
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.statementService.deleteUpload(upload.id))
+      )
+      .subscribe({
+        next: () => this.loadData(),
+        error: () => this.error.set('Failed to delete statement')
+      });
   }
 
   categoriseTransaction(transaction: BankTransactionResponse, categoryId: string): void {

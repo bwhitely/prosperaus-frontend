@@ -175,13 +175,14 @@
 
 .feature-card {
   text-align: center;
-  transition: all $transition-slow $ease-out-expo;
-  border: none !important;
-  box-shadow: $shadow-sm !important;
+  transition: border-color $transition-base, box-shadow $transition-base;
+  border: 1px solid $color-border !important;
+  box-shadow: $shadow-card !important;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: $shadow-lg !important;
+    border-color: $color-border-strong !important;
+    box-shadow: $shadow-card-hover !important;
+    // Design principle: No transform - subtle shadow change only
   }
 
   mat-card-content {
@@ -189,19 +190,19 @@
   }
 
   &__icon {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     margin: 0 auto $spacing-md;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba($color-primary, 0.08);
-    border-radius: $radius-lg;
+    background: rgba($color-primary, 0.06);
+    border-radius: $radius-md;
 
     .mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
       color: $color-primary;
     }
   }
@@ -431,6 +432,156 @@
   &__role {
     font-size: $font-size-xs;
     color: $color-text-muted;
+  }
+}
+
+// ===========================================
+// ROADMAP SECTION
+// ===========================================
+.roadmap {
+  padding: $spacing-4xl 0;
+  background: $color-surface-alt;
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-3xl;
+  }
+
+  &__title {
+    font-family: $font-family-display;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $color-text-secondary;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__grid {
+    display: grid;
+    gap: $spacing-lg;
+
+    @include respond-to(md) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @include respond-to(lg) {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+
+  &__card {
+    border: 1px solid $color-border !important;
+    transition: border-color $transition-base, box-shadow $transition-base;
+
+    &:hover {
+      border-color: $color-border-strong !important;
+      box-shadow: $shadow-card-hover !important;
+      // Design principle: No transform - subtle shadow change only
+    }
+
+    &--featured {
+      border-color: $color-primary !important;
+      background: linear-gradient(180deg, rgba($color-primary, 0.02) 0%, transparent 100%);
+
+      @include respond-to(md) {
+        grid-row: span 2;
+      }
+
+      @include respond-to(lg) {
+        grid-row: span 1;
+      }
+
+      .roadmap__badge {
+        background: $color-primary;
+        color: white;
+      }
+    }
+
+    mat-card-content {
+      padding: $spacing-xl;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: $spacing-xs $spacing-sm;
+    background: rgba($color-primary, 0.1);
+    color: $color-primary;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-wider;
+    border-radius: $radius-full;
+    margin-bottom: $spacing-md;
+
+    &--planned {
+      background: rgba($color-text-muted, 0.1);
+      color: $color-text-muted;
+    }
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($color-primary, 0.08);
+    border-radius: $radius-lg;
+    margin-bottom: $spacing-md;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: $color-primary;
+    }
+  }
+
+  &__card-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__card-description {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: $line-height-relaxed;
+    margin-bottom: $spacing-md;
+    flex: 1;
+  }
+
+  &__features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin-bottom: $spacing-xs;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: $color-accent;
+      }
+    }
   }
 }
 

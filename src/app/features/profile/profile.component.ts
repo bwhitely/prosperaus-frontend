@@ -23,6 +23,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { ProfileService, UserProfile, TaxResidency, ProfileUpdateRequest } from '../../core/services/profile.service';
 import { NetWorthService } from '../../core/services/net-worth.service';
 import { SubscriptionService } from '../../core/services/subscription.service';
+import { FREE_ACCESS_MODE } from '../../core/auth/subscription.guard';
 import { PropertyService } from '../../core/services/property.service';
 import { SuperAccountService } from '../../core/services/super-account.service';
 import { InvestmentService } from '../../core/services/investment.service';
@@ -167,6 +168,44 @@ export class ProfileComponent implements OnInit {
     this.loadProfile();
     this.loadNetWorth();
     this.loadCashFlowSummary();
+    // Eagerly load asset/liability counts so they appear immediately
+    this.loadAllAssetCounts();
+  }
+
+  /**
+   * Load all asset/liability data so counts appear immediately
+   * without waiting for user to expand sections.
+   */
+  private loadAllAssetCounts(): void {
+    // Load properties count
+    this.propertyService.getProperties().subscribe({
+      next: (data) => this.properties.set(data),
+      error: () => {} // Silently fail
+    });
+
+    // Load super accounts count
+    this.superAccountService.getAll().subscribe({
+      next: (data) => this.superAccounts.set(data),
+      error: () => {}
+    });
+
+    // Load investments count
+    this.investmentService.getAll().subscribe({
+      next: (data) => this.investments.set(data),
+      error: () => {}
+    });
+
+    // Load cash accounts count
+    this.cashLiabilityService.getCashAccounts().subscribe({
+      next: (data) => this.cashAccounts.set(data),
+      error: () => {}
+    });
+
+    // Load liabilities count
+    this.cashLiabilityService.getLiabilities().subscribe({
+      next: (data) => this.liabilities.set(data),
+      error: () => {}
+    });
   }
 
   setTab(tab: ProfileTab): void {
@@ -404,6 +443,11 @@ export class ProfileComponent implements OnInit {
   }
 
   getSubscriptionStatusLabel(): string {
+    // During free access mode, show beta status
+    if (FREE_ACCESS_MODE) {
+      return 'Free (Beta)';
+    }
+
     const sub = this.subscription();
     if (!sub) return 'Free';
 
@@ -417,6 +461,11 @@ export class ProfileComponent implements OnInit {
   }
 
   getSubscriptionStatusClass(): string {
+    // During free access mode, show pro styling
+    if (FREE_ACCESS_MODE) {
+      return 'pro';
+    }
+
     const sub = this.subscription();
     if (!sub) return 'free';
 

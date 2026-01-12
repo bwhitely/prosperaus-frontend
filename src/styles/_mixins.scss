@@ -1,13 +1,14 @@
 @use 'variables' as *;
 
 // ===========================================
-// CARD MIXINS - Refined Luxury
+// CARD MIXINS - Sophisticated & Trustworthy
+// Design principle: Borders + subtle shadows, minimal transform on hover
 // ===========================================
 @mixin card {
   background: $color-surface;
   border: 1px solid $color-border;
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
+  box-shadow: $shadow-card;
   padding: $spacing-lg;
 }
 
@@ -21,12 +22,12 @@
 
 @mixin card-hover {
   @include card;
-  transition: all $transition-slow $ease-out-expo;
+  transition: border-color $transition-base, box-shadow $transition-base;
 
   &:hover {
     border-color: $color-border-strong;
-    box-shadow: $shadow-lg;
-    transform: translateY(-2px);
+    box-shadow: $shadow-card-hover;
+    // Note: No transform - subtle shadow change only (design principle: restraint)
   }
 }
 

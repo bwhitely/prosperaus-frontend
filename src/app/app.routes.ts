@@ -68,40 +68,35 @@ export const routes: Routes = [
     title: 'Get Started - ProsperAus'
   },
 
-  // Free calculators (require auth + onboarding, but no Pro subscription)
+  // Public calculators (no auth required for SEO - save scenarios require login)
   {
     path: 'equity-recycling',
     loadComponent: () => import('./features/equity-recycling/equity-recycling.component')
       .then(m => m.EquityRecyclingComponent),
-    canActivate: [authGuard, onboardingGuard],
     title: 'Equity Recycling Calculator - ProsperAus'
   },
   {
     path: 'fire-calculator',
     loadComponent: () => import('./features/fire-calculator/fire-calculator.component')
       .then(m => m.FireCalculatorComponent),
-    canActivate: [authGuard, onboardingGuard],
     title: 'FIRE Calculator - ProsperAus'
   },
   {
     path: 'super-optimiser',
     loadComponent: () => import('./features/super-optimiser/super-optimiser.component')
       .then(m => m.SuperOptimiserComponent),
-    canActivate: [authGuard, onboardingGuard],
     title: 'Super Optimiser - ProsperAus'
   },
   {
     path: 'property-analyser',
     loadComponent: () => import('./features/property-analyser/property-analyser.component')
       .then(m => m.PropertyAnalyserComponent),
-    canActivate: [authGuard, onboardingGuard],
     title: 'Property Analyser - ProsperAus'
   },
   {
     path: 'mortgage-calculator',
     loadComponent: () => import('./features/mortgage-calculator/mortgage-calculator.component')
       .then(m => m.MortgageCalculatorComponent),
-    canActivate: [authGuard, onboardingGuard],
     title: 'Mortgage Calculator - ProsperAus'
   },
 
@@ -124,13 +119,6 @@ export const routes: Routes = [
   },
 
   // Pro features (require auth + onboarding + Pro subscription)
-  {
-    path: 'portfolio',
-    loadComponent: () => import('./features/portfolio-analyser/portfolio-analyser.component')
-      .then(m => m.PortfolioAnalyserComponent),
-    canActivate: [authGuard, onboardingGuard, paidFeatureGuard],
-    title: 'Portfolio Analyser - ProsperAus'
-  },
   {
     path: 'analyse',
     loadComponent: () => import('./features/statement-analyser/statement-analyser.component')

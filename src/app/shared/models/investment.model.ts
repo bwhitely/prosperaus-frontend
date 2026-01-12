@@ -6,6 +6,7 @@ export interface InvestmentHoldingRequest {
   costBase: number;
   acquisitionDate?: string;
   currentPrice?: number;
+  mer?: number;
 }
 
 export interface InvestmentHoldingResponse {
@@ -34,10 +35,29 @@ export interface InvestmentHoldingResponse {
 export interface StockQuote {
   symbol: string;
   name: string;
+  quoteType?: string;  // "ETF", "EQUITY", "MUTUALFUND", etc.
   price: number;
   change: number;
   changePercent: number;
   lastUpdated: string;
+
+  // ETF-specific fields (null for stocks)
+  mer?: number;              // Management Expense Ratio (decimal, e.g., 0.0007 for 0.07%)
+  yield?: number;            // Dividend yield (decimal)
+  category?: string;         // Fund category
+  fundFamily?: string;       // Issuer/fund family
+
+  // Sector weightings (for ETFs)
+  sectorWeightings?: Record<string, number>;
+
+  // Top holdings (for ETFs)
+  topHoldings?: TopHolding[];
+}
+
+export interface TopHolding {
+  symbol: string;
+  name?: string;
+  holdingPercent?: number;
 }
 
 // Security search

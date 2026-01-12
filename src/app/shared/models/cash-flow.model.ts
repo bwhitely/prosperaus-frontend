@@ -88,11 +88,22 @@ export interface UserExpenseResponse {
 
 export type UploadStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'awaiting_analysis';
 
+export type BankFormat = 'CBA' | 'WESTPAC' | 'ANZ' | 'NAB' | 'GENERIC';
+
+export const BANK_FORMAT_OPTIONS: { value: BankFormat; label: string }[] = [
+  { value: 'CBA', label: 'Commonwealth Bank' },
+  { value: 'WESTPAC', label: 'Westpac' },
+  { value: 'ANZ', label: 'ANZ' },
+  { value: 'NAB', label: 'NAB' },
+  { value: 'GENERIC', label: 'Other Bank' }
+];
+
 export interface BankStatementUploadRequest {
   accountName?: string;
   institution?: string;
   periodStart?: string;
   periodEnd?: string;
+  bankFormat?: BankFormat;
 }
 
 export interface BankStatementUploadResponse {
@@ -187,6 +198,5 @@ export interface StatementAnalysisResponse {
   summary: AnalysisSummary;
   categorySuggestions: CategorySuggestion[];
   insights: string[];
-  optimisationSuggestions: string[];
   spendingSummary: SpendingSummary;
 }

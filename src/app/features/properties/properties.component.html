@@ -158,7 +158,7 @@
           <div class="form-group">
             <label for="interestRate">Interest Rate *</label>
             <div class="input-suffix">
-              <input type="number" id="interestRate" formControlName="interestRate" step="0.01">
+              <input type="number" id="interestRate" formControlName="interestRate" step="0.01" appTwoDecimal>
               <span class="suffix">%</span>
             </div>
           </div>
@@ -295,7 +295,10 @@
                       }
                     </span>
                     <span class="mortgage-item__details">
-                      {{ mortgage.effectiveBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                      {{ mortgage.currentBalance | currency:'AUD':'symbol-narrow':'1.0-0' }}
+                      @if (mortgage.offsetBalance > 0) {
+                        <span class="offset-badge">({{ mortgage.offsetBalance | currency:'AUD':'symbol-narrow':'1.0-0' }} offset)</span>
+                      }
                       @ {{ mortgage.interestRate * 100 | number:'1.2-2' }}%
                       @if (mortgage.isFixed) {
                         (Fixed)

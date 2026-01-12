@@ -11,7 +11,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { filter, switchMap } from 'rxjs/operators';
 import { ExpenseService } from '../../../../core/services/expense.service';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import {
   UserExpenseRequest,
   UserExpenseResponse,
@@ -47,6 +49,7 @@ export class ExpenseListComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private expenseService = inject(ExpenseService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   expenses = signal<UserExpenseResponse[]>([]);
   categories = signal<ExpenseCategoryResponse[]>([]);
@@ -225,15 +228,16 @@ export class ExpenseListComponent implements OnInit {
   }
 
   deleteExpense(expense: UserExpenseResponse): void {
-    if (!confirm(`Are you sure you want to delete "${expense.name}"?`)) {
-      return;
-    }
-
-    this.expenseService.deleteExpense(expense.id).subscribe({
-      next: () => {
-        this.loadData();
-        this.changed.emit();
-      },
+    this.confirmDialog.confirmDelete(expense.name)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.expenseService.deleteExpense(expense.id))
+      )
+      .subscribe({
+        next: () => {
+          this.loadData();
+          this.changed.emit();
+        },
       error: () => this.error.set('Failed to delete expense')
     });
   }
@@ -299,14 +303,15 @@ export class ExpenseListComponent implements OnInit {
 
   deleteCategory(category: ExpenseCategoryResponse): void {
     if (category.isSystemDefault) return;
-    if (!confirm(`Are you sure you want to delete category "${category.name}"? Expenses in this category will become uncategorised.`)) {
-      return;
-    }
-
-    this.expenseService.deleteCategory(category.id).subscribe({
-      next: () => this.loadData(),
-      error: () => this.error.set('Failed to delete category')
-    });
+    this.confirmDialog.confirmDelete(category.name, 'Expenses in this category will become uncategorised.')
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.expenseService.deleteCategory(category.id))
+      )
+      .subscribe({
+        next: () => this.loadData(),
+        error: () => this.error.set('Failed to delete category')
+      });
   }
 
   formatFrequency(freq: string): string {

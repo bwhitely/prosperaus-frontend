@@ -1,8 +1,10 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { filter, switchMap } from 'rxjs/operators';
 import { SuperAccountService } from '../../core/services/super-account.service';
 import { IncomeService } from '../../core/services/income.service';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import { SuperAccountRequest, SuperAccountResponse } from '../../shared/models/super-account.model';
 import { IncomeSourceResponse } from '../../shared/models/cash-flow.model';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,6 +23,7 @@ export class SuperAccountsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private superService = inject(SuperAccountService);
   private incomeService = inject(IncomeService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   accounts = signal<SuperAccountResponse[]>([]);
   isLoading = signal(true);
@@ -233,14 +236,15 @@ export class SuperAccountsComponent implements OnInit {
   }
 
   delete(account: SuperAccountResponse): void {
-    if (!confirm(`Are you sure you want to delete "${account.fundName}"?`)) {
-      return;
-    }
-
-    this.superService.delete(account.id).subscribe({
-      next: () => this.loadAccounts(),
-      error: () => this.error.set('Failed to delete super account')
-    });
+    this.confirmDialog.confirmDelete(account.fundName)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.superService.delete(account.id))
+      )
+      .subscribe({
+        next: () => this.loadAccounts(),
+        error: () => this.error.set('Failed to delete super account')
+      });
   }
 
   toggleAdvanced(): void {

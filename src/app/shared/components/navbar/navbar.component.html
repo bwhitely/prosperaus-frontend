@@ -41,10 +41,6 @@
             <mat-icon>payments</mat-icon>
             <span>Income & Expenses</span>
           </button>
-          <button mat-menu-item (click)="navigateTo('/portfolio')">
-            <mat-icon>pie_chart</mat-icon>
-            <span>Portfolio Analysis</span>
-          </button>
         </mat-menu>
 
         <!-- Tools Menu -->
@@ -124,8 +120,39 @@
       </button>
     } @else {
       <!-- Desktop Navigation (Not Authenticated) -->
+      <nav class="navbar__nav hide-mobile">
+        <!-- Calculators Menu (public) -->
+        <button mat-button [matMenuTriggerFor]="publicToolsMenu" class="navbar__link">
+          Calculators
+          <mat-icon iconPositionEnd>expand_more</mat-icon>
+        </button>
+        <mat-menu #publicToolsMenu="matMenu" class="navbar__menu">
+          <button mat-menu-item (click)="navigateTo('/equity-recycling')">
+            <mat-icon>autorenew</mat-icon>
+            <span>Equity Recycling</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/fire-calculator')">
+            <mat-icon>local_fire_department</mat-icon>
+            <span>FIRE Calculator</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/super-optimiser')">
+            <mat-icon>savings</mat-icon>
+            <span>Super Optimiser</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/property-analyser')">
+            <mat-icon>home</mat-icon>
+            <span>Property Analyser</span>
+          </button>
+          <button mat-menu-item (click)="navigateTo('/mortgage-calculator')">
+            <mat-icon>account_balance</mat-icon>
+            <span>Mortgage Calculator</span>
+          </button>
+        </mat-menu>
+
+        <a mat-button routerLink="/pricing" class="navbar__link">Pricing</a>
+      </nav>
+
       <div class="navbar__actions hide-mobile">
-        <a mat-button routerLink="/pricing">Pricing</a>
         <a mat-button routerLink="/auth/login">Sign in</a>
         <a mat-flat-button color="primary" routerLink="/auth/signup">Get Started</a>
       </div>
@@ -171,10 +198,6 @@
         <a mat-button class="navbar__mobile-link" routerLink="/income-expenses" routerLinkActive="active" (click)="toggleMobileMenu()">
           <mat-icon>payments</mat-icon>
           Income & Expenses
-        </a>
-        <a mat-button class="navbar__mobile-link" routerLink="/portfolio" routerLinkActive="active" (click)="toggleMobileMenu()">
-          <mat-icon>pie_chart</mat-icon>
-          Portfolio Analysis
         </a>
 
         <div class="navbar__mobile-section">Tools</div>
@@ -225,6 +248,29 @@
           Sign out
         </button>
       } @else {
+        <div class="navbar__mobile-section">Calculators</div>
+        <a mat-button class="navbar__mobile-link" routerLink="/equity-recycling" (click)="toggleMobileMenu()">
+          <mat-icon>autorenew</mat-icon>
+          Equity Recycling
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/fire-calculator" (click)="toggleMobileMenu()">
+          <mat-icon>local_fire_department</mat-icon>
+          FIRE Calculator
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/super-optimiser" (click)="toggleMobileMenu()">
+          <mat-icon>savings</mat-icon>
+          Super Optimiser
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/property-analyser" (click)="toggleMobileMenu()">
+          <mat-icon>home</mat-icon>
+          Property Analyser
+        </a>
+        <a mat-button class="navbar__mobile-link" routerLink="/mortgage-calculator" (click)="toggleMobileMenu()">
+          <mat-icon>account_balance</mat-icon>
+          Mortgage Calculator
+        </a>
+
+        <div class="navbar__mobile-section">Account</div>
         <a mat-button class="navbar__mobile-link" routerLink="/pricing" (click)="toggleMobileMenu()">
           <mat-icon>sell</mat-icon>
           Pricing

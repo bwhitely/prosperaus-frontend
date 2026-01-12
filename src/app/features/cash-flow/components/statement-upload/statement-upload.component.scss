@@ -66,6 +66,12 @@
   gap: $spacing-md;
 }
 
+.pdf-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
 .info-banner {
   display: flex;
   align-items: center;

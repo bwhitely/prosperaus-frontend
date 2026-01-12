@@ -1,7 +1,9 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, Output, EventEmitter, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { filter, switchMap } from 'rxjs/operators';
 import { IncomeService } from '../../../../core/services/income.service';
+import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import { IncomeSourceRequest, IncomeSourceResponse, IncomeFrequency } from '../../../../shared/models/cash-flow.model';
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatIconModule } from '@angular/material/icon';
@@ -38,6 +40,7 @@ export class IncomeListComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private incomeService = inject(IncomeService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   incomeSources = signal<IncomeSourceResponse[]>([]);
   isLoading = signal(true);
@@ -208,15 +211,16 @@ export class IncomeListComponent implements OnInit {
   }
 
   delete(source: IncomeSourceResponse): void {
-    if (!confirm(`Are you sure you want to delete "${source.name}"?`)) {
-      return;
-    }
-
-    this.incomeService.delete(source.id).subscribe({
-      next: () => {
-        this.loadIncomeSources();
-        this.changed.emit();
-      },
+    this.confirmDialog.confirmDelete(source.name)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.incomeService.delete(source.id))
+      )
+      .subscribe({
+        next: () => {
+          this.loadIncomeSources();
+          this.changed.emit();
+        },
       error: () => this.error.set('Failed to delete income source')
     });
   }

@@ -8,7 +8,7 @@
       </div>
 
       <h1 class="hero__title">
-        <span class="hero__title-line">Build Wealth.</span>
+        <span class="hero__title-line">Understand Your Financial Picture.</span>
         <span class="hero__title-line hero__title-line--accent">The Australian Way.</span>
       </h1>
 
@@ -141,11 +141,57 @@
     </div>
   </section>
 
+  <!-- Roadmap Section -->
+  <section class="roadmap">
+    <div class="container">
+      <div class="roadmap__header">
+        <h2 class="roadmap__title">Coming Soon</h2>
+        <p class="roadmap__subtitle">
+          We're constantly improving ProsperAus. Here's what's on the horizon.
+        </p>
+      </div>
+
+      <div class="roadmap__grid">
+        <mat-card class="roadmap__card roadmap__card--featured">
+          <mat-card-content>
+            <div class="roadmap__badge">In Development</div>
+            <div class="roadmap__icon">
+              <mat-icon>account_balance</mat-icon>
+            </div>
+            <h3 class="roadmap__card-title">OpenBanking Integration</h3>
+            <p class="roadmap__card-description">
+              Connect your bank accounts and super funds securely via Consumer Data Right (CDR).
+              Automatic balance updates, transaction imports, and real-time net worth tracking.
+            </p>
+            <ul class="roadmap__features">
+              <li><mat-icon>check</mat-icon> Auto-sync bank balances</li>
+              <li><mat-icon>check</mat-icon> Super fund integration</li>
+              <li><mat-icon>check</mat-icon> Transaction categorisation</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="roadmap__card">
+          <mat-card-content>
+            <div class="roadmap__badge roadmap__badge--planned">Planned</div>
+            <div class="roadmap__icon">
+              <mat-icon>download</mat-icon>
+            </div>
+            <h3 class="roadmap__card-title">Data Export & Reports</h3>
+            <p class="roadmap__card-description">
+              Export your data to CSV/PDF. Generate tax-time reports with all your franking credits and CGT calculations.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA Section -->
   <section class="cta">
     <div class="container">
       <div class="cta__content">
-        <h2 class="cta__title">Ready to Build Your Wealth?</h2>
+        <h2 class="cta__title">Ready to Start Tracking Your Wealth?</h2>
         <p class="cta__description">
           Start tracking, optimising, and growing your wealth today.
         </p>
@@ -168,12 +214,13 @@
           <a routerLink="/" class="footer__logo">
             <span class="footer__logo-prosper">Prosper</span><span class="footer__logo-aus">Aus</span>
           </a>
-          <p class="footer__tagline">Build wealth the Australian way.</p>
+          <p class="footer__tagline">Wealth tracking, the Australian way.</p>
         </div>
 
         <div class="footer__links">
           <div class="footer__section">
             <h4>Tools</h4>
+            <a routerLink="/mortgage-calculator">Mortgage Calculator</a>
             <a routerLink="/equity-recycling">Equity Recycling</a>
             <a routerLink="/fire-calculator">FIRE Calculator</a>
             <a routerLink="/super-optimiser">Super Optimiser</a>

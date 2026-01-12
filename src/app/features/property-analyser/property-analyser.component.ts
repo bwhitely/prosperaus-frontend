@@ -11,6 +11,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TwoDecimalDirective } from '../../shared/directives/two-decimal.directive';
 import { PropertyAnalyserService } from '../../core/services/property-analyser.service';
 import { PropertyAnalysisRequest, PropertyAnalysisResponse, YearProjection, CgtScenario } from '../../shared/models/property-analysis.model';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
@@ -31,7 +32,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatTabsModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
-    MatTooltipModule
+    MatTooltipModule,
+    TwoDecimalDirective
   ],
   templateUrl: './property-analyser.component.html',
   styleUrl: './property-analyser.component.scss',

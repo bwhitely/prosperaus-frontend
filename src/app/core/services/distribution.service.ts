@@ -5,7 +5,8 @@ import { environment } from '../../../environments/environment';
 import {
   DistributionRequest,
   DistributionResponse,
-  DistributionSummaryResponse
+  DistributionSummaryResponse,
+  DividendProjectionResponse
 } from '../../shared/models/distribution.model';
 
 @Injectable({
@@ -69,5 +70,12 @@ export class DistributionService {
    */
   getSummaryForYear(financialYear: string): Observable<DistributionSummaryResponse> {
     return this.http.get<DistributionSummaryResponse>(`${this.baseUrl}/summary/${financialYear}`);
+  }
+
+  /**
+   * Get dividend projections based on current holdings and yield data.
+   */
+  getProjections(): Observable<DividendProjectionResponse> {
+    return this.http.get<DividendProjectionResponse>(`${this.baseUrl}/projections`);
   }
 }

@@ -4,12 +4,16 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { filter, switchMap } from 'rxjs/operators';
 import { DistributionService } from '../../core/services/distribution.service';
 import { InvestmentService } from '../../core/services/investment.service';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import {
   DistributionResponse,
   DistributionSummaryResponse,
-  DistributionRequest
+  DistributionRequest,
+  DividendProjectionResponse,
+  HoldingDistributionSummary
 } from '../../shared/models/distribution.model';
 import { InvestmentHoldingResponse } from '../../shared/models/investment.model';
 
@@ -28,9 +32,11 @@ export class DividendsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private distributionService = inject(DistributionService);
   private investmentService = inject(InvestmentService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   distributions = signal<DistributionResponse[]>([]);
   summary = signal<DistributionSummaryResponse | null>(null);
+  projections = signal<DividendProjectionResponse | null>(null);
   holdings = signal<InvestmentHoldingResponse[]>([]);
 
   isLoading = signal(true);
@@ -40,7 +46,7 @@ export class DividendsComponent implements OnInit {
   editing = signal<DistributionResponse | null>(null);
   isSubmitting = signal(false);
 
-  activeTab = signal<'summary' | 'list'>('summary');
+  activeTab = signal<'summary' | 'list' | 'projections' | 'tax-report'>('summary');
   selectedYear = signal<string | null>(null);
 
   distributionForm: FormGroup = this.fb.group({
@@ -97,9 +103,15 @@ export class DividendsComponent implements OnInit {
       next: (data) => this.distributions.set(data),
       error: (err) => console.error('Failed to load distributions:', err)
     });
+
+    // Load projections
+    this.distributionService.getProjections().subscribe({
+      next: (data) => this.projections.set(data),
+      error: (err) => console.error('Failed to load projections:', err)
+    });
   }
 
-  setTab(tab: 'summary' | 'list'): void {
+  setTab(tab: 'summary' | 'list' | 'projections' | 'tax-report'): void {
     this.activeTab.set(tab);
   }
 
@@ -183,12 +195,16 @@ export class DividendsComponent implements OnInit {
   }
 
   deleteDistribution(distribution: DistributionResponse): void {
-    if (!confirm(`Delete ${distribution.ticker} distribution from ${distribution.distributionDate}?`)) return;
-
-    this.distributionService.deleteDistribution(distribution.id).subscribe({
-      next: () => this.loadData(),
-      error: () => this.error.set('Failed to delete distribution')
-    });
+    const name = `${distribution.ticker} distribution from ${distribution.distributionDate}`;
+    this.confirmDialog.confirmDelete(name)
+      .pipe(
+        filter(confirmed => confirmed),
+        switchMap(() => this.distributionService.deleteDistribution(distribution.id))
+      )
+      .subscribe({
+        next: () => this.loadData(),
+        error: () => this.error.set('Failed to delete distribution')
+      });
   }
 
   getDistributionTypeLabel(type: string): string {
@@ -214,5 +230,31 @@ export class DividendsComponent implements OnInit {
     const s = this.summary();
     if (!s) return 0;
     return s.totalDividends - this.getFrankedDividends();
+  }
+
+  // Calculate franked portion for a specific holding
+  getHoldingFranked(holding: HoldingDistributionSummary): number {
+    if (!holding.totalFrankingCredits) return 0;
+    return holding.totalFrankingCredits / this.FRANKING_CREDIT_FACTOR;
+  }
+
+  // Calculate unfranked portion for a specific holding
+  getHoldingUnfranked(holding: HoldingDistributionSummary): number {
+    return holding.totalDividends - this.getHoldingFranked(holding);
+  }
+
+  // Copy tax values to clipboard
+  copyToClipboard(): void {
+    const s = this.summary();
+    if (!s) return;
+
+    const text = `Tax Return - Dividends (Item 11)
+FY ${s.financialYearDisplay}
+Unfranked Amount: $${this.getUnfrankedDividends().toFixed(2)}
+Franked Amount: $${this.getFrankedDividends().toFixed(2)}
+Franking Credit: $${s.totalFrankingCredits.toFixed(2)}
+Total (A + B + C): $${s.totalGrossedUp.toFixed(2)}`;
+
+    navigator.clipboard.writeText(text);
   }
 }

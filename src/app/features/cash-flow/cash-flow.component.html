@@ -20,7 +20,7 @@
 <!-- Summary Cards -->
 <div class="summary-cards">
   <div class="summary-card">
-    <span class="summary-card__label">Annual Income</span>
+    <span class="summary-card__label">Annual Income (post-tax)</span>
     <span class="summary-card__value positive">
       {{ ((summary()?.totalMonthlyIncome ?? 0) * 12) | currency:'AUD':'symbol-narrow':'1.0-0' }}
     </span>

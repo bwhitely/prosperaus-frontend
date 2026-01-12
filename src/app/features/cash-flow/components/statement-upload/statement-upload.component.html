@@ -74,20 +74,6 @@
         </div>
       }
 
-      <!-- Optimisation Suggestions -->
-      @if (analysisResult()!.optimisationSuggestions.length > 0) {
-        <div class="analysis-section">
-          <h3>Saving Opportunities</h3>
-          <ul class="suggestions-list">
-            @for (suggestion of analysisResult()!.optimisationSuggestions; track suggestion) {
-              <li class="suggestion-item">
-                <span class="suggestion-icon">💰</span>
-                {{ suggestion }}
-              </li>
-            }
-          </ul>
-        </div>
-      }
 
       <!-- Top Merchants -->
       @if (analysisResult()!.spendingSummary.topMerchants.length > 0) {
@@ -141,7 +127,7 @@
       <input
         #fileInput
         type="file"
-        accept=".csv"
+        accept=".csv,.pdf"
         (change)="onFileSelect($event)"
         hidden>
 
@@ -150,17 +136,42 @@
           <div class="loading-spinner"></div>
           <p>{{ uploadProgress() }}</p>
         </div>
+      } @else if (isPdfFile() && selectedFile()) {
+        <div class="upload-zone__content">
+          <span class="upload-zone__icon">📄</span>
+          <p class="upload-zone__text">{{ selectedFile()!.name }}</p>
+          <p class="upload-zone__hint">PDF selected - please choose your bank below</p>
+        </div>
       } @else {
         <div class="upload-zone__content">
           <span class="upload-zone__icon">📂</span>
-          <p class="upload-zone__text">Drop CSV files here or click to upload</p>
-          <p class="upload-zone__hint">Supports .csv format</p>
-          <p class="upload-zone__hint">Required columns: processed_date,description,amount,type</p>
+          <p class="upload-zone__text">Drop CSV or PDF files here or click to upload</p>
+          <p class="upload-zone__hint">Supports .csv and .pdf formats</p>
+          <p class="upload-zone__hint">CSV: Required columns - processed_date, description, amount, type</p>
         </div>
       }
     </div>
 
     <div class="upload-options" [formGroup]="uploadForm">
+      @if (isPdfFile()) {
+        <div class="form-group">
+          <label for="bankFormat">Bank (required for PDF) *</label>
+          <select id="bankFormat" formControlName="bankFormat" class="form-control">
+            <option value="">-- Select your bank --</option>
+            @for (bank of bankFormatOptions; track bank.value) {
+              <option [value]="bank.value">{{ bank.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="pdf-actions">
+          <button class="btn btn--primary" (click)="uploadSelectedPdf()" [disabled]="isUploading()">
+            Upload PDF
+          </button>
+          <button class="btn btn--secondary" (click)="cancelPdfUpload()">
+            Cancel
+          </button>
+        </div>
+      }
       <div class="form-group">
         <label for="accountName">Account Name (optional)</label>
         <input type="text" id="accountName" formControlName="accountName"
@@ -188,9 +199,7 @@
           Analyse All Statements with AI
         }
       </button>
-      <p class="analyse-hint">Uses Claude Sonnet 4.5 to go over your expenses and income and automatically categorize them.</p>
-      <p class="analyse-hint">Be mindful of personal information included in the file.</p>
-      <p class="analyse-hint">.csv format is preferred.</p>
+      <p class="analyse-hint">Analyses bank statements using AI.</p>
     </div>
   }
 
@@ -251,7 +260,7 @@
     <div class="empty-state">
       <span class="empty-state__icon">📊</span>
       <h3>No statements uploaded yet</h3>
-      <p>Upload a CSV bank statement to get started with AI-powered spending analysis.</p>
+      <p>Upload a CSV or PDF bank statement to get started with AI-powered spending analysis.</p>
     </div>
   }
 } @else {

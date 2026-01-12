@@ -48,11 +48,12 @@
 .stat-card {
   @include card;
   text-align: center;
-  transition: all $transition-slow $ease-out-expo;
+  transition: border-color $transition-base, box-shadow $transition-base;
 
   &:hover {
     border-color: $color-border-strong;
-    transform: translateY(-2px);
+    box-shadow: $shadow-card-hover;
+    // Design principle: No transform - subtle shadow change only
   }
 
   &__label {
