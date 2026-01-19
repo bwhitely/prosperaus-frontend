@@ -544,16 +544,21 @@
               <div class="detail-section">
                 <h4>Property vs ETF Comparison</h4>
                 <p class="comparison-intro">
-                  Comparing investing {{ formatCurrency(r.etfComparison.initialInvestment) }} in this property
-                  vs investing the same amount in ETFs at {{ formatPercent(r.etfComparison.returnRate) }} p.a.
+                  Comparing this property vs ETFs at {{ formatPercent(r.etfComparison.returnRate) }} p.a.
+                </p>
+                <p class="comparison-methodology">
+                  <small>
+                    Fair comparison: both scenarios use the same total cash outlay.
+                    When the property has negative cash flow, that amount is added to the ETF investment.
+                  </small>
                 </p>
 
-                <div class="comparison-result" [class.property-wins]="r.etfComparison.difference > 0" [class.etf-wins]="r.etfComparison.difference < 0">
+                <div class="comparison-result" [class.property-wins]="r.etfComparison.winner === 'Property'" [class.etf-wins]="r.etfComparison.winner === 'ETF'">
                   <div class="winner-badge">
-                    @if (r.etfComparison.difference > 0) {
+                    @if (r.etfComparison.winner === 'Property') {
                       <mat-icon>home</mat-icon>
                       Property Wins
-                    } @else if (r.etfComparison.difference < 0) {
+                    } @else if (r.etfComparison.winner === 'ETF') {
                       <mat-icon>show_chart</mat-icon>
                       ETF Wins
                     } @else {
@@ -573,8 +578,14 @@
                     <mat-card-content>
                       <h5>Property</h5>
                       <div class="metric">
+                        <span class="label">Total Invested</span>
+                        <span class="value">{{ formatCurrency(r.etfComparison.totalPropertyInvested) }}</span>
+                      </div>
+                      <div class="metric">
                         <span class="label">Total Return</span>
-                        <span class="value">{{ formatCurrency(r.etfComparison.propertyTotalReturn) }}</span>
+                        <span class="value" [class.positive]="r.etfComparison.propertyTotalReturn > 0" [class.negative]="r.etfComparison.propertyTotalReturn < 0">
+                          {{ formatCurrency(r.etfComparison.propertyTotalReturn) }}
+                        </span>
                       </div>
                       <div class="metric">
                         <span class="label">Annualised Return</span>
@@ -587,12 +598,18 @@
                     <mat-card-content>
                       <h5>ETF Portfolio</h5>
                       <div class="metric">
-                        <span class="label">Total Return</span>
-                        <span class="value">{{ formatCurrency(r.etfComparison.etfTotalReturn) }}</span>
+                        <span class="label">Total Invested</span>
+                        <span class="value">{{ formatCurrency(r.etfComparison.totalEtfInvested) }}</span>
                       </div>
                       <div class="metric">
-                        <span class="label">Annual Return (assumed)</span>
-                        <span class="value">{{ formatPercent(r.etfComparison.returnRate) }}</span>
+                        <span class="label">Total Return</span>
+                        <span class="value" [class.positive]="r.etfComparison.etfTotalReturn > 0" [class.negative]="r.etfComparison.etfTotalReturn < 0">
+                          {{ formatCurrency(r.etfComparison.etfTotalReturn) }}
+                        </span>
+                      </div>
+                      <div class="metric">
+                        <span class="label">Annualised Return</span>
+                        <span class="value">{{ formatPercent(r.etfComparison.etfAnnualisedReturn) }}</span>
                       </div>
                     </mat-card-content>
                   </mat-card>
@@ -605,6 +622,7 @@
                       <thead>
                         <tr>
                           <th>Year</th>
+                          <th>Contributions</th>
                           <th>ETF Value</th>
                           <th>Total Growth</th>
                         </tr>
@@ -613,6 +631,7 @@
                         @for (year of r.etfComparison.yearlyValues; track year.year) {
                           <tr>
                             <td>{{ year.year }}</td>
+                            <td class="mono">{{ formatCurrency(year.totalContributions) }}</td>
                             <td class="mono">{{ formatCurrency(year.value) }}</td>
                             <td class="mono positive">{{ formatCurrency(year.totalGrowth) }}</td>
                           </tr>

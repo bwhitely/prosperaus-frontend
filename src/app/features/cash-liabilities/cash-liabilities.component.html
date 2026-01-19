@@ -123,7 +123,7 @@
       } @else {
         <div class="items-list">
           @for (liability of liabilities(); track liability.id) {
-            <div class="item-card">
+            <div class="item-card" [class.item-card--expanded]="isHecsExpanded(liability.id)">
               <div class="item-card__info">
                 <div class="item-card__name">{{ liability.name }}</div>
                 <div class="item-card__details">
@@ -141,6 +141,47 @@
                     <span class="badge badge--info">Limit: {{ liability.creditLimit | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
                   }
                 </div>
+                <!-- HECS/HELP Payoff Estimate -->
+                @if (isHecsHelp(liability.liabilityType)) {
+                  @if (getHecsProjection(liability.id); as projection) {
+                    <div class="hecs-payoff-info">
+                      @if (projection.estimatedPayoffDate) {
+                        <span class="badge badge--hecs">
+                          Est. payoff: {{ projection.estimatedPayoffDate | date:'MMM yyyy' }}
+                          ({{ projection.yearsRemaining }} {{ projection.yearsRemaining === 1 ? 'year' : 'years' }})
+                        </span>
+                      } @else if (projection.yearsRemaining === -1) {
+                        <span class="badge badge--hecs-info">Below repayment threshold</span>
+                      }
+                      <button mat-icon-button class="hecs-expand-btn" (click)="toggleHecsDetails(liability.id)" matTooltip="View projection details">
+                        <mat-icon>{{ isHecsExpanded(liability.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      </button>
+                    </div>
+                    @if (isHecsExpanded(liability.id)) {
+                      <div class="hecs-details">
+                        <div class="hecs-details__row">
+                          <span>Annual repayment:</span>
+                          <span class="mono">{{ projection.currentAnnualRepayment | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                        @if (projection.totalAmountRepaid > 0) {
+                          <div class="hecs-details__row">
+                            <span>Total to repay (incl. CPI):</span>
+                            <span class="mono">{{ projection.totalAmountRepaid | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                          </div>
+                          <div class="hecs-details__row">
+                            <span>CPI indexation total:</span>
+                            <span class="mono">{{ projection.totalIndexationPaid | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+                          </div>
+                        }
+                        <div class="hecs-details__note">* Assumes {{ projection.assumedCpiRate * 100 | number:'1.0-0' }}% annual CPI indexation</div>
+                      </div>
+                    }
+                  } @else {
+                    <div class="hecs-payoff-info">
+                      <span class="badge badge--loading">Loading projection...</span>
+                    </div>
+                  }
+                }
               </div>
               <div class="item-card__value negative">
                 {{ liability.balance | currency:'AUD':'symbol-narrow':'1.0-0' }}

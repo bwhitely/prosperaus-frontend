@@ -3,8 +3,11 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { filter, switchMap } from 'rxjs/operators';
 import { IncomeService } from '../../../../core/services/income.service';
+import { CashLiabilityService } from '../../../../core/services/cash-liability.service';
 import { ConfirmDialogService } from '../../../../shared/services/confirm-dialog.service';
 import { IncomeSourceRequest, IncomeSourceResponse, IncomeFrequency } from '../../../../shared/models/cash-flow.model';
+import { LiabilityResponse } from '../../../../shared/models/cash-liability.model';
+import { calculateCappedHecsRepayment } from '../../../../core/constants/australian-tax.constants';
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,9 +43,11 @@ export class IncomeListComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private incomeService = inject(IncomeService);
+  private liabilityService = inject(CashLiabilityService);
   private confirmDialog = inject(ConfirmDialogService);
 
   incomeSources = signal<IncomeSourceResponse[]>([]);
+  hecsLiabilities = signal<LiabilityResponse[]>([]);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
@@ -57,7 +62,18 @@ export class IncomeListComponent implements OnInit {
 
   totalAnnualTax = computed(() => this.calculateTax(this.totalAnnualGross()));
 
-  totalAnnualNet = computed(() => this.totalAnnualGross() - this.totalAnnualTax());
+  // HECS debt and repayment calculations
+  hecsBalance = computed(() =>
+    this.hecsLiabilities().reduce((sum, l) => sum + l.balance, 0)
+  );
+
+  annualHecsRepayment = computed(() =>
+    calculateCappedHecsRepayment(this.totalAnnualGross(), this.hecsBalance())
+  );
+
+  totalAnnualNet = computed(() =>
+    this.totalAnnualGross() - this.totalAnnualTax() - this.annualHecsRepayment()
+  );
 
   form: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -90,6 +106,7 @@ export class IncomeListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadIncomeSources();
+    this.loadHecsLiabilities();
   }
 
   loadIncomeSources(): void {
@@ -104,6 +121,27 @@ export class IncomeListComponent implements OnInit {
       error: () => {
         this.error.set('Failed to load income sources');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loadHecsLiabilities(): void {
+    this.liabilityService.getLiabilities().subscribe({
+      next: (liabilities) => {
+        // Filter for HECS/HELP debts only
+        const hecsDebts = liabilities.filter(l => l.liabilityType === 'hecs_help');
+        const previousHecsBalance = this.hecsBalance();
+        this.hecsLiabilities.set(hecsDebts);
+
+        // If HECS balance changed, notify parent to refresh summary (for savings rate)
+        const newHecsBalance = hecsDebts.reduce((sum, l) => sum + l.balance, 0);
+        if (newHecsBalance !== previousHecsBalance) {
+          this.changed.emit();
+        }
+      },
+      error: () => {
+        // Silently fail - HECS is supplementary info
+        this.hecsLiabilities.set([]);
       }
     });
   }

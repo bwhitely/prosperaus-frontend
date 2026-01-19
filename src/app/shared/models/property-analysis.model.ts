@@ -120,6 +120,9 @@ export interface EtfComparison {
   propertyTotalReturn: number;
   etfTotalReturn: number;
   propertyAnnualisedReturn: number;
+  etfAnnualisedReturn: number;
+  totalPropertyInvested: number;
+  totalEtfInvested: number;
   winner: string;
   difference: number;
 }

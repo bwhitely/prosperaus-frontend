@@ -432,7 +432,13 @@
 // Comparison section
 .comparison-intro {
   color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.comparison-methodology {
+  color: $color-text-muted;
   margin-bottom: $spacing-lg;
+  font-size: $font-size-sm;
 }
 
 .comparison-result {

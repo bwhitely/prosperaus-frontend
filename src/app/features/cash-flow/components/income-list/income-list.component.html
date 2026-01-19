@@ -141,6 +141,21 @@
       </div>
     </div>
 
+    <!-- HECS/HELP Repayment row (only show if user has HECS debt) -->
+    @if (hecsBalance() > 0) {
+      <div class="income-breakdown__row income-breakdown__row--hecs">
+        <span class="income-breakdown__label">
+          HECS/HELP Repayment
+          <mat-icon class="info-icon" [matTooltip]="'Compulsory repayment based on your income. Balance: ' + (hecsBalance() | currency:'AUD':'symbol-narrow':'1.0-0')">info</mat-icon>
+        </span>
+        <div class="income-breakdown__values">
+          <span class="mono negative">-{{ annualHecsRepayment() / 26 | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          <span class="mono negative">-{{ annualHecsRepayment() / 12 | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          <span class="mono negative">-{{ annualHecsRepayment() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+      </div>
+    }
+
     <!-- Post-tax row -->
     <div class="income-breakdown__row income-breakdown__row--net">
       <span class="income-breakdown__label"><strong>Post-tax (Net)</strong></span>

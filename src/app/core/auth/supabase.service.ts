@@ -101,6 +101,20 @@ export class SupabaseService {
     return { error: error as Error | null };
   }
 
+  async signInWithGoogle(): Promise<{ error: Error | null }> {
+    const { error } = await this.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
+      }
+    });
+    return { error: error as Error | null };
+  }
+
   onAuthStateChange(callback: (event: string, session: Session | null) => void) {
     return this.supabase.auth.onAuthStateChange(callback);
   }

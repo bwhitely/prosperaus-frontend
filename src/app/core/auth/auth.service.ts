@@ -110,6 +110,20 @@ export class AuthService {
     return { success: true, error: null };
   }
 
+  async signInWithGoogle(): Promise<{ success: boolean; error: string | null }> {
+    this.isLoadingSignal.set(true);
+    try {
+      const { error } = await this.supabase.signInWithGoogle();
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      // OAuth redirect happens, so we won't reach here normally
+      return { success: true, error: null };
+    } finally {
+      this.isLoadingSignal.set(false);
+    }
+  }
+
   getAccessToken(): string | null {
     return this.sessionSignal()?.access_token ?? null;
   }

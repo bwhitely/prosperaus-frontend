@@ -58,6 +58,12 @@ export const routes: Routes = [
     canActivate: [publicGuard],
     title: 'Create Account - ProsperAus'
   },
+  {
+    path: 'auth/callback',
+    loadComponent: () => import('./features/auth/callback/callback.component')
+      .then(m => m.CallbackComponent),
+    title: 'Signing in... - ProsperAus'
+  },
 
   // Onboarding (requires auth, but only if not completed)
   {

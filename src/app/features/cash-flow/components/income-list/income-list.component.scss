@@ -103,14 +103,35 @@
       background: rgba($color-negative, 0.03);
     }
 
+    &--hecs {
+      background: rgba($color-warning, 0.05);
+    }
+
     &--net {
       background: rgba($color-accent, 0.05);
     }
   }
 
   &__label {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
     color: $color-text-secondary;
     font-size: $font-size-sm;
+
+    .info-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: $color-text-muted;
+      cursor: help;
+      opacity: 0.7;
+      transition: opacity 0.15s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 
   &__values {

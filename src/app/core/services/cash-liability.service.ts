@@ -4,7 +4,8 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CashAccountRequest, CashAccountResponse, CashAccountsByType,
-  LiabilityRequest, LiabilityResponse, LiabilitiesByType
+  LiabilityRequest, LiabilityResponse, LiabilitiesByType,
+  HecsPayoffProjection
 } from '../../shared/models/cash-liability.model';
 
 @Injectable({
@@ -47,6 +48,21 @@ export class CashLiabilityService {
 
   deleteLiability(id: string): Observable<void> {
     return this.http.delete<void>(`${this.liabilityUrl}/${id}`);
+  }
+
+  /**
+   * Get HECS/HELP payoff projection for a liability.
+   * Includes year-by-year breakdown with CPI indexation.
+   *
+   * @param liabilityId Liability ID (must be a HECS/HELP debt)
+   * @param cpiRate Optional CPI rate assumption (defaults to 3%)
+   * @returns Payoff projection with estimated payoff date and yearly breakdown
+   */
+  getHecsPayoffProjection(liabilityId: string, cpiRate: number = 0.03): Observable<HecsPayoffProjection> {
+    return this.http.get<HecsPayoffProjection>(
+      `${this.liabilityUrl}/${liabilityId}/hecs-payoff-projection`,
+      { params: { cpiRate: cpiRate.toString() } }
+    );
   }
 
   // Helper methods for grouping

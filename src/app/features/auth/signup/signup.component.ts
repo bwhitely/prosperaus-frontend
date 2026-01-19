@@ -95,6 +95,15 @@ export class SignupComponent {
     }
   }
 
+  async signInWithGoogle(): Promise<void> {
+    this.errorMessage.set(null);
+    const { error } = await this.authService.signInWithGoogle();
+    if (error) {
+      this.errorMessage.set(error);
+    }
+    // Otherwise, user is redirected to Google
+  }
+
   get email() { return this.signupForm.get('email'); }
   get password() { return this.signupForm.get('password'); }
   get confirmPassword() { return this.signupForm.get('confirmPassword'); }

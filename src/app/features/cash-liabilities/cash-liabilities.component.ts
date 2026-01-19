@@ -10,7 +10,8 @@ import { CashLiabilityService } from '../../core/services/cash-liability.service
 import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import {
   CashAccountRequest, CashAccountResponse,
-  LiabilityRequest, LiabilityResponse, LiabilityType
+  LiabilityRequest, LiabilityResponse, LiabilityType,
+  HecsPayoffProjection
 } from '../../shared/models/cash-liability.model';
 
 @Component({
@@ -30,6 +31,8 @@ export class CashLiabilitiesComponent implements OnInit {
 
   cashAccounts = signal<CashAccountResponse[]>([]);
   liabilities = signal<LiabilityResponse[]>([]);
+  hecsProjections = signal<Map<string, HecsPayoffProjection>>(new Map());
+  expandedHecsId = signal<string | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
@@ -105,11 +108,36 @@ export class CashLiabilitiesComponent implements OnInit {
       next: (liabilities) => {
         this.liabilities.set(liabilities);
         this.isLoading.set(false);
+        // Load HECS projections for any HECS/HELP debts
+        this.loadHecsProjections(liabilities);
       },
       error: () => {
         this.error.set('Failed to load liabilities');
         this.isLoading.set(false);
       }
+    });
+  }
+
+  private loadHecsProjections(liabilities: LiabilityResponse[]): void {
+    const hecsLiabilities = liabilities.filter(l => l.liabilityType === 'hecs_help');
+    if (hecsLiabilities.length === 0) {
+      this.hecsProjections.set(new Map());
+      return;
+    }
+
+    // Fetch projections for each HECS liability
+    const newProjections = new Map<string, HecsPayoffProjection>();
+    hecsLiabilities.forEach(liability => {
+      this.service.getHecsPayoffProjection(liability.id).subscribe({
+        next: (projection) => {
+          newProjections.set(liability.id, projection);
+          // Update the signal with a new Map to trigger change detection
+          this.hecsProjections.set(new Map(newProjections));
+        },
+        error: () => {
+          // Silently fail for individual projections
+        }
+      });
     });
   }
 
@@ -309,5 +337,22 @@ export class CashLiabilitiesComponent implements OnInit {
 
   isOffset(accountType: string): boolean {
     return accountType === 'offset';
+  }
+
+  isHecsHelp(liabilityType: string): boolean {
+    return liabilityType === 'hecs_help';
+  }
+
+  getHecsProjection(liabilityId: string): HecsPayoffProjection | undefined {
+    return this.hecsProjections().get(liabilityId);
+  }
+
+  toggleHecsDetails(liabilityId: string): void {
+    const currentExpanded = this.expandedHecsId();
+    this.expandedHecsId.set(currentExpanded === liabilityId ? null : liabilityId);
+  }
+
+  isHecsExpanded(liabilityId: string): boolean {
+    return this.expandedHecsId() === liabilityId;
   }
 }

@@ -122,3 +122,27 @@ export interface LiabilitiesByType {
   marginLoans: LiabilityResponse[];
   other: LiabilityResponse[];
 }
+
+// HECS/HELP Payoff Projection types
+export interface HecsPayoffProjection {
+  currentBalance: number;
+  currentAnnualRepayment: number;
+  annualIncome: number;
+  estimatedPayoffDate: string | null;
+  yearsRemaining: number;
+  totalAmountRepaid: number;
+  totalIndexationPaid: number;
+  assumedCpiRate: number;
+  assumedAnnualIncomeGrowth: number;
+  yearlyProjections: HecsYearlyProjection[];
+  message: string;
+}
+
+export interface HecsYearlyProjection {
+  financialYear: number;
+  startingBalance: number;
+  indexationApplied: number;
+  balanceAfterIndexation: number;
+  repaymentAmount: number;
+  endingBalance: number;
+}
