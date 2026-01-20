@@ -1,0 +1,251 @@
+@use '../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+mat-dialog-content {
+  min-width: 600px;
+  max-height: 70vh;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+// Loading/Error/Success states
+.loading-state,
+.error-state,
+.success-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2xl;
+  text-align: center;
+
+  p {
+    margin: $spacing-md 0 0;
+    color: $color-text-secondary;
+  }
+
+  h3 {
+    margin: $spacing-md 0 $spacing-sm;
+  }
+}
+
+.error-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: $color-negative;
+}
+
+.success-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: $color-accent;
+}
+
+.empty-state {
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: $color-text-muted;
+  }
+}
+
+// Warnings
+.warnings {
+  margin-bottom: $spacing-lg;
+}
+
+.warning-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba($color-warning, 0.1);
+  border: 1px solid rgba($color-warning, 0.3);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+
+  mat-icon {
+    color: $color-warning;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  span {
+    font-size: $font-size-sm;
+    color: $color-text-primary;
+  }
+}
+
+// Summary cards
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-md;
+  background: $color-background;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+
+  .label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-xs;
+  }
+
+  .value {
+    font-size: $font-size-2xl;
+    font-weight: 600;
+    font-family: $font-family-mono;
+
+    &.positive {
+      color: $color-accent;
+    }
+
+    &.negative {
+      color: $color-negative;
+    }
+  }
+
+  .count {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+// Sections
+.section {
+  margin-bottom: $spacing-xl;
+
+  h3 {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    margin: 0 0 $spacing-md;
+    color: $color-text-primary;
+  }
+}
+
+// Items table
+.items-table {
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 100px 120px 40px;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $color-background;
+  border-bottom: 1px solid $color-border;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 100px 120px 40px;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  border-bottom: 1px solid $color-border;
+  align-items: center;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba($color-primary, 0.02);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-xs;
+
+    .col-name {
+      grid-column: 1 / -1;
+    }
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: $spacing-xs $spacing-sm;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    background: $color-surface;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+
+  input[type="number"] {
+    font-family: $font-family-mono;
+    text-align: right;
+  }
+
+  button[mat-icon-button] {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: $color-text-muted;
+    }
+
+    &:hover mat-icon {
+      color: $color-negative;
+    }
+  }
+}
+
+.col-actions {
+  display: flex;
+  justify-content: center;
+}
+
+// Dialog actions
+mat-dialog-actions {
+  padding: $spacing-md 0 0;
+  gap: $spacing-sm;
+}

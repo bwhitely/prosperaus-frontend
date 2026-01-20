@@ -1,6 +1,26 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
 
+.page-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-xs;
+
+    p {
+      margin: 0;
+      font-size: $font-size-base;
+      color: $color-text-primary;
+    }
+  }
+}
+
 .upload-section {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -275,9 +295,9 @@
   font-size: $font-size-sm;
 }
 
-// Analyse All Section
+// Action Buttons Section
 
-.analyse-all-section {
+.action-buttons-section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -289,10 +309,18 @@
   border: 1px solid rgba($color-primary, 0.1);
 }
 
-.analyse-hint {
+.action-buttons {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.action-hint {
   color: $color-text-muted;
   font-size: $font-size-sm;
   margin: 0;
+  text-align: center;
 }
 
 // Statement Card Actions

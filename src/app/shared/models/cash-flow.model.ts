@@ -104,6 +104,7 @@ export interface BankStatementUploadRequest {
   periodStart?: string;
   periodEnd?: string;
   bankFormat?: BankFormat;
+  password?: string;
 }
 
 export interface BankStatementUploadResponse {
@@ -120,6 +121,8 @@ export interface BankStatementUploadResponse {
   transactionCount: number;
   totalInflow: number;
   totalOutflow: number;
+  categorisedCount: number;
+  pendingReviewCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -199,4 +202,86 @@ export interface StatementAnalysisResponse {
   categorySuggestions: CategorySuggestion[];
   insights: string[];
   spendingSummary: SpendingSummary;
+}
+
+// Migration (convert bank transactions to income/expenses)
+
+export interface MigrationPreviewRequest {
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface DetectedIncome {
+  id: string;
+  name: string;
+  sourceType: string;
+  amount: number;
+  frequency: IncomeFrequency;
+  transactionCount: number;
+  sampleDescriptions: string[];
+  confidence: number;
+}
+
+export interface DetectedExpense {
+  id: string;
+  name: string;
+  categoryId?: string;
+  categoryName?: string;
+  amount: number;
+  frequency: ExpenseFrequency;
+  isRecurring: boolean;
+  transactionCount: number;
+  sampleDescriptions: string[];
+  confidence: number;
+}
+
+export interface MigrationSummary {
+  incomeSourceCount: number;
+  expenseCount: number;
+  totalMonthlyIncome: number;
+  totalMonthlyExpenses: number;
+  monthlySurplus: number;
+  existingIncomeCount: number;
+  existingExpenseCount: number;
+}
+
+export interface MigrationPreviewResponse {
+  detectedIncome: DetectedIncome[];
+  detectedExpenses: DetectedExpense[];
+  summary: MigrationSummary;
+  warnings: string[];
+}
+
+export interface IncomeToCreate {
+  name: string;
+  sourceType: string;
+  grossAmount: number;
+  frequency: IncomeFrequency;
+  notes?: string;
+}
+
+export interface ExpenseToCreate {
+  name: string;
+  categoryId?: string;
+  amount: number;
+  frequency: ExpenseFrequency;
+  isRecurring: boolean;
+  notes?: string;
+}
+
+export interface MigrationApplyRequest {
+  incomeSources: IncomeToCreate[];
+  expenses: ExpenseToCreate[];
+  confirmReplace: boolean;
+}
+
+export interface MigrationApplyResponse {
+  status: string;
+  incomeSourcesCreated: number;
+  expensesCreated: number;
+  incomeSourcesDeleted: number;
+  expensesDeleted: number;
+  totalMonthlyIncome: number;
+  totalMonthlyExpenses: number;
+  message: string;
 }

@@ -16,14 +16,14 @@ export class PortfolioService {
   private apiUrl = `${environment.apiBaseUrl}/portfolio`;
 
   /**
-   * Analyse a portfolio based on provided holdings.
+   * Analyze a portfolio based on provided holdings.
    */
   analyse(request: PortfolioAnalysisRequest): Observable<PortfolioAnalysisResponse> {
     return this.http.post<PortfolioAnalysisResponse>(`${this.apiUrl}/analyse`, request);
   }
 
   /**
-   * Analyse the current user's saved portfolio holdings.
+   * Analyze the current user's saved portfolio holdings.
    */
   analyseUserPortfolio(): Observable<PortfolioAnalysisResponse> {
     return this.http.get<PortfolioAnalysisResponse>(`${this.apiUrl}/analyse`);

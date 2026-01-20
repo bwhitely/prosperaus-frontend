@@ -35,7 +35,7 @@ export class LandingComponent {
     {
       icon: 'building',
       title: 'Property Analysis',
-      description: 'Analyse investment properties with accurate negative gearing calculations, rental yields, and capital growth projections.'
+      description: 'Analyze investment properties with accurate negative gearing calculations, rental yields, and capital growth projections.'
     },
     {
       icon: 'piggy-bank',

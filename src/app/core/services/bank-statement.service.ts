@@ -8,7 +8,11 @@ import {
   BankTransactionCategoriseRequest,
   BankTransactionResponse,
   StatementAnalysisResponse,
-  CategorySuggestion
+  CategorySuggestion,
+  MigrationPreviewRequest,
+  MigrationPreviewResponse,
+  MigrationApplyRequest,
+  MigrationApplyResponse
 } from '../../shared/models/cash-flow.model';
 
 @Injectable({
@@ -45,6 +49,9 @@ export class BankStatementService {
     if (request?.bankFormat) {
       formData.append('bankFormat', request.bankFormat);
     }
+    if (request?.password) {
+      formData.append('password', request.password);
+    }
 
     return this.http.post<BankStatementUploadResponse>(`${this.apiUrl}/upload`, formData);
   }
@@ -69,14 +76,14 @@ export class BankStatementService {
   }
 
   /**
-   * Analyse transactions from a specific upload using AI.
+   * Analyze transactions from a specific upload using AI.
    */
   analyseStatement(uploadId: string): Observable<StatementAnalysisResponse> {
     return this.http.post<StatementAnalysisResponse>(`${this.apiUrl}/${uploadId}/analyse`, {});
   }
 
   /**
-   * Analyse all uploaded statements for the user.
+   * Analyze all uploaded statements for the user.
    */
   analyseAllStatements(): Observable<StatementAnalysisResponse> {
     return this.http.post<StatementAnalysisResponse>(`${this.apiUrl}/analyse-all`, {});
@@ -87,5 +94,19 @@ export class BankStatementService {
    */
   applySuggestions(uploadId: string, suggestions: CategorySuggestion[]): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/${uploadId}/apply-suggestions`, suggestions);
+  }
+
+  /**
+   * Get migration preview - detect recurring patterns from bank transactions.
+   */
+  getMigrationPreview(request?: MigrationPreviewRequest): Observable<MigrationPreviewResponse> {
+    return this.http.post<MigrationPreviewResponse>(`${this.apiUrl}/migration/preview`, request || {});
+  }
+
+  /**
+   * Apply migration - replace income sources and expenses with detected patterns.
+   */
+  applyMigration(request: MigrationApplyRequest): Observable<MigrationApplyResponse> {
+    return this.http.post<MigrationApplyResponse>(`${this.apiUrl}/migration/apply`, request);
   }
 }

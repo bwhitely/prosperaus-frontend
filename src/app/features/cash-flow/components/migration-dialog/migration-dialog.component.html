@@ -1,0 +1,203 @@
+<h2 mat-dialog-title>Migrate to Budget</h2>
+
+<mat-dialog-content>
+  <!-- Loading State -->
+  @if (step() === 'loading') {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Analyzing your transactions...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (step() === 'error') {
+    <div class="error-state">
+      <mat-icon class="error-icon">error</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-button color="primary" (click)="retry()">Try Again</button>
+    </div>
+  }
+
+  <!-- Success State -->
+  @if (step() === 'success') {
+    <div class="success-state">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <h3>Migration Complete</h3>
+      <p>Your income sources and expenses have been updated based on your bank transactions.</p>
+    </div>
+  }
+
+  <!-- Applying State -->
+  @if (step() === 'applying') {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Applying migration...</p>
+    </div>
+  }
+
+  <!-- Preview State -->
+  @if (step() === 'preview') {
+    <!-- Warnings -->
+    @if (previewResponse()?.warnings?.length) {
+      <div class="warnings">
+        @for (warning of previewResponse()!.warnings; track warning) {
+          <div class="warning-item">
+            <mat-icon>warning</mat-icon>
+            <span>{{ warning }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (editableIncome().length === 0 && editableExpenses().length === 0) {
+      <div class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <h3>No Recurring Patterns Found</h3>
+        <p>We couldn't detect any recurring income or expense patterns in your bank transactions. Try uploading more statement history.</p>
+      </div>
+    } @else {
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card income">
+          <span class="label">Monthly Income</span>
+          <span class="value positive">{{ totalMonthlyIncome() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          <span class="count">{{ editableIncome().length }} sources</span>
+        </div>
+        <div class="summary-card expenses">
+          <span class="label">Monthly Expenses</span>
+          <span class="value negative">{{ totalMonthlyExpenses() | currency:'AUD':'symbol-narrow':'1.0-0' }}</span>
+          <span class="count">{{ editableExpenses().length }} items</span>
+        </div>
+        <div class="summary-card surplus">
+          <span class="label">Monthly Surplus</span>
+          <span class="value" [class.positive]="monthlySurplus() >= 0" [class.negative]="monthlySurplus() < 0">
+            {{ monthlySurplus() | currency:'AUD':'symbol-narrow':'1.0-0' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Income Section -->
+      @if (editableIncome().length > 0) {
+        <div class="section">
+          <h3>Detected Income ({{ editableIncome().length }})</h3>
+          <div class="items-table">
+            <div class="table-header">
+              <span class="col-name">Name</span>
+              <span class="col-type">Type</span>
+              <span class="col-amount">Amount</span>
+              <span class="col-frequency">Frequency</span>
+              <span class="col-actions"></span>
+            </div>
+            @for (income of editableIncome(); track income.id; let i = $index) {
+              <div class="table-row">
+                <input
+                  class="col-name"
+                  type="text"
+                  [value]="income.name"
+                  (change)="updateIncomeName(i, $any($event.target).value)"
+                  placeholder="Income name">
+                <select
+                  class="col-type"
+                  [value]="income.sourceType"
+                  (change)="updateIncomeSourceType(i, $any($event.target).value)">
+                  @for (opt of sourceTypeOptions; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+                <input
+                  class="col-amount"
+                  type="number"
+                  [value]="income.amount"
+                  (change)="updateIncomeAmount(i, +$any($event.target).value)"
+                  min="0"
+                  step="0.01">
+                <select
+                  class="col-frequency"
+                  [value]="income.frequency"
+                  (change)="updateIncomeFrequency(i, $any($event.target).value)">
+                  @for (opt of frequencyOptions; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+                <button class="col-actions" mat-icon-button (click)="removeIncome(i)" title="Remove">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Expenses Section -->
+      @if (editableExpenses().length > 0) {
+        <div class="section">
+          <h3>Detected Expenses ({{ editableExpenses().length }})</h3>
+          <div class="items-table">
+            <div class="table-header">
+              <span class="col-name">Name</span>
+              <span class="col-category">Category</span>
+              <span class="col-amount">Amount</span>
+              <span class="col-frequency">Frequency</span>
+              <span class="col-actions"></span>
+            </div>
+            @for (expense of editableExpenses(); track expense.id; let i = $index) {
+              <div class="table-row">
+                <input
+                  class="col-name"
+                  type="text"
+                  [value]="expense.name"
+                  (change)="updateExpenseName(i, $any($event.target).value)"
+                  placeholder="Expense name">
+                <select
+                  class="col-category"
+                  [value]="expense.categoryId || ''"
+                  (change)="updateExpenseCategory(i, $any($event.target).value)">
+                  <option value="">-- Select --</option>
+                  @for (cat of categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+                <input
+                  class="col-amount"
+                  type="number"
+                  [value]="expense.amount"
+                  (change)="updateExpenseAmount(i, +$any($event.target).value)"
+                  min="0"
+                  step="0.01">
+                <select
+                  class="col-frequency"
+                  [value]="expense.frequency"
+                  (change)="updateExpenseFrequency(i, $any($event.target).value)">
+                  @for (opt of frequencyOptions; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+                <button class="col-actions" mat-icon-button (click)="removeExpense(i)" title="Remove">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (step() === 'preview') {
+    <button mat-button (click)="close()">Cancel</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="applyMigration()"
+      [disabled]="editableIncome().length === 0 && editableExpenses().length === 0">
+      Apply Migration
+    </button>
+  } @else if (step() === 'success') {
+    <button mat-flat-button color="primary" (click)="close()">Done</button>
+  } @else if (step() === 'error') {
+    <button mat-button (click)="close()">Close</button>
+  }
+</mat-dialog-actions>

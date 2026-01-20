@@ -16,7 +16,7 @@ export class SuperOptimiserService {
   private apiUrl = environment.apiBaseUrl;
 
   /**
-   * Analyse super contributions and get optimisation recommendations.
+   * Analyze super contributions and get optimisation recommendations.
    */
   analyse(request: SuperOptimisationRequest): Observable<SuperOptimisationResponse> {
     return this.http.post<SuperOptimisationResponse>(

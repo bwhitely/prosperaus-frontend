@@ -1,3 +1,10 @@
+<div class="page-header">
+  <div class="page-header__content">
+    <p>Upload bank statements and get AI-powered spending insights</p>
+    <p>You can also automatically add the transactions to your income and expenses to get a realistic view of your spending</p>
+  </div>
+</div>
+
 @if (error()) {
   <div class="alert alert--error">
     {{ error() }}
@@ -145,9 +152,7 @@
       } @else {
         <div class="upload-zone__content">
           <span class="upload-zone__icon">📂</span>
-          <p class="upload-zone__text">Drop CSV or PDF files here or click to upload</p>
-          <p class="upload-zone__hint">Supports .csv and .pdf formats</p>
-          <p class="upload-zone__hint">CSV: Required columns - processed_date, description, amount, type</p>
+          <p class="upload-zone__text">Drop .pdf files here or click to upload</p>
         </div>
       }
     </div>
@@ -162,6 +167,13 @@
               <option [value]="bank.value">{{ bank.label }}</option>
             }
           </select>
+        </div>
+        <div class="form-group">
+          <label for="password">PDF Password (if protected)</label>
+          <input type="password" id="password" formControlName="password"
+                 placeholder="e.g., last 4 digits of account number"
+                 class="form-control">
+          <span class="form-hint">CBA statements use the last 4 digits of your account number</span>
         </div>
         <div class="pdf-actions">
           <button class="btn btn--primary" (click)="uploadSelectedPdf()" [disabled]="isUploading()">
@@ -185,21 +197,28 @@
     </div>
   </div>
 
-  <!-- Analyse All Button -->
+  <!-- Action Buttons -->
   @if (uploads().length > 0) {
-    <div class="analyse-all-section">
-      <button
-        class="btn btn--primary btn--lg"
-        [disabled]="isAnalysing()"
-        (click)="analyseAllStatements()">
-        @if (isAnalysing()) {
-          <span class="loading-spinner loading-spinner--sm"></span>
-          Analysing...
-        } @else {
-          Analyse All Statements with AI
-        }
-      </button>
-      <p class="analyse-hint">Analyses bank statements using AI.</p>
+    <div class="action-buttons-section">
+      <div class="action-buttons">
+        <button
+          class="btn btn--primary btn--lg"
+          [disabled]="isAnalysing()"
+          (click)="analyseAllStatements()">
+          @if (isAnalysing()) {
+            <span class="loading-spinner loading-spinner--sm"></span>
+            Analysing...
+          } @else {
+            Analyze All Statements
+          }
+        </button>
+        <button
+          class="btn btn--secondary btn--lg"
+          (click)="openMigrationDialog()">
+          Migrate to Budget
+        </button>
+      </div>
+      <p class="action-hint">Analyze uses AI to categorize and provide insights. Migrate converts transactions to income/expenses.</p>
     </div>
   }
 
@@ -233,11 +252,11 @@
               class="btn btn--sm btn--outline"
               [disabled]="isAnalysing()"
               (click)="analyseStatement(upload); $event.stopPropagation()"
-              title="Analyse with AI">
+              title="Analyze with AI">
               @if (isAnalysing()) {
                 ...
               } @else {
-                Analyse
+                Analyze
               }
             </button>
             <button
@@ -279,7 +298,7 @@
           @if (isAnalysing()) {
             Analysing...
           } @else {
-            🤖 Analyse
+            🤖 Analyze
           }
         </button>
         <span class="meta">{{ transactions().length }} transactions</span>

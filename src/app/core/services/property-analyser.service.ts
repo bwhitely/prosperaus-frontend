@@ -24,7 +24,7 @@ export class PropertyAnalyserService {
   private readonly apiUrl = `${environment.apiBaseUrl}/property`;
 
   /**
-   * Analyse an investment property.
+   * Analyze an investment property.
    */
   analyse(request: PropertyAnalysisRequest): Observable<PropertyAnalysisResponse> {
     return this.http.post<PropertyAnalysisResponse>(`${this.apiUrl}/analyse`, request);

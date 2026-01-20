@@ -16,6 +16,8 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltip } from "@angular/material/tooltip";
+import { MatDialog } from '@angular/material/dialog';
+import { MigrationDialogComponent } from '../migration-dialog/migration-dialog.component';
 
 @Component({
   selector: 'app-statement-upload',
@@ -30,6 +32,7 @@ export class StatementUploadComponent implements OnInit {
   private statementService = inject(BankStatementService);
   private expenseService = inject(ExpenseService);
   private confirmDialog = inject(ConfirmDialogService);
+  private dialog = inject(MatDialog);
 
   uploads = signal<BankStatementUploadResponse[]>([]);
   categories = signal<ExpenseCategoryResponse[]>([]);
@@ -59,7 +62,8 @@ export class StatementUploadComponent implements OnInit {
   uploadForm: FormGroup = this.fb.group({
     accountName: [''],
     institution: [''],
-    bankFormat: ['']
+    bankFormat: [''],
+    password: ['']
   });
 
   ngOnInit(): void {
@@ -149,22 +153,26 @@ export class StatementUploadComponent implements OnInit {
     }
 
     this.isUploading.set(true);
-    this.uploadProgress.set('Uploading...');
+    this.uploadProgress.set('Uploading and categorizing...');
     this.error.set(null);
 
     this.statementService.uploadStatement(file, {
       accountName: formValue.accountName || undefined,
       institution: formValue.institution || undefined,
-      bankFormat: isPdf ? formValue.bankFormat : undefined
+      bankFormat: isPdf ? formValue.bankFormat : undefined,
+      password: isPdf && formValue.password ? formValue.password : undefined
     }).subscribe({
       next: (upload) => {
-        this.uploadProgress.set(`Processed ${upload.transactionCount} transactions`);
+        const catMsg = upload.categorisedCount > 0
+          ? ` (${upload.categorisedCount} auto-categorized)`
+          : '';
+        this.uploadProgress.set(`Processed ${upload.transactionCount} transactions${catMsg}`);
         setTimeout(() => {
           this.isUploading.set(false);
           this.uploadProgress.set(null);
           this.selectedFile.set(null);
           this.isPdfFile.set(false);
-          this.uploadForm.patchValue({ bankFormat: '' });
+          this.uploadForm.patchValue({ bankFormat: '', password: '' });
           this.loadData();
         }, 1500);
       },
@@ -186,7 +194,7 @@ export class StatementUploadComponent implements OnInit {
   cancelPdfUpload(): void {
     this.selectedFile.set(null);
     this.isPdfFile.set(false);
-    this.uploadForm.patchValue({ bankFormat: '' });
+    this.uploadForm.patchValue({ bankFormat: '', password: '' });
   }
 
   viewTransactions(upload: BankStatementUploadResponse): void {
@@ -329,5 +337,20 @@ export class StatementUploadComponent implements OnInit {
         percentage: (amount / total) * 100
       }))
       .sort((a, b) => b.amount - a.amount);
+  }
+
+  openMigrationDialog(): void {
+    const dialogRef = this.dialog.open(MigrationDialogComponent, {
+      width: '800px',
+      maxWidth: '95vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Migration was successful, reload data
+        this.loadData();
+      }
+    });
   }
 }
